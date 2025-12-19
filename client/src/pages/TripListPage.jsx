@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Plus, Search, AlertCircle } from "lucide-react";
 import { tripApi } from "../services/api.service";
-import TripCard from "../components/TripCard";
-import Button from "../components/Button";
-import Input from "../components/Input";
-import Loader from "../components/Loader";
-import { SkeletonTripGrid } from "../components/SkeletonLoader";
-import { EmptyTrips, EmptySearchResults } from "../components/EmptyState";
-import Modal from "../components/Modal";
-import TripCreateForm from "../components/TripCreateForm";
+import TripCard from "../components/features/trips/TripCard";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Loader from "../components/ui/Loader";
+import { SkeletonTripGrid } from "../components/ui/SkeletonLoader";
+import { EmptyTrips, EmptySearchResults } from "../components/ui/EmptyState";
+import Modal from "../components/ui/Modal";
+import TripCreateForm from "../components/features/trips/TripCreateForm";
 import { useAuth } from "../hooks/useAuth";
 
 /**
@@ -108,7 +108,6 @@ const TripListPage = () => {
   const handleCreateCancel = () => {
     setIsCreateModalOpen(false);
   };
-  console.log(user);
 
   if (loading) {
     return (

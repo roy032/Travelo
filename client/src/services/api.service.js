@@ -299,6 +299,52 @@ export const adminApi = {
       return handleApiError(error);
     }
   },
+
+  updateUserRole: async (userId, role) => {
+    try {
+      const response = await fetchWithAuth(`/admin/users/${userId}/role`, {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  toggleUserBlock: async (userId, blocked) => {
+    try {
+      const response = await fetchWithAuth(`/admin/users/${userId}/block`, {
+        method: "PATCH",
+        body: JSON.stringify({ blocked }),
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteUser: async (userId) => {
+    try {
+      const response = await fetchWithAuth(`/admin/users/${userId}`, {
+        method: "DELETE",
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteTrip: async (tripId) => {
+    try {
+      const response = await fetchWithAuth(`/admin/trips/${tripId}`, {
+        method: "DELETE",
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 // ============================================================================
@@ -306,6 +352,23 @@ export const adminApi = {
 // ============================================================================
 
 export const tripApi = {
+  // Public endpoint - no authentication required
+  getPublicTrips: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/trips/explore`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch public trips");
+      }
+
+      const data = await response.json();
+      return data.trips || [];
+    } catch (error) {
+      console.error("Error fetching public trips:", error);
+      return [];
+    }
+  },
+
   getUserTrips: async (params = {}) => {
     try {
       const queryString = new URLSearchParams(params).toString();
@@ -397,6 +460,62 @@ export const tripApi = {
       return handleApiError(error);
     }
   },
+
+  requestToJoin: async (tripId, userId) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/join-request`, {
+        method: "POST",
+        body: JSON.stringify({ userId }),
+      });
+      toast.success(response.message || "Join request sent successfully!");
+      return response;
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
+  },
+
+  getJoinRequests: async (tripId) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/join-requests`);
+      return response.requests || [];
+    } catch (error) {
+      handleApiError(error);
+      return [];
+    }
+  },
+
+  acceptJoinRequest: async (tripId, notificationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/trips/${tripId}/join-requests/${notificationId}/accept`,
+        {
+          method: "POST",
+        }
+      );
+      toast.success("Join request accepted!");
+      return response;
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
+  },
+
+  rejectJoinRequest: async (tripId, notificationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/trips/${tripId}/join-requests/${notificationId}/reject`,
+        {
+          method: "POST",
+        }
+      );
+      toast.success("Join request rejected");
+      return response;
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
+  },
 };
 
 // ============================================================================
@@ -452,7 +571,8 @@ export const activityApi = {
 
   getMapData: async (tripId) => {
     try {
-      return await fetchWithAuth(`/trips/${tripId}/map`);
+      const response = await fetchWithAuth(`/trips/${tripId}/map`);
+      return response;
     } catch (error) {
       return handleApiError(error);
     }
@@ -669,33 +789,6 @@ export const expenseApi = {
 // ============================================================================
 // Chat Endpoints
 // ============================================================================
-
-export const chatApi = {
-  getMessages: async (tripId, options = {}) => {
-    try {
-      const { limit = 10, before } = options;
-      const params = new URLSearchParams();
-
-      if (limit) params.append("limit", limit);
-      if (before) params.append("before", before);
-
-      const queryString = params.toString();
-      const url = `/trips/${tripId}/messages${
-        queryString ? `?${queryString}` : ""
-      }`;
-
-      const response = await fetchWithAuth(url);
-      return {
-        messages: response.messages || [],
-        hasMore: response.hasMore || false,
-      };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  },
-};
-
-// ============================================================================
 // Photo Endpoints
 // ============================================================================
 
@@ -703,7 +796,7 @@ export const photoApi = {
   getPhotos: async (tripId) => {
     try {
       const response = await fetchWithAuth(`/trips/${tripId}/photos`);
-      return response.photos || [];
+      return response; // Return the full response object with photos array
     } catch (error) {
       return handleApiError(error);
     }
@@ -749,6 +842,7 @@ export const notificationApi = {
       const response = await fetchWithAuth(
         `/notifications${queryString ? `?${queryString}` : ""}`
       );
+      console.log(response);
       return response;
     } catch (error) {
       return handleApiError(error);
@@ -758,7 +852,8 @@ export const notificationApi = {
   getUnreadCount: async () => {
     try {
       const response = await fetchWithAuth("/notifications/unread-count");
-      return response.unreadCount;
+
+      return response;
     } catch (error) {
       return handleApiError(error);
     }
@@ -793,6 +888,105 @@ export const notificationApi = {
       return await fetchWithAuth(`/notifications/${notificationId}`, {
         method: "DELETE",
       });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Invitation Endpoints
+// ============================================================================
+
+export const invitationApi = {
+  getPendingInvitations: async () => {
+    try {
+      const response = await fetchWithAuth("/invitations/pending");
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  getInvitationById: async (invitationId) => {
+    try {
+      const response = await fetchWithAuth(`/invitations/${invitationId}`);
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  getInvitationPreview: async (invitationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/invitations/${invitationId}/preview`
+      );
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  acceptInvitation: async (invitationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/invitations/${invitationId}/accept`,
+        {
+          method: "POST",
+        }
+      );
+      toast.success("Invitation accepted successfully");
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  rejectInvitation: async (invitationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/invitations/${invitationId}/reject`,
+        {
+          method: "POST",
+        }
+      );
+      toast.success("Invitation declined");
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  cancelInvitation: async (invitationId) => {
+    try {
+      const response = await fetchWithAuth(`/invitations/${invitationId}`, {
+        method: "DELETE",
+      });
+      toast.success("Invitation cancelled");
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  getTripInvitations: async (tripId) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/invitations`);
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  sendInvitation: async (tripId, email) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/invitations`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      toast.success("Invitation sent successfully");
+      return response;
     } catch (error) {
       return handleApiError(error);
     }
@@ -858,6 +1052,104 @@ export const packingApi = {
   },
 };
 
+// ============================================================================
+// Report Endpoints
+// ============================================================================
+
+export const reportApi = {
+  // User endpoint to report a trip
+  reportTrip: async (tripId, reportData) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/report`, {
+        method: "POST",
+        body: JSON.stringify(reportData),
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Admin endpoints
+  getAllReports: async (filters = {}) => {
+    try {
+      const queryString = new URLSearchParams(
+        Object.entries(filters).filter(([_, value]) => value !== "")
+      ).toString();
+      const response = await fetchWithAuth(
+        `/admin/reports${queryString ? `?${queryString}` : ""}`
+      );
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  getReportById: async (reportId) => {
+    try {
+      const response = await fetchWithAuth(`/admin/reports/${reportId}`);
+      return response.report;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  updateReportStatus: async (reportId, updateData) => {
+    try {
+      const response = await fetchWithAuth(`/admin/reports/${reportId}`, {
+        method: "PATCH",
+        body: JSON.stringify(updateData),
+      });
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  getStatistics: async () => {
+    try {
+      const response = await fetchWithAuth("/admin/reports/statistics");
+      return response.statistics;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Message/Chat Endpoints
+// ============================================================================
+
+export const messageApi = {
+  // Get paginated messages for a trip
+  getMessages: async (tripId, params = {}) => {
+    try {
+      const queryString = new URLSearchParams(
+        Object.entries(params).filter(([_, value]) => value != null)
+      ).toString();
+      const response = await fetchWithAuth(
+        `/trips/${tripId}/messages${queryString ? `?${queryString}` : ""}`
+      );
+      return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Send a message (REST fallback, prefer Socket.IO)
+  sendMessage: async (tripId, text) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      });
+      return response.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
 // Export all APIs
 export default {
   auth: authApi,
@@ -869,9 +1161,11 @@ export default {
   checklist: checklistApi,
   notes: notesApi,
   expense: expenseApi,
-  chat: chatApi,
   photo: photoApi,
   notification: notificationApi,
+  invitation: invitationApi,
   destination: destinationApi,
   packing: packingApi,
+  report: reportApi,
+  message: messageApi,
 };

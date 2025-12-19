@@ -49,6 +49,18 @@ const tripSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,
@@ -58,6 +70,12 @@ const tripSchema = new mongoose.Schema(
 // Create indexes for efficient queries
 tripSchema.index({ owner: 1 });
 tripSchema.index({ members: 1 });
+tripSchema.index({ isDeleted: 1, createdAt: -1 });
+
+// Query helper to exclude deleted trips
+tripSchema.query.notDeleted = function () {
+  return this.where({ isDeleted: false });
+};
 
 const Trip = mongoose.model("Trip", tripSchema);
 

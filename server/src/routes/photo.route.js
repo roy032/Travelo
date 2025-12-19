@@ -1,11 +1,17 @@
-import express from 'express';
+import express from "express";
 import {
   uploadPhotoController,
   deletePhotoController,
   getPhotosController,
-} from '#controllers/photo.controller.js';
-import { authenticateToken, isTripMember } from '#middlewares/auth.middleware.js';
-import { uploadPhoto, handleUploadError } from '#middlewares/upload.middleware.js';
+} from "#controllers/photo.controller.js";
+import {
+  authenticateToken,
+  isTripMember,
+} from "#middlewares/auth.middleware.js";
+import {
+  uploadPhoto,
+  handleUploadError,
+} from "#middlewares/upload.middleware.js";
 
 const router = express.Router();
 
@@ -13,11 +19,11 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Get all photos for a trip (member only)
-router.get('/trips/:tripId/photos', isTripMember, getPhotosController);
+router.get("/trips/:tripId/photos", isTripMember, getPhotosController);
 
 // Upload a photo to a trip (member only)
 router.post(
-  '/trips/:tripId/photos',
+  "/trips/:tripId/photos",
   isTripMember,
   uploadPhoto,
   handleUploadError,
@@ -25,6 +31,6 @@ router.post(
 );
 
 // Delete a photo (uploader only - enforced in controller)
-router.delete('/photos/:photoId', deletePhotoController);
+router.delete("/trips/:tripId/photos/:photoId", deletePhotoController);
 
 export default router;

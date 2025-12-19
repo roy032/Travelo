@@ -1,14 +1,15 @@
-import Photo from '#models/photo.model.js';
-import Trip from '#models/trip.model.js';
-import Notification from '#models/notification.model.js';
-import fs from 'fs/promises';
+import Photo from "#models/photo.model.js";
+import Trip from "#models/trip.model.js";
+import Notification from "#models/notification.model.js";
+import { deleteFiles } from "#config/uploadthing.config.js";
 
 /**
  * Upload a photo to a trip
  * @param {Object} photoData - Photo upload data
  * @param {string} photoData.trip - Trip ID
  * @param {string} photoData.filename - Photo filename
- * @param {string} photoData.path - Photo file path
+ * @param {string} photoData.url - Photo URL from UploadThing
+ * @param {string} photoData.fileKey - UploadThing file key
  * @param {string} photoData.caption - Photo caption (optional)
  * @param {string} photoData.uploader - User ID of the uploader
  * @returns {Promise<Object>} Created photo object
@@ -16,20 +17,21 @@ import fs from 'fs/promises';
  */
 export const uploadPhoto = async (photoData) => {
   try {
-    const { trip, filename, path, caption, uploader } = photoData;
+    const { trip, filename, url, fileKey, caption, uploader } = photoData;
 
     // Verify trip exists
     const tripDoc = await Trip.findById(trip);
 
     if (!tripDoc) {
-      throw new Error('Trip not found');
+      throw new Error("Trip not found");
     }
 
     // Create new photo
     const photo = new Photo({
       trip,
       filename,
-      path,
+      url,
+      fileKey,
       caption,
       uploader,
       uploadedAt: new Date(),
@@ -38,15 +40,15 @@ export const uploadPhoto = async (photoData) => {
     await photo.save();
 
     // Populate uploader information
-    await photo.populate('uploader', 'name email');
+    await photo.populate("uploader", "name email");
 
     // Create notifications for all trip members except the uploader
     const notifications = tripDoc.members
       .filter((member) => member.toString() !== uploader.toString())
       .map((member) => ({
         user: member,
-        type: 'photo_uploaded',
-        title: 'New Photo Uploaded',
+        type: "photo_uploaded",
+        title: "New Photo Uploaded",
         message: `A new photo has been uploaded to the trip`,
         relatedTrip: trip,
         relatedResource: photo._id,
@@ -60,7 +62,8 @@ export const uploadPhoto = async (photoData) => {
       id: photo._id,
       trip: photo.trip,
       filename: photo.filename,
-      path: photo.path,
+      url: photo.url,
+      fileKey: photo.fileKey,
       caption: photo.caption,
       uploader: photo.uploader,
       uploadedAt: photo.uploadedAt,
@@ -73,7 +76,7 @@ export const uploadPhoto = async (photoData) => {
 };
 
 /**
- * Delete a photo with file removal
+ * Delete a photo with file removal from UploadThing
  * @param {string} photoId - Photo ID
  * @param {string} userId - User ID attempting to delete
  * @returns {Promise<Object>} Deletion confirmation
@@ -85,30 +88,37 @@ export const deletePhoto = async (photoId, userId) => {
     const photo = await Photo.findById(photoId);
 
     if (!photo) {
-      throw new Error('Photo not found');
+      throw new Error("Photo not found");
     }
 
     // Verify user is the uploader
     if (photo.uploader.toString() !== userId.toString()) {
-      throw new Error('Access denied: Only the photo uploader can delete this photo');
+      throw new Error(
+        "Access denied: Only the photo uploader can delete this photo"
+      );
     }
 
-    const photoPath = photo.path;
+    const fileKey = photo.fileKey;
 
     // Delete the photo from database
     await Photo.findByIdAndDelete(photoId);
 
-    // Delete the photo file from filesystem
-    try {
-      await fs.unlink(photoPath);
-    } catch (fileError) {
-      // Log the error but don't fail the deletion
-      console.error(`Failed to delete photo file: ${photoPath}`, fileError);
-      // Continue with photo deletion even if file deletion fails
+    // Delete the photo file from UploadThing
+    if (fileKey) {
+      try {
+        await deleteFiles(fileKey);
+      } catch (fileError) {
+        // Log the error but don't fail the deletion
+        console.error(
+          `Failed to delete photo file from UploadThing: ${fileKey}`,
+          fileError
+        );
+        // Continue with photo deletion even if file deletion fails
+      }
     }
 
     return {
-      message: 'Photo deleted successfully',
+      message: "Photo deleted successfully",
       photoId,
     };
   } catch (e) {
@@ -129,7 +139,7 @@ export const getPhotosByTrip = async (tripId, userId) => {
     const trip = await Trip.findById(tripId);
 
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new Error("Trip not found");
     }
 
     // Verify user is a member
@@ -138,19 +148,20 @@ export const getPhotosByTrip = async (tripId, userId) => {
     );
 
     if (!isMember) {
-      throw new Error('Access denied: You are not a member of this trip');
+      throw new Error("Access denied: You are not a member of this trip");
     }
 
     // Get all photos for the trip, sorted by upload date (newest first)
     const photos = await Photo.find({ trip: tripId })
-      .populate('uploader', 'name email')
+      .populate("uploader", "name email")
       .sort({ uploadedAt: -1 });
 
     return photos.map((photo) => ({
       id: photo._id,
       trip: photo.trip,
       filename: photo.filename,
-      path: photo.path,
+      url: photo.url,
+      fileKey: photo.fileKey,
       caption: photo.caption,
       uploader: photo.uploader,
       uploadedAt: photo.uploadedAt,

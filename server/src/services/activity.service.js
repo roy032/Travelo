@@ -7,7 +7,7 @@ import Notification from "#models/notification.model.js";
  * Get latitude and longitude from place name using OpenStreetMap Nominatim API
  */
 async function getLatLng(place) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}&limit=1`;
 
   const res = await fetch(url, {
     headers: {
@@ -18,6 +18,7 @@ async function getLatLng(place) {
   if (!res.ok) throw new Error("Geocoding request failed");
 
   const data = await res.json();
+
   if (data.length === 0) return null; // Return null if place not found
 
   return {
@@ -62,6 +63,7 @@ export const createActivity = async (activityData) => {
 
       try {
         const coords = await getLatLng(locationQuery);
+
         if (coords) {
           locationWithCoords.coordinates = coords;
         }

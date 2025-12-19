@@ -1,6 +1,7 @@
 import { UTApi } from "uploadthing/server";
 
 // Initialize UploadThing API with token from environment
+// For Node.js v20+, we use the native File API
 export const utapi = new UTApi({
   token: process.env.UPLOADTHING_TOKEN,
 });
@@ -20,10 +21,18 @@ export const uploadFile = async (file, fileName) => {
       },
     });
 
+    // Check for error in response
+    if (result?.error || !result?.data) {
+      console.error("UploadThing upload error:", result);
+      throw new Error(
+        result?.error?.message || "Failed to upload file to UploadThing"
+      );
+    }
+
     return result;
   } catch (error) {
     console.error("UploadThing upload error:", error);
-    throw new Error("Failed to upload file to UploadThing");
+    throw new Error(error.message || "Failed to upload file to UploadThing");
   }
 };
 

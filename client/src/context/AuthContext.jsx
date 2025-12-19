@@ -28,18 +28,40 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await authApi.register(userData);
-    setUser(response.user);
-    setIsAuthenticated(true);
-    toast.success("Registration successful!");
-    return response;
+
+    // Fetch complete user profile data after successful registration
+    try {
+      const profileResponse = await profileApi.getProfile();
+      setUser(profileResponse.user);
+      setIsAuthenticated(true);
+      toast.success("Registration successful!");
+      return profileResponse;
+    } catch (error) {
+      // Fallback to registration response user data if profile fetch fails
+      setUser(response.user);
+      setIsAuthenticated(true);
+      toast.success("Registration successful!");
+      return response;
+    }
   };
 
   const login = async (credentials) => {
     const response = await authApi.login(credentials);
-    setUser(response.user);
-    setIsAuthenticated(true);
-    toast.success("Login successful!");
-    return response;
+
+    // Fetch complete user profile data after successful login
+    try {
+      const profileResponse = await profileApi.getProfile();
+      setUser(profileResponse.user);
+      setIsAuthenticated(true);
+      toast.success("Login successful!");
+      return profileResponse;
+    } catch (error) {
+      // Fallback to login response user data if profile fetch fails
+      setUser(response.user);
+      setIsAuthenticated(true);
+      toast.success("Login successful!");
+      return response;
+    }
   };
 
   const logout = async () => {

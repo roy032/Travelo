@@ -1,5 +1,5 @@
 import { uploadVerificationDocument } from "#services/document.service.js";
-import { utapi } from "#config/uploadthing.config.js";
+import { UTApi } from "uploadthing/server";
 
 /**
  * Upload verification document (NID/Passport)
@@ -7,7 +7,6 @@ import { utapi } from "#config/uploadthing.config.js";
  */
 export const uploadDocument = async (req, res, next) => {
   try {
-    // Check if user is authenticated
     if (!req.user) {
       return res.status(401).json({
         error: "Authentication required",
@@ -15,7 +14,6 @@ export const uploadDocument = async (req, res, next) => {
       });
     }
 
-    // Check if file was uploaded
     if (!req.file) {
       return res.status(400).json({
         error: "Validation failed",
@@ -23,9 +21,7 @@ export const uploadDocument = async (req, res, next) => {
       });
     }
 
-    // Get document type from request body (default to 'nid' for backward compatibility)
     const documentType = req.body.documentType || "nid";
-
     if (!["nid", "passport"].includes(documentType)) {
       return res.status(400).json({
         error: "Validation failed",
@@ -33,46 +29,68 @@ export const uploadDocument = async (req, res, next) => {
       });
     }
 
-    const userId = req.user.id;
+    const utapi = new UTApi({ token: process.env.UPLOADTHING_TOKEN });
 
-    // Upload file to UploadThing
-    const uploadedFile = await utapi.uploadFiles(
-      new File([req.file.buffer], req.file.originalname, {
-        type: req.file.mimetype,
-      })
-    );
+    // Convert Buffer → File (proper format for UploadThing)
+    const file = new File([req.file.buffer], req.file.originalname, {
+      type: req.file.mimetype,
+    });
 
-    if (!uploadedFile.data) {
-      throw new Error("Failed to upload file to UploadThing");
+    console.log("Uploading:", {
+      name: req.file.originalname,
+      type: req.file.mimetype,
+      size: req.file.buffer.length,
+    });
+
+    let uploadResult;
+    try {
+      uploadResult = await utapi.uploadFiles([file], {
+        metadata: { userId: req.user.id, documentType },
+        contentDisposition: "inline",
+      });
+      console.log("Upload result:", JSON.stringify(uploadResult, null, 2));
+    } catch (err) {
+      console.error("UploadThing API error:", err);
+      return res.status(500).json({
+        error: "Upload failed",
+        message: "Failed to upload file to UploadThing",
+        details: err.message,
+      });
+    }
+
+    // UploadThing returns array when passed array, get first result
+    const result = Array.isArray(uploadResult) ? uploadResult[0] : uploadResult;
+
+    // Check for errors
+    if (result?.error || !result?.data) {
+      console.error("UploadThing error:", result);
+      return res.status(500).json({
+        error: "Upload failed",
+        message:
+          result?.error?.message || "Failed to upload file to UploadThing",
+      });
     }
 
     const fileInfo = {
-      key: uploadedFile.data.key,
-      url: uploadedFile.data.url,
-      name: uploadedFile.data.name,
-      size: uploadedFile.data.size,
+      key: result.data.key,
+      url: result.data.url,
+      name: result.data.name,
+      size: result.data.size,
     };
 
     const updatedUser = await uploadVerificationDocument(
-      userId,
+      req.user.id,
       fileInfo,
       documentType
     );
 
-    const documentTypeName = documentType === "nid" ? "NID" : "Passport";
-    res.status(200).json({
-      message: `${documentTypeName} uploaded successfully. Verification status set to pending.`,
+    return res.status(200).json({
+      message: `${documentType === "nid" ? "NID" : "Passport"} uploaded successfully. Verification pending.`,
       user: updatedUser,
       documentType,
     });
   } catch (e) {
-    if (e.message === "User not found") {
-      return res.status(404).json({ error: "User not found" });
-    }
-    if (e.message.includes("Invalid document type")) {
-      return res.status(400).json({ error: e.message });
-    }
-    console.error("Document upload error:", e);
+    console.error("Upload error:", e);
     next(e);
   }
 };

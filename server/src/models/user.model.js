@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
     // Legacy verification fields (kept for backward compatibility)
     verificationStatus: {
       type: String,

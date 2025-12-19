@@ -7,23 +7,26 @@ import {
   expenseApi,
   photoApi,
 } from "../services/api.service";
-import TripHeader from "../components/TripHeader";
-import MemberList from "../components/MemberList";
-import ItineraryView from "../components/ItineraryView";
-import ActivityForm from "../components/ActivityForm";
-import MapView from "../components/MapView";
-import ChecklistView from "../components/ChecklistView";
-import NotesList from "../components/NotesList";
-import NoteEditor from "../components/NoteEditor";
-import ExpenseList from "../components/ExpenseList";
-import ExpenseForm from "../components/ExpenseForm";
-import SplitSummary from "../components/SplitSummary";
-import ReceiptViewer from "../components/ReceiptViewer";
-import ChatWindow from "../components/ChatWindow";
-import PhotoGrid from "../components/PhotoGrid";
-import PhotoUpload from "../components/PhotoUpload";
-import Modal from "../components/Modal";
-import Loader from "../components/Loader";
+import TripHeader from "../components/features/trips/TripHeader";
+import MemberList from "../components/features/members/MemberList";
+import ItineraryView from "../components/features/trips/ItineraryView";
+import ActivityForm from "../components/features/trips/ActivityForm";
+import MapView from "../components/features/trips/MapView";
+import ChecklistView from "../components/features/checklist/ChecklistView";
+import NotesList from "../components/features/notes/NotesList";
+import NoteEditor from "../components/features/notes/NoteEditor";
+import ExpenseList from "../components/features/expenses/ExpenseList";
+import ExpenseForm from "../components/features/expenses/ExpenseForm";
+import SplitSummary from "../components/features/expenses/SplitSummary";
+import ReceiptViewer from "../components/features/expenses/ReceiptViewer";
+import PhotoGrid from "../components/features/photos/PhotoGrid";
+import PhotoUploadButton from "../components/features/photos/PhotoUploadButton";
+import PlaceImageGallery from "../components/features/trips/PlaceImageGallery";
+import PackageHelper from "../components/features/packing/PackageHelper";
+import JoinRequestsPanel from "../components/trip/JoinRequestsPanel";
+import TripChat from "../components/chat/TripChat";
+import Modal from "../components/ui/Modal";
+import Loader from "../components/ui/Loader";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -66,6 +69,10 @@ const TripDetailPage = () => {
   const [photosLoading, setPhotosLoading] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
 
+  // Place images state
+  const [placeImages, setPlaceImages] = useState([]);
+  const [placeImagesLoading, setPlaceImagesLoading] = useState(false);
+
   useEffect(() => {
     fetchTrip();
     fetchMembers();
@@ -74,6 +81,9 @@ const TripDetailPage = () => {
   useEffect(() => {
     if (activeTab === "photos") {
       fetchPhotos();
+    }
+    if (activeTab === "place-images") {
+      fetchPlaceImages();
     }
   }, [activeTab, tripId]);
 
@@ -281,6 +291,28 @@ const TripDetailPage = () => {
     }
   };
 
+  // Place images handlers
+  const fetchPlaceImages = async () => {
+    try {
+      setPlaceImagesLoading(true);
+      const data = await activityApi.getMapData(tripId);
+
+      // Filter activities that have valid coordinates
+      const activitiesWithCoordinates = data.activities.filter(
+        (activity) =>
+          activity.location?.coordinates?.lat &&
+          activity.location?.coordinates?.lng
+      );
+
+      setPlaceImages(activitiesWithCoordinates);
+    } catch (error) {
+      console.error("Error fetching place images:", error);
+      toast.error("Failed to load place images");
+    } finally {
+      setPlaceImagesLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
@@ -313,11 +345,13 @@ const TripDetailPage = () => {
     { id: "overview", label: "Overview" },
     { id: "itinerary", label: "Itinerary" },
     { id: "map", label: "Map" },
+    { id: "place-images", label: "Place Images" },
+    { id: "chat", label: "Chat" },
     { id: "members", label: "Members" },
     { id: "expenses", label: "Expenses" },
     { id: "checklist", label: "Checklist" },
     { id: "notes", label: "Notes" },
-    { id: "chat", label: "Chat" },
+    { id: "package-helper", label: "Package Helper" },
     { id: "photos", label: "Photos" },
   ];
   return (
@@ -356,25 +390,31 @@ const TripDetailPage = () => {
       {/* Tab Content */}
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
         {activeTab === "overview" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
-            <h2 className='text-xl font-semibold text-gray-900 mb-4'>
-              Trip Overview
-            </h2>
-            <div className='space-y-4'>
-              <div>
-                <h3 className='text-sm font-medium text-gray-500'>
-                  Description
-                </h3>
-                <p className='mt-1 text-gray-900'>
-                  {trip.description || "No description provided"}
-                </p>
-              </div>
-              <div>
-                <h3 className='text-sm font-medium text-gray-500'>Members</h3>
-                <p className='mt-1 text-gray-900'>
-                  {trip.members?.length || 0}{" "}
-                  {trip.members?.length === 1 ? "member" : "members"}
-                </p>
+          <div className='space-y-6'>
+            {/* Join Requests Panel - Only visible to owner */}
+            <JoinRequestsPanel tripId={tripId} isOwner={isOwner} />
+
+            {/* Trip Overview */}
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+                Trip Overview
+              </h2>
+              <div className='space-y-4'>
+                <div>
+                  <h3 className='text-sm font-medium text-gray-500'>
+                    Description
+                  </h3>
+                  <p className='mt-1 text-gray-900'>
+                    {trip.description || "No description provided"}
+                  </p>
+                </div>
+                <div>
+                  <h3 className='text-sm font-medium text-gray-500'>Members</h3>
+                  <p className='mt-1 text-gray-900'>
+                    {trip.members?.length || 0}{" "}
+                    {trip.members?.length === 1 ? "member" : "members"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -418,6 +458,12 @@ const TripDetailPage = () => {
           </div>
         )}
 
+        {activeTab === "chat" && (
+          <div className='max-w-4xl mx-auto'>
+            <TripChat tripId={tripId} />
+          </div>
+        )}
+
         {activeTab === "expenses" && (
           <div className='space-y-6'>
             <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
@@ -453,32 +499,80 @@ const TripDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "chat" && (
+        {activeTab === "package-helper" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
-            <h2 className='text-xl font-semibold text-gray-900 mb-4'>Chat</h2>
-            <ChatWindow tripId={tripId} />
+            <PackageHelper tripId={tripId} startDate={trip.startDate} />
           </div>
         )}
 
         {activeTab === "photos" && (
-          <div className='space-y-6'>
-            {/* Photo Upload */}
-            <PhotoUpload
-              onUpload={handlePhotoUpload}
-              loading={photoUploading}
-            />
-
-            {/* Photo Gallery */}
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            {/* Header with Upload Button */}
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-xl font-semibold text-gray-900'>
                 Gallery
+                {photos.length > 0 && (
+                  <span className='ml-2 text-sm font-normal text-gray-500'>
+                    ({photos.length} {photos.length === 1 ? "photo" : "photos"})
+                  </span>
+                )}
               </h2>
-              <PhotoGrid
-                photos={photos}
-                onDeletePhoto={handlePhotoDelete}
-                currentUserId={user?.id}
-                loading={photosLoading}
+              <PhotoUploadButton
+                onUpload={handlePhotoUpload}
+                loading={photoUploading}
               />
+            </div>
+
+            {/* Photo Grid */}
+            <PhotoGrid
+              photos={photos}
+              onDeletePhoto={handlePhotoDelete}
+              currentUserId={user?.id}
+              loading={photosLoading}
+            />
+          </div>
+        )}
+
+        {activeTab === "place-images" && (
+          <div className='space-y-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+              <div className='mb-6'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                  Place Images from Wikimedia Commons
+                </h2>
+                <p className='text-gray-600'>
+                  Explore images of your trip destinations sourced from
+                  Wikimedia Commons. Images are shown for activities with
+                  location coordinates.
+                </p>
+              </div>
+
+              {placeImagesLoading ? (
+                <div className='flex justify-center py-12'>
+                  <Loader size='lg' text='Loading place images...' />
+                </div>
+              ) : placeImages.length === 0 ? (
+                <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
+                  <p className='text-gray-600 mb-2'>
+                    No places with coordinates found
+                  </p>
+                  <p className='text-sm text-gray-500'>
+                    Add coordinates to your activities in the itinerary to see
+                    images from Wikimedia Commons
+                  </p>
+                </div>
+              ) : (
+                <div className='space-y-6'>
+                  {placeImages.map((activity, index) => (
+                    <PlaceImageGallery
+                      key={index}
+                      placeName={activity.location.name}
+                      latitude={activity.location.coordinates.lat}
+                      longitude={activity.location.coordinates.lng}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

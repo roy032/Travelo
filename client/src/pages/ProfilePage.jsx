@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { profileApi } from "../services/api.service";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import Card from "../components/Card";
-import DocumentUpload from "../components/DocumentUpload";
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import DocumentUpload from "../components/features/admin/DocumentUpload";
 import toast from "react-hot-toast";
 import { User, Mail, Calendar, Lock } from "lucide-react";
 

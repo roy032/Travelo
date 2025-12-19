@@ -77,6 +77,10 @@ export const updateTrip = async (tripId, userId, updateData) => {
       throw new Error("Trip not found");
     }
 
+    if (trip.isDeleted) {
+      throw new Error("This trip has been deleted and cannot be updated");
+    }
+
     // Verify ownership
     if (trip.owner.toString() !== userId.toString()) {
       throw new Error("Only the trip owner can update trip details");
@@ -117,7 +121,7 @@ export const updateTrip = async (tripId, userId, updateData) => {
 };
 
 /**
- * Delete a trip and all associated data (cascade deletion)
+ * Delete a trip (soft delete - marks as inactive)
  * @param {string} tripId - Trip ID
  * @param {string} userId - User ID attempting the deletion
  * @returns {Promise<Object>} Deletion confirmation
@@ -132,6 +136,11 @@ export const deleteTrip = async (tripId, userId) => {
       throw new Error("Trip not found");
     }
 
+    // Check if already deleted
+    if (trip.isDeleted) {
+      throw new Error("Trip is already deleted");
+    }
+
     // Verify ownership
     if (trip.owner.toString() !== userId.toString()) {
       throw new Error("Only the trip owner can delete the trip");
@@ -140,59 +149,22 @@ export const deleteTrip = async (tripId, userId) => {
     // Get all member IDs for notifications
     const memberIds = trip.members.map((member) => member._id);
 
-    // Delete the trip
-    await Trip.findByIdAndDelete(tripId);
-
-    // Delete all related notifications
-    await Notification.deleteMany({ relatedTrip: tripId });
-
-    // Cascade deletion for activities
-    const { default: Activity } = await import("#models/activity.model.js");
-    await Activity.deleteMany({ trip: tripId });
-
-    // Cascade deletion for checklist items
-    const { default: ChecklistItem } =
-      await import("#models/checklist.model.js");
-    await ChecklistItem.deleteMany({ trip: tripId });
-
-    // Cascade deletion for expenses
-    const { default: Expense } = await import("#models/expense.model.js");
-    await Expense.deleteMany({ trip: tripId });
-
-    // Cascade deletion for notes
-    const { default: Note } = await import("#models/note.model.js");
-    await Note.deleteMany({ trip: tripId });
-
-    // Cascade deletion for messages
-    const { default: Message } = await import("#models/message.model.js");
-    await Message.deleteMany({ trip: tripId });
-
-    // Cascade deletion for photos (with file removal)
-    const { default: Photo } = await import("#models/photo.model.js");
-    const photos = await Photo.find({ trip: tripId });
-
-    // Delete photo files from filesystem
-    const fs = await import("fs/promises");
-    for (const photo of photos) {
-      try {
-        await fs.unlink(photo.path);
-      } catch (fileError) {
-        // Log the error but don't fail the deletion
-        console.error(`Failed to delete photo file: ${photo.path}`, fileError);
-      }
-    }
-
-    // Delete photo records from database
-    await Photo.deleteMany({ trip: tripId });
+    // Soft delete the trip
+    trip.isDeleted = true;
+    trip.deletedAt = new Date();
+    trip.deletedBy = userId;
+    await trip.save();
 
     // Create notifications for all members about trip deletion
-    const notifications = memberIds.map((memberId) => ({
-      user: memberId,
-      type: "member_removed",
-      title: "Trip Deleted",
-      message: `The trip "${trip.title}" has been deleted by the owner`,
-      relatedTrip: tripId,
-    }));
+    const notifications = memberIds
+      .filter((memberId) => memberId.toString() !== userId.toString())
+      .map((memberId) => ({
+        user: memberId,
+        type: "member_removed",
+        title: "Trip Deleted",
+        message: `The trip "${trip.title}" has been deleted by the owner`,
+        relatedTrip: tripId,
+      }));
 
     if (notifications.length > 0) {
       await Notification.insertMany(notifications);
@@ -222,6 +194,10 @@ export const getTripById = async (tripId, userId) => {
 
     if (!trip) {
       throw new Error("Trip not found");
+    }
+
+    if (trip.isDeleted) {
+      throw new Error("This trip has been deleted");
     }
 
     // Verify user is a member
@@ -269,8 +245,8 @@ export const getUserTrips = async (userId, options = {}) => {
       sortOrder = "desc",
     } = options;
 
-    // Build query
-    const query = { members: userId };
+    // Build query - exclude deleted trips
+    const query = { members: userId, isDeleted: false };
 
     // Apply filter for upcoming/past trips
     const now = new Date();
@@ -315,71 +291,23 @@ export const getUserTrips = async (userId, options = {}) => {
 };
 
 /**
- * Invite a member to a trip
+ * Invite a member to a trip (DEPRECATED - use invitation.service.js)
+ * This function is kept for backward compatibility but now uses the invitation system
  * @param {string} tripId - Trip ID
  * @param {string} ownerId - User ID of the trip owner
  * @param {string} email - Email of the user to invite
- * @returns {Promise<Object>} Updated trip with new member
+ * @returns {Promise<Object>} Created invitation
  * @throws {Error} If trip not found, user is not owner, invitee not found, or already a member
  */
 export const inviteMember = async (tripId, ownerId, email) => {
   try {
-    // Find the trip
-    const trip = await Trip.findById(tripId);
+    // Import invitation service to avoid circular dependency
+    const { sendInvitation } = await import("#services/invitation.service.js");
 
-    if (!trip) {
-      throw new Error("Trip not found");
-    }
+    // Use the new invitation system
+    const invitation = await sendInvitation(tripId, ownerId, email);
 
-    // Verify ownership
-    if (trip.owner.toString() !== ownerId.toString()) {
-      throw new Error("Only the trip owner can invite members");
-    }
-
-    // Find the user to invite by email
-    const userToInvite = await User.findOne({ email: email.toLowerCase() });
-
-    if (!userToInvite) {
-      throw new Error("User not found");
-    }
-
-    // Check if user is already a member
-    const isAlreadyMember = trip.members.some(
-      (memberId) => memberId.toString() === userToInvite._id.toString()
-    );
-
-    if (isAlreadyMember) {
-      throw new Error("User is already a member of this trip");
-    }
-
-    // Add user to members
-    trip.members.push(userToInvite._id);
-    await trip.save();
-
-    // Create notification for invited user
-    await Notification.create({
-      user: userToInvite._id,
-      type: "trip_invite",
-      title: "Trip Invitation",
-      message: `You have been invited to join the trip "${trip.title}"`,
-      relatedTrip: trip._id,
-    });
-
-    // Populate members and owner for response
-    await trip.populate("owner", "name email");
-    await trip.populate("members", "name email");
-
-    return {
-      id: trip._id,
-      title: trip.title,
-      description: trip.description,
-      startDate: trip.startDate,
-      endDate: trip.endDate,
-      destinationType: trip.destinationType,
-      owner: trip.owner,
-      members: trip.members,
-      updatedAt: trip.updatedAt,
-    };
+    return invitation;
   } catch (e) {
     throw e;
   }
@@ -400,6 +328,10 @@ export const removeMember = async (tripId, ownerId, memberIdToRemove) => {
 
     if (!trip) {
       throw new Error("Trip not found");
+    }
+
+    if (trip.isDeleted) {
+      throw new Error("This trip has been deleted");
     }
 
     // Verify ownership
@@ -473,6 +405,10 @@ export const getTripMembers = async (tripId, userId) => {
       throw new Error("Trip not found");
     }
 
+    if (trip.isDeleted) {
+      throw new Error("This trip has been deleted");
+    }
+
     // Verify user is a member
     const isMember = trip.members.some(
       (member) => member._id.toString() === userId.toString()
@@ -489,6 +425,75 @@ export const getTripMembers = async (tripId, userId) => {
       verificationStatus: member.verificationStatus,
       isOwner: member._id.toString() === trip.owner.toString(),
     }));
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * Get all upcoming trips for public exploration (NO AUTH REQUIRED)
+ * Returns only non-sensitive data: title, description, dates, destination type, activities, and checklist
+ * @returns {Promise<Array>} Array of sanitized trip objects with activities and checklist
+ */
+export const getPublicUpcomingTrips = async () => {
+  try {
+    const now = new Date();
+
+    // Import Activity and ChecklistItem models
+    const Activity = (await import("#models/activity.model.js")).default;
+    const ChecklistItem = (await import("#models/checklist.model.js")).default;
+
+    // Find all upcoming trips that are not deleted
+    const trips = await Trip.find({
+      startDate: { $gte: now },
+      isDeleted: false,
+    }).sort({ startDate: 1 });
+
+    // Fetch activities and checklist for each trip
+    const tripsWithDetails = await Promise.all(
+      trips.map(async (trip) => {
+        // Get activities for this trip
+        const activities = await Activity.find({ trip: trip._id })
+          .select("title description date time location category")
+          .sort({ date: 1, time: 1 })
+          .limit(10); // Limit to 10 activities per trip
+
+        // Get checklist items for this trip
+        const checklistItems = await ChecklistItem.find({ trip: trip._id })
+          .select("text isChecked")
+          .limit(20); // Limit to 20 items per trip
+
+        return {
+          id: trip._id,
+          title: trip.title,
+          description: trip.description,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          destinationType: trip.destinationType,
+          tripCategory: trip.tripCategory,
+          ownerId: trip.owner.toString(), // Include owner ID for filtering
+          members: trip.members.map((m) => m.toString()), // Include member IDs for filtering
+          activities: activities.map((act) => ({
+            id: act._id,
+            title: act.title,
+            description: act.description,
+            date: act.date,
+            time: act.time,
+            location: act.location?.name || null,
+            category: act.category,
+          })),
+          checklist: checklistItems.map((item) => ({
+            id: item._id,
+            text: item.text,
+            isChecked: item.isChecked,
+          })),
+          activityCount: activities.length,
+          checklistCount: checklistItems.length,
+        };
+      })
+    );
+
+    return tripsWithDetails;
   } catch (e) {
     throw e;
   }
