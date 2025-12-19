@@ -59,7 +59,6 @@ const destinationSchema = new mongoose.Schema(
 );
 
 // Create indexes for efficient queries
-destinationSchema.index({ name: 1 });
 destinationSchema.index({ category: 1 });
 
 const Destination = mongoose.model('Destination', destinationSchema);
