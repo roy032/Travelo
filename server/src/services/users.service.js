@@ -63,7 +63,7 @@ export const getUserById = async (id) => {
  */
 export const updateProfile = async (id, updates) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("+password");
 
     if (!user) {
       throw new Error("User not found");

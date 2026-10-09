@@ -13,16 +13,18 @@ export const getDestinations = async ({ category, search } = {}) => {
     const query = {};
 
     // Add category filter if provided
-    if (category) {
+    if (typeof category === 'string' && category) {
       query.category = category;
     }
 
     // Add search filter if provided (case-insensitive search in name and description)
-    if (search) {
+    // (escape user input so it is matched literally, not as a regex)
+    if (typeof search === 'string' && search.trim()) {
+      const pattern = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { country: { $regex: search, $options: 'i' } },
+        { name: { $regex: pattern, $options: 'i' } },
+        { description: { $regex: pattern, $options: 'i' } },
+        { country: { $regex: pattern, $options: 'i' } },
       ];
     }
 

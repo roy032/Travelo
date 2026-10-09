@@ -40,6 +40,16 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Handle Mongoose schema validation errors
+  if (err.name === 'ValidationError' && err.errors) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: Object.values(err.errors)
+        .map((e) => e.message)
+        .join(', '),
+    });
+  }
+
   // Handle MongoDB cast errors (invalid ObjectId)
   if (err.name === 'CastError') {
     return res.status(400).json({

@@ -49,26 +49,39 @@ export const calculateSplits = async (tripId, userId) => {
       };
     }
 
-    // Calculate total expenses
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    // Work in integer cents so rounding never makes balances drift
+    const toCents = (value) => Math.round(Number(value) * 100);
+    const fromCents = (cents) => cents / 100;
 
-    // Calculate equal share per member
     const memberCount = trip.members.length;
-    const equalShare = totalExpenses / memberCount;
+    const totalCents = expenses.reduce(
+      (sum, expense) => sum + toCents(expense.amount),
+      0
+    );
+
+    // Equal share in cents; leftover cents go one each to the first members
+    // (ordered by id so the result is stable between requests)
+    const baseShareCents = Math.floor(totalCents / memberCount);
+    const remainderCents = totalCents - baseShareCents * memberCount;
+    const orderedIds = trip.members
+      .map((member) => member._id.toString())
+      .sort();
+    const shareCents = {};
+    orderedIds.forEach((id, index) => {
+      shareCents[id] = baseShareCents + (index < remainderCents ? 1 : 0);
+    });
 
     // Calculate total paid by each member
     const memberPayments = {};
-
-    // Initialize all members with 0
-    trip.members.forEach((member) => {
-      memberPayments[member._id.toString()] = 0;
+    orderedIds.forEach((id) => {
+      memberPayments[id] = 0;
     });
 
-    // Sum up payments by each member
+    // Sum up payments by each member (payer may be null if the user was deleted)
     expenses.forEach((expense) => {
-      const payerId = expense.payer._id.toString();
-      if (memberPayments[payerId] !== undefined) {
-        memberPayments[payerId] += expense.amount;
+      const payerId = expense.payer?._id?.toString();
+      if (payerId && memberPayments[payerId] !== undefined) {
+        memberPayments[payerId] += toCents(expense.amount);
       }
     });
 
@@ -77,8 +90,8 @@ export const calculateSplits = async (tripId, userId) => {
     // Negative balance = member owes money (paid less than their share)
     const splits = trip.members.map((member) => {
       const memberId = member._id.toString();
-      const totalPaid = memberPayments[memberId] || 0;
-      const netBalance = totalPaid - equalShare;
+      const paidCents = memberPayments[memberId] || 0;
+      const memberShareCents = shareCents[memberId];
 
       return {
         user: {
@@ -86,11 +99,14 @@ export const calculateSplits = async (tripId, userId) => {
           name: member.name,
           email: member.email,
         },
-        totalPaid: parseFloat(totalPaid.toFixed(2)),
-        equalShare: parseFloat(equalShare.toFixed(2)),
-        netBalance: parseFloat(netBalance.toFixed(2)),
+        totalPaid: fromCents(paidCents),
+        equalShare: fromCents(memberShareCents),
+        netBalance: fromCents(paidCents - memberShareCents),
       };
     });
+
+    const totalExpenses = fromCents(totalCents);
+    const equalShare = totalExpenses / memberCount;
 
     return {
       tripId,

@@ -93,6 +93,34 @@ export const uploadPhoto = multer({
   },
 }).single("photo"); // Expect a single file with field name 'photo'
 
+// Verify the file content matches its declared MIME type (the client controls
+// file.mimetype, so check magic bytes before the buffer is uploaded anywhere)
+const FILE_SIGNATURES = {
+  "image/jpeg": [[0xff, 0xd8, 0xff]],
+  "image/png": [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]],
+  "application/pdf": [[0x25, 0x50, 0x44, 0x46]], // %PDF
+};
+
+export const validateFileContent = (req, res, next) => {
+  if (!req.file) return next();
+
+  const signatures = FILE_SIGNATURES[req.file.mimetype];
+  const buffer = req.file.buffer;
+  const matches =
+    signatures &&
+    buffer &&
+    signatures.some((sig) => sig.every((byte, i) => buffer[i] === byte));
+
+  if (!matches) {
+    return res.status(415).json({
+      error: "Upload failed",
+      message: "File content does not match an allowed file type",
+    });
+  }
+
+  next();
+};
+
 // Error handling middleware for multer errors
 export const handleUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {

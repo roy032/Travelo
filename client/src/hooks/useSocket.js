@@ -52,36 +52,33 @@ const useSocket = (tripId) => {
     };
   }, []);
 
-  // Join room when socket connects and tripId is available
+  // Join room when socket connects and tripId is available; leave it when the
+  // trip changes, the socket reconnects, or the component unmounts
   useEffect(() => {
-    if (!socket || !isConnected || !tripId || isJoined) return;
+    if (!socket || !isConnected || !tripId) return;
+
+    let active = true;
 
     socket.emit("joinRoom", { tripId }, (response) => {
+      if (!active) return;
       if (response?.error) {
         console.error("Failed to join room:", response.error);
         setError(response.error);
         setIsJoined(false);
       } else {
-        console.log("Successfully joined room:", response?.room);
         setIsJoined(true);
         setError(null);
       }
     });
 
     return () => {
-      // Leave room on unmount
-      if (isJoined) {
-        socket.emit("leaveRoom", { tripId }, (response) => {
-          if (response?.error) {
-            console.error("Failed to leave room:", response.error);
-          } else {
-            console.log("Successfully left room");
-            setIsJoined(false);
-          }
-        });
+      active = false;
+      setIsJoined(false);
+      if (socket.connected) {
+        socket.emit("leaveRoom", { tripId });
       }
     };
-  }, [socket, isConnected, tripId, isJoined]);
+  }, [socket, isConnected, tripId]);
 
   // Send message
   const sendMessage = useCallback(

@@ -36,25 +36,17 @@ export const uploadDocument = async (req, res, next) => {
       type: req.file.mimetype,
     });
 
-    console.log("Uploading:", {
-      name: req.file.originalname,
-      type: req.file.mimetype,
-      size: req.file.buffer.length,
-    });
-
     let uploadResult;
     try {
       uploadResult = await utapi.uploadFiles([file], {
         metadata: { userId: req.user.id, documentType },
         contentDisposition: "inline",
       });
-      console.log("Upload result:", JSON.stringify(uploadResult, null, 2));
     } catch (err) {
       console.error("UploadThing API error:", err);
       return res.status(500).json({
         error: "Upload failed",
         message: "Failed to upload file to UploadThing",
-        details: err.message,
       });
     }
 
@@ -63,7 +55,7 @@ export const uploadDocument = async (req, res, next) => {
 
     // Check for errors
     if (result?.error || !result?.data) {
-      console.error("UploadThing error:", result);
+      console.error("UploadThing error:", result?.error?.message);
       return res.status(500).json({
         error: "Upload failed",
         message:

@@ -41,14 +41,15 @@ const TripChat = ({ tripId }) => {
     if (!isJoined) return;
 
     const unsubscribe = onNewMessage((message) => {
-      console.log("New message received:", message);
+      // Ignore messages for other trips (e.g. a room left a moment ago)
+      const messageTripId = message?.trip?._id || message?.trip;
+      if (messageTripId && String(messageTripId) !== String(tripId)) return;
 
-      // Add confirmed message
       addMessage(message);
     });
 
     return unsubscribe;
-  }, [isJoined, onNewMessage, addMessage]);
+  }, [isJoined, onNewMessage, addMessage, tripId]);
 
   // Handle sending a message
   const handleSendMessage = useCallback(
@@ -92,7 +93,7 @@ const TripChat = ({ tripId }) => {
         }
       });
     },
-    [isConnected, isJoined, sendMessage]
+    [isConnected, isJoined, sendMessage, user]
   );
 
   // Show connection errors

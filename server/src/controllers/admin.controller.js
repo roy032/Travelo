@@ -131,7 +131,8 @@ export const rejectUserVerification = async (req, res, next) => {
  */
 export const fetchAllUsers = async (req, res, next) => {
   try {
-    const { verificationStatus, search, page = 1, limit = 20 } = req.query;
+    const { verificationStatus, search } = req.query;
+    let { page = 1, limit = 20 } = req.query;
 
     // Build query
     const query = {};
@@ -145,15 +146,21 @@ export const fetchAllUsers = async (req, res, next) => {
     }
 
     // Search by name or email if provided
-    if (search) {
+    if (typeof search === "string" && search.trim()) {
+      const escaped = search
+        .trim()
+        .slice(0, 100)
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
+        { name: { $regex: escaped, $options: "i" } },
+        { email: { $regex: escaped, $options: "i" } },
       ];
     }
 
-    // Calculate pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    // Calculate pagination (guard against NaN / negative values)
+    page = Math.max(parseInt(page, 10) || 1, 1);
+    limit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+    const skip = (page - 1) * limit;
 
     // Get users with pagination
     const users = await User.find(query)
@@ -344,16 +351,16 @@ export const deleteUserAccount = async (req, res, next) => {
       Trip.updateMany({ members: userId }, { $pull: { members: userId } }),
 
       // Delete activities created by user
-      Activity.deleteMany({ createdBy: userId }),
+      Activity.deleteMany({ creator: userId }),
 
       // Delete checklists created by user
-      Checklist.deleteMany({ createdBy: userId }),
+      Checklist.deleteMany({ creator: userId }),
 
       // Delete expenses created by user
-      Expense.deleteMany({ paidBy: userId }),
+      Expense.deleteMany({ creator: userId }),
 
       // Delete notes created by user
-      Note.deleteMany({ author: userId }),
+      Note.deleteMany({ creator: userId }),
 
       // Delete photos uploaded by user
       Photo.deleteMany({ uploader: userId }),

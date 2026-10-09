@@ -1,7 +1,9 @@
 import toast from "react-hot-toast";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL + "/api" || "http://localhost:3000/api";
+// VITE_API_URL is the server origin without the /api suffix
+const API_BASE_URL = `${
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+}/api`;
 
 /**
  * Custom error class for API errors

@@ -216,6 +216,7 @@ export const getTripById = async (tripId, userId) => {
       startDate: trip.startDate,
       endDate: trip.endDate,
       destinationType: trip.destinationType,
+      tripCategory: trip.tripCategory,
       owner: trip.owner,
       members: trip.members,
       createdAt: trip.createdAt,
@@ -256,9 +257,11 @@ export const getUserTrips = async (userId, options = {}) => {
       query.endDate = { $lt: now };
     }
 
-    // Apply search by title (case-insensitive)
-    if (search && search.trim()) {
-      query.title = { $regex: search.trim(), $options: "i" };
+    // Apply search by title (case-insensitive). Only accept strings and escape
+    // regex metacharacters so user input cannot inject operators or slow regexes.
+    if (typeof search === "string" && search.trim()) {
+      const escaped = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.title = { $regex: escaped, $options: "i" };
     }
 
     // Build sort object

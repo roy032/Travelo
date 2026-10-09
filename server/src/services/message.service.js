@@ -59,6 +59,14 @@ export const createMessage = async (tripId, senderId, text) => {
     throw new Error("Cannot send messages to a deleted trip");
   }
 
+  // Sender must still be a member (they may have been removed after joining)
+  const isMember = trip.members.some(
+    (memberId) => memberId.toString() === senderId.toString()
+  );
+  if (!isMember) {
+    throw new Error("You are not a member of this trip");
+  }
+
   // Create message
   const message = await Message.create({
     trip: tripId,

@@ -92,7 +92,9 @@ export const createUser = async ({
 export const authenticateUser = async ({ email, password }) => {
   try {
     // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() }).select(
+      "+password"
+    );
     if (!user) {
       throw new Error("User not found");
     }
@@ -103,6 +105,10 @@ export const authenticateUser = async ({ email, password }) => {
       throw new Error("Invalid password");
     }
 
+    if (user.isBlocked) {
+      throw new Error("User is blocked");
+    }
+
     // Return user without password
     return {
       id: user._id,
@@ -110,6 +116,10 @@ export const authenticateUser = async ({ email, password }) => {
       email: user.email,
       role: user.role,
       verificationStatus: user.verificationStatus,
+      domesticVerification: { status: user.domesticVerification?.status },
+      internationalVerification: {
+        status: user.internationalVerification?.status,
+      },
     };
   } catch (e) {
     throw e;

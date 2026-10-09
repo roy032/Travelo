@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
 import Trip from "#models/trip.model.js";
 import { createMessage } from "#services/message.service.js";
@@ -12,7 +13,9 @@ let io;
 export const initializeSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: (process.env.CLIENT_URL || "http://localhost:5173")
+        .split(",")
+        .map((o) => o.trim()),
       credentials: true,
     },
   });
@@ -39,7 +42,7 @@ export const initializeSocket = (httpServer) => {
 
       next();
     } catch (error) {
-      console.error("Socket authentication error:", error);
+      console.error("Socket authentication error:", error.message);
       next(new Error("Authentication failed"));
     }
   });
@@ -49,8 +52,17 @@ export const initializeSocket = (httpServer) => {
     console.log(`User connected: ${socket.userId}`);
 
     // Handle joining a trip chatroom
-    socket.on("joinRoom", async ({ tripId }, callback) => {
+    // Payloads come from the client: never destructure them in the parameter
+    // list, a missing payload would throw outside the try/catch
+    socket.on("joinRoom", async (payload, ackArg) => {
+      const callback = typeof ackArg === "function" ? ackArg : undefined;
       try {
+        const tripId = payload?.tripId;
+
+        if (typeof tripId !== "string" || !mongoose.isValidObjectId(tripId)) {
+          return callback?.({ error: "Invalid trip ID" });
+        }
+
         // Verify user is a member of the trip
         const trip = await Trip.findById(tripId);
 
@@ -71,8 +83,17 @@ export const initializeSocket = (httpServer) => {
           return callback?.({ error: "You are not a member of this trip" });
         }
 
-        // Join the room
+        // Leave the previously joined trip room so messages don't leak across chats
         const roomName = `trip_${tripId}`;
+        if (socket.currentRoom && socket.currentRoom !== roomName) {
+          socket.leave(socket.currentRoom);
+          socket.to(socket.currentRoom).emit("userLeft", {
+            userId: socket.userId,
+            timestamp: new Date(),
+          });
+        }
+
+        // Join the room
         socket.join(roomName);
         socket.currentRoom = roomName;
         socket.currentTripId = tripId;
@@ -93,8 +114,14 @@ export const initializeSocket = (httpServer) => {
     });
 
     // Handle leaving a room
-    socket.on("leaveRoom", ({ tripId }, callback) => {
+    socket.on("leaveRoom", (payload, ackArg) => {
+      const callback = typeof ackArg === "function" ? ackArg : undefined;
       try {
+        const tripId = payload?.tripId;
+        if (typeof tripId !== "string") {
+          return callback?.({ error: "Invalid trip ID" });
+        }
+
         const roomName = `trip_${tripId}`;
         socket.leave(roomName);
 
@@ -119,15 +146,19 @@ export const initializeSocket = (httpServer) => {
     });
 
     // Handle sending a message
-    socket.on("sendMessage", async ({ tripId, text }, callback) => {
+    socket.on("sendMessage", async (payload, ackArg) => {
+      const callback = typeof ackArg === "function" ? ackArg : undefined;
       try {
+        const tripId = payload?.tripId;
+        const text = payload?.text;
+
         // Verify user is in the room
         if (socket.currentTripId !== tripId) {
           return callback?.({ error: "You must join the room first" });
         }
 
         // Validate text
-        if (!text || text.trim().length === 0) {
+        if (typeof text !== "string" || text.trim().length === 0) {
           return callback?.({ error: "Message cannot be empty" });
         }
 
@@ -158,17 +189,27 @@ export const initializeSocket = (httpServer) => {
         });
       } catch (error) {
         console.error("Error sending message:", error);
-        callback?.({ error: error.message || "Failed to send message" });
+        const clientErrors = [
+          "Trip not found",
+          "Cannot send messages to a deleted trip",
+          "You are not a member of this trip",
+        ];
+        callback?.({
+          error: clientErrors.includes(error.message)
+            ? error.message
+            : "Failed to send message",
+        });
       }
     });
 
     // Handle typing indicator (future feature)
-    socket.on("typing", ({ tripId, isTyping }) => {
-      if (socket.currentTripId === tripId) {
+    socket.on("typing", (payload) => {
+      const tripId = payload?.tripId;
+      if (tripId && socket.currentTripId === tripId) {
         const roomName = `trip_${tripId}`;
         socket.to(roomName).emit("userTyping", {
           userId: socket.userId,
-          isTyping,
+          isTyping: Boolean(payload.isTyping),
         });
       }
     });

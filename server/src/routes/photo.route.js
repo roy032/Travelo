@@ -11,6 +11,7 @@ import {
 import {
   uploadPhoto,
   handleUploadError,
+  validateFileContent,
 } from "#middlewares/upload.middleware.js";
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.post(
   isTripMember,
   uploadPhoto,
   handleUploadError,
+  validateFileContent,
   uploadPhotoController
 );
 

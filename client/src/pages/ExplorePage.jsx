@@ -33,7 +33,7 @@ const ExplorePage = () => {
       setTripsError(null);
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/trips/explore`
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/trips/explore`
       );
 
       if (!response.ok) {

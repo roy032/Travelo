@@ -16,12 +16,12 @@ npm install
 ```
 
 2. Configure environment variables:
-   - Copy `.env.example` to `.env` (or use the existing `.env` file)
-   - Update the following variables:
+   - Copy `.env.example` to `.env`
+   - Set at least the following variables (the server exits on startup if the first two are missing):
      - `MONGODB_URI`: Your MongoDB connection string
-     - `JWT_SECRET`: A secure secret key for JWT tokens
-     - `PORT`: Server port (default: 3000)
-     - `CLIENT_URL`: Frontend URL for CORS (default: http://localhost:5173)
+     - `JWT_SECRET`: A long random secret for signing JWTs
+     - `UPLOADTHING_TOKEN`: UploadThing token (needed for uploads)
+   - See the table under "Environment Variables" for optional settings
 
 ## MongoDB Setup
 
@@ -106,12 +106,7 @@ Configuration details in `src/config/database.js`:
 
 ## File Upload Structure
 
-The server maintains three upload directories:
-- `uploads/documents/`: User verification documents (NID, passport)
-- `uploads/receipts/`: Expense receipt images
-- `uploads/photos/`: Trip photo gallery images
-
-These directories are created automatically and tracked by git (with `.gitkeep` files) but their contents are ignored.
+New uploads (verification documents, receipts, photos) are stored on UploadThing. The `src/uploads/` directories only hold legacy local files; their contents are ignored by git, and `uploads/documents/` is never served publicly.
 
 ## API Endpoints
 
@@ -119,12 +114,12 @@ These directories are created automatically and tracked by git (with `.gitkeep` 
 - `GET /` - Server status
 - `GET /api` - API status
 
-### Authentication (Coming in next tasks)
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
+### Authentication
+- `POST /api/auth/sign-up` - Register (rate limited)
+- `POST /api/auth/sign-in` - Sign in (rate limited)
+- `POST /api/auth/sign-out` - Sign out
 
-### Additional endpoints will be added as features are implemented
+Other route groups live in `src/routes/` (trips, activities, checklist, notes, expenses, photos, messages, notifications, invitations, destinations, profile, documents, admin).
 
 ## Environment Variables
 
@@ -132,15 +127,19 @@ These directories are created automatically and tracked by git (with `.gitkeep` 
 |----------|-------------|---------|
 | `PORT` | Server port | 3000 |
 | `NODE_ENV` | Environment (development/production) | development |
-| `MONGODB_URI` | MongoDB connection string | mongodb://localhost:27017/travel-planner |
-| `JWT_SECRET` | Secret key for JWT tokens | (must be set) |
-| `JWT_EXPIRES_IN` | JWT token expiration | 7d |
-| `CLIENT_URL` | Frontend URL for CORS | http://localhost:5173 |
+| `MONGODB_URI` | MongoDB connection string | (required) |
+| `JWT_SECRET` | Secret key for JWT tokens | (required) |
+| `JWT_EXPIRES_IN` | JWT and auth cookie lifetime | 1d |
+| `UPLOADTHING_TOKEN` | UploadThing API token | (required for uploads) |
+| `CLIENT_URL` | Allowed client origin(s) for CORS and Socket.IO, comma-separated | http://localhost:5173 |
+| `TRUST_PROXY` | Set to `true` behind a reverse proxy | false |
 
 ## Scripts
 
 - `npm start` - Start the server
-- `npm run dev` - Start with auto-reload (using Node.js --watch)
+- `npm run dev` - Start with auto-reload (nodemon)
+- `npm test` - Run tests (Vitest)
+- `npm run seed:destinations` - Seed destination data
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint errors
 - `npm run format` - Format code with Prettier
@@ -148,10 +147,11 @@ These directories are created automatically and tracked by git (with `.gitkeep` 
 
 ## Testing
 
-Testing will be implemented in subsequent tasks using:
-- Jest/Mocha for unit tests
-- fast-check for property-based tests
-- Supertest for API integration tests
+Tests use Vitest (with fast-check and Supertest available):
+
+```bash
+npm test
+```
 
 ## Troubleshooting
 
@@ -176,19 +176,6 @@ Testing will be implemented in subsequent tasks using:
 If port 3000 is already in use:
 1. Change the `PORT` in `.env` to another port (e.g., 3001)
 2. Or stop the process using port 3000
-
-## Next Steps
-
-The following features will be implemented in subsequent tasks:
-1. User authentication and authorization
-2. Document verification system
-3. Trip management
-4. Itinerary planning
-5. Expense tracking and split calculations
-6. Real-time chat
-7. Photo gallery
-8. Notifications
-9. And more...
 
 ## License
 

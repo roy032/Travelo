@@ -9,6 +9,7 @@ import {
 import {
   authenticateToken,
   isTripMember,
+  requireRole,
 } from "#middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.delete("/checklist/:itemId", deleteItemController);
 // Manually trigger checklist reminder notifications (for testing/debugging)
 router.post(
   "/checklist/trigger-reminders",
+  requireRole(["admin"]),
   triggerChecklistRemindersController
 );
 

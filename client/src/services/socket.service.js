@@ -17,8 +17,9 @@ class SocketService {
       this.socket = null;
     }
 
-    this.socket = io(process.env.EXPO_PUBLIC_BACKEND_URL, {
+    this.socket = io(import.meta.env.VITE_API_URL || "http://localhost:3000", {
       transports: ["websocket"],
+      withCredentials: true,
       timeout: 20000,
       reconnection: true,
       reconnectionAttempts: 10,

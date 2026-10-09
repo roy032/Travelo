@@ -186,7 +186,7 @@ function TripList() {
 function CustomEmpty() {
   return (
     <EmptyState
-      icon="🎉"
+      icon={<Inbox className="w-12 h-12" />}
       title="Custom Title"
       message="Custom message"
       actionLabel="Take Action"

@@ -16,7 +16,7 @@ export const sendInvitation = async (tripId, inviterId, email) => {
     // Find the trip
     const trip = await Trip.findById(tripId);
 
-    if (!trip) {
+    if (!trip || trip.isDeleted) {
       throw new Error("Trip not found");
     }
 
@@ -121,9 +121,11 @@ export const acceptInvitation = async (invitationId, userId) => {
     }
 
     // Add user to trip members
-    const trip = await Trip.findById(invitation.trip._id);
+    const trip = invitation.trip
+      ? await Trip.findById(invitation.trip._id)
+      : null;
 
-    if (!trip) {
+    if (!trip || trip.isDeleted) {
       throw new Error("Trip not found");
     }
 

@@ -79,7 +79,7 @@ export const createActivityController = async (req, res, next) => {
  */
 export const updateActivityController = async (req, res, next) => {
   try {
-    const { activityId } = req.params;
+    const { tripId, activityId } = req.params;
 
     const validationResult = updateActivitySchema.safeParse(req.body);
 
@@ -97,7 +97,12 @@ export const updateActivityController = async (req, res, next) => {
       updateData.date = new Date(updateData.date);
     }
 
-    const activity = await updateActivity(activityId, req.user.id, updateData);
+    const activity = await updateActivity(
+      activityId,
+      req.user.id,
+      updateData,
+      tripId
+    );
 
     res.status(200).json({
       message: "Activity updated successfully",
@@ -127,9 +132,9 @@ export const updateActivityController = async (req, res, next) => {
  */
 export const deleteActivityController = async (req, res, next) => {
   try {
-    const { activityId } = req.params;
+    const { tripId, activityId } = req.params;
 
-    const result = await deleteActivity(activityId, req.user.id);
+    const result = await deleteActivity(activityId, req.user.id, tripId);
 
     res.status(200).json(result);
   } catch (e) {

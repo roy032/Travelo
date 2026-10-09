@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authApi, profileApi, checklistApi } from "../services/api.service";
+import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
 
@@ -55,18 +55,12 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       toast.success("Login successful!");
 
-      // Trigger checklist reminders in the background (silent)
-      checklistApi.triggerReminders();
-
       return profileResponse;
     } catch (error) {
       // Fallback to login response user data if profile fetch fails
       setUser(response.user);
       setIsAuthenticated(true);
       toast.success("Login successful!");
-
-      // Trigger checklist reminders in the background (silent)
-      checklistApi.triggerReminders();
 
       return response;
     }

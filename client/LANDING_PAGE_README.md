@@ -1,10 +1,10 @@
-# Landing Page - Production-Quality Implementation
+# Landing Page
 
-## 🎯 Overview
+## Overview
 
-A fully responsive, production-ready landing page recreated from the reference design (`main-ref.png`). Built with React, Vite, and Tailwind CSS, featuring modern UI components with smooth animations and excellent mobile responsiveness.
+Responsive landing page based on the reference design (`main-ref.png`), built with React, Vite and Tailwind CSS.
 
-## 📁 File Structure
+## File Structure
 
 ```
 client/src/
@@ -24,7 +24,7 @@ client/src/
 └── index.css                        # Enhanced with custom utilities
 ```
 
-## 🎨 Components Breakdown
+## Components Breakdown
 
 ### 1. **Hero Component**
 
@@ -112,29 +112,29 @@ client/src/
   - Bottom bar with copyright and policy links
   - Fully responsive (stacks on mobile)
 
-## 🎯 Key Features Implemented
+## Key Features Implemented
 
-### ✅ Visual Fidelity
+### Visual Fidelity
 
 - Exact spacing, padding, and border-radius matching the reference
 - Consistent color scheme using Tailwind utilities
 - Proper typography hierarchy
 - Shadow and hover effects on interactive elements
 
-### ✅ Responsiveness
+### Responsiveness
 
 - **Desktop** (1024px+): Full multi-column layout
 - **Tablet** (768px-1023px): 2-column grids, adjusted spacing
 - **Mobile** (< 768px): Single column, stacked elements, touch-friendly buttons
 
-### ✅ Performance
+### Performance
 
 - Optimized images (placeholder paths ready)
 - Efficient Tailwind classes
 - No inline styles
 - Smooth CSS transitions (respects `prefers-reduced-motion`)
 
-### ✅ Accessibility
+### Accessibility
 
 - Semantic HTML structure
 - ARIA labels where needed
@@ -143,7 +143,7 @@ client/src/
 - Screen reader friendly
 - Sufficient color contrast
 
-## 🚀 Usage
+## Usage
 
 ### Running the Application
 
@@ -166,7 +166,7 @@ The landing page is displayed when users are **not authenticated**. To see it:
 
 Authenticated users see a different dashboard view with quick actions (defined earlier in HomePage.jsx).
 
-## 🖼️ Image Placeholders
+## Image Placeholders
 
 The components reference images from `/main/` directory:
 
@@ -178,7 +178,7 @@ The components reference images from `/main/` directory:
 
 **To use real images**: Replace these paths in each component with actual image URLs or Next.js `<Image>` components.
 
-## 🎨 Customization
+## Customization
 
 ### Colors
 
@@ -201,7 +201,7 @@ All colors use Tailwind utilities. Primary theme:
 - Section padding: `py-16` to `py-20`
 - Grid gaps: `gap-8` for cards, `gap-12` for sections
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Dependencies Used
 
@@ -223,7 +223,7 @@ All colors use Tailwind utilities. Primary theme:
 - Local state with `useState` for interactive elements (FAQ accordion, search form)
 - No external state management needed
 
-## 📱 Responsive Breakpoints
+## Responsive Breakpoints
 
 ```css
 /* Mobile First Approach */
@@ -234,7 +234,7 @@ lg:     1024px+    (desktop)
 xl:     1280px+    (large desktop)
 ```
 
-## ✨ Animation & Effects
+## Animation & Effects
 
 - **Hover transitions**: `transition-all`, `transform hover:-translate-y-2`
 - **Card shadows**: `shadow-lg hover:shadow-2xl`
@@ -242,7 +242,7 @@ xl:     1280px+    (large desktop)
 - **Button effects**: Scale, shadow, and color transitions
 - **Accordion**: Smooth height transitions with `max-h-0` to `max-h-96`
 
-## 🐛 Known Linting Warnings
+## Known Linting Warnings
 
 ESLint may show warnings about:
 
@@ -252,7 +252,7 @@ ESLint may show warnings about:
 
 These are **cosmetic warnings** and do not affect functionality. The current classes are valid and work correctly.
 
-## 🔄 Future Enhancements
+## Future Enhancements
 
 Consider adding:
 
@@ -267,10 +267,10 @@ Consider adding:
 - [ ] Destination filtering
 - [ ] Interactive map integration
 
-## 📄 License
+## License
 
 Part of the Travelo project. All rights reserved.
 
 ---
 
-**Built with ❤️ using React + Vite + Tailwind CSS**
+Built with React, Vite and Tailwind CSS.

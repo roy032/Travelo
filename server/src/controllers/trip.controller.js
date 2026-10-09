@@ -262,7 +262,7 @@ export const inviteMemberController = async (req, res, next) => {
     const { tripId } = req.params;
     const { email } = req.body;
 
-    if (!email) {
+    if (typeof email !== "string" || !email.trim()) {
       return res.status(400).json({
         error: "Validation failed",
         message: "Email is required",
@@ -420,8 +420,8 @@ export const requestJoinTripController = async (req, res, next) => {
 
     // Get trip details without member restriction
     const trip = await Trip.findById(tripId)
-      .populate("owner", "firstName lastName email")
-      .populate("members", "_id firstName lastName email");
+      .populate("owner", "name email")
+      .populate("members", "_id name email");
 
     if (!trip) {
       return res.status(404).json({
@@ -491,6 +491,22 @@ export const requestJoinTripController = async (req, res, next) => {
       }
     }
 
+    // Avoid duplicate pending requests from the same user
+    const existingRequest = await Notification.findOne({
+      user: trip.owner._id,
+      type: "join_request",
+      relatedTrip: trip._id,
+      relatedResource: userId,
+      isRead: false,
+    });
+
+    if (existingRequest) {
+      return res.status(409).json({
+        error: "Conflict",
+        message: "You have already requested to join this trip",
+      });
+    }
+
     await Notification.create({
       user: trip.owner._id,
       type: "join_request",
@@ -554,7 +570,11 @@ export const getJoinRequestsController = async (req, res, next) => {
       type: "join_request",
       relatedTrip: tripId,
     })
-      .populate("relatedResource", "firstName lastName email")
+      .populate({
+        path: "relatedResource",
+        model: "User",
+        select: "name email",
+      })
       .sort({ createdAt: -1 });
 
     // Filter out requests where the user is already a member
@@ -620,10 +640,12 @@ export const acceptJoinRequestController = async (req, res, next) => {
       });
     }
 
-    // Verify notification belongs to this user and trip
+    // Verify notification is a join request that belongs to this user and trip
     if (
+      notification.type !== "join_request" ||
+      !notification.relatedResource ||
       notification.user.toString() !== userId ||
-      notification.relatedTrip.toString() !== tripId
+      notification.relatedTrip?.toString() !== tripId
     ) {
       return res.status(403).json({
         error: "Access denied",
@@ -711,10 +733,12 @@ export const rejectJoinRequestController = async (req, res, next) => {
       });
     }
 
-    // Verify notification belongs to this user and trip
+    // Verify notification is a join request that belongs to this user and trip
     if (
+      notification.type !== "join_request" ||
+      !notification.relatedResource ||
       notification.user.toString() !== userId ||
-      notification.relatedTrip.toString() !== tripId
+      notification.relatedTrip?.toString() !== tripId
     ) {
       return res.status(403).json({
         error: "Access denied",
@@ -753,7 +777,7 @@ export const deleteTripByAdmin = async (req, res, next) => {
   try {
     const { tripId } = req.params;
     const adminId = req.user.id;
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const ipAddress = req.ip || req.socket?.remoteAddress;
 
     // Validate request body
     const { adminDeleteTripSchema } =

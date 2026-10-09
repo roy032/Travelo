@@ -87,12 +87,20 @@ export const createActivity = async (activityData) => {
  * @returns {Promise<Object>} Updated activity object
  * @throws {Error} If activity not found
  */
-export const updateActivity = async (activityId, userId, updateData) => {
+export const updateActivity = async (
+  activityId,
+  userId,
+  updateData,
+  tripId
+) => {
   try {
-    // Find the activity
+    // Find the activity (must belong to the trip in the route)
     const activity = await Activity.findById(activityId);
 
-    if (!activity) {
+    if (
+      !activity ||
+      (tripId && activity.trip.toString() !== tripId.toString())
+    ) {
       throw new Error("Activity not found");
     }
 
@@ -157,12 +165,15 @@ export const updateActivity = async (activityId, userId, updateData) => {
  * @returns {Promise<Object>} Deletion confirmation
  * @throws {Error} If activity not found
  */
-export const deleteActivity = async (activityId, userId) => {
+export const deleteActivity = async (activityId, userId, tripId) => {
   try {
-    // Find the activity
+    // Find the activity (must belong to the trip in the route)
     const activity = await Activity.findById(activityId);
 
-    if (!activity) {
+    if (
+      !activity ||
+      (tripId && activity.trip.toString() !== tripId.toString())
+    ) {
       throw new Error("Activity not found");
     }
 

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
 
 export const authenticateToken = (req, res, next) => {
@@ -16,7 +17,7 @@ export const authenticateToken = (req, res, next) => {
 
     next();
   } catch (e) {
-    if (e.message === "Failed to authenticate token") {
+    if (e.message === "Failed to verify token") {
       return res.status(401).json({
         error: "Authentication failed",
         message: "Invalid or expired token",
@@ -111,9 +112,16 @@ export const isTripMember = async (req, res, next) => {
     // Import Trip model dynamically to avoid circular dependencies
     const { default: Trip } = await import("#models/trip.model.js");
 
+    if (!mongoose.Types.ObjectId.isValid(tripId)) {
+      return res.status(400).json({
+        error: "Validation failed",
+        message: "Invalid trip ID",
+      });
+    }
+
     const trip = await Trip.findById(tripId);
 
-    if (!trip) {
+    if (!trip || trip.isDeleted) {
       return res.status(404).json({
         error: "Resource not found",
         message: "Trip not found",
@@ -170,9 +178,16 @@ export const isTripOwner = async (req, res, next) => {
     // Import Trip model dynamically to avoid circular dependencies
     const { default: Trip } = await import("#models/trip.model.js");
 
+    if (!mongoose.Types.ObjectId.isValid(tripId)) {
+      return res.status(400).json({
+        error: "Validation failed",
+        message: "Invalid trip ID",
+      });
+    }
+
     const trip = await Trip.findById(tripId);
 
-    if (!trip) {
+    if (!trip || trip.isDeleted) {
       return res.status(404).json({
         error: "Resource not found",
         message: "Trip not found",

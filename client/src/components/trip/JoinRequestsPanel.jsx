@@ -99,8 +99,7 @@ const JoinRequestsPanel = ({ tripId, isOwner }) => {
               </div>
               <div>
                 <p className='font-semibold text-gray-900'>
-                  {request.relatedResource?.firstName}{" "}
-                  {request.relatedResource?.lastName}
+                  {request.relatedResource?.name}
                 </p>
                 <p className='text-sm text-gray-600'>
                   {request.relatedResource?.email}

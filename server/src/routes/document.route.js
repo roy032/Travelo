@@ -4,6 +4,7 @@ import { authenticateToken } from '#middlewares/auth.middleware.js';
 import {
   uploadDocument as uploadMiddleware,
   handleUploadError,
+  validateFileContent,
 } from '#middlewares/upload.middleware.js';
 
 const router = express.Router();
@@ -14,6 +15,7 @@ router.post(
   authenticateToken,
   uploadMiddleware,
   handleUploadError,
+  validateFileContent,
   uploadDocument
 );
 

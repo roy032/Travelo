@@ -92,7 +92,7 @@ const PhotoLightbox = ({ isOpen, onClose, photos, currentIndex, onNavigate }) =>
     });
   };
 
-  const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${currentPhoto.path}`;
+  const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${currentPhoto.path}`;
 
   return (
     <div

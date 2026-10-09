@@ -6,6 +6,17 @@ import { startChecklistNotificationJob } from "./jobs/checklistNotifications.js"
 
 const PORT = process.env.PORT || 3000;
 
+// Fail fast when required configuration is missing
+const missingEnv = ["MONGODB_URI", "JWT_SECRET"].filter(
+  (name) => !process.env[name]
+);
+if (missingEnv.length > 0) {
+  console.error(
+    `Missing required environment variables: ${missingEnv.join(", ")}. See server/.env.example.`
+  );
+  process.exit(1);
+}
+
 // Initialize database connection and start server
 const startServer = async () => {
   try {

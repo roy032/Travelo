@@ -6,13 +6,13 @@ This document describes the implementation of receipt upload functionality for e
 ## Requirements Implemented
 
 ### Requirement 20.1: File Format and Size Validation
-✅ **Implemented**: Receipt upload accepts JPEG and PNG formats up to 5MB
+**Implemented**: Receipt upload accepts JPEG and PNG formats up to 5MB
 - Location: `server/src/middlewares/upload.middleware.js`
 - Implementation: `receiptFileFilter` validates MIME types (image/jpeg, image/png)
 - File size limit: 5MB configured in multer options
 
 ### Requirement 20.2: Receipt Association with Expense
-✅ **Implemented**: Receipts are associated with expense entries
+**Implemented**: Receipts are associated with expense entries
 - Location: `server/src/controllers/expense.controller.js`
 - Implementation: 
   - `createExpenseController`: Adds receipt data to expense on creation
@@ -20,7 +20,7 @@ This document describes the implementation of receipt upload functionality for e
 - Receipt data includes: filename, path, uploadedAt timestamp
 
 ### Requirement 20.4: Upload Error Handling
-✅ **Implemented**: Descriptive error messages for upload failures
+**Implemented**: Descriptive error messages for upload failures
 - Location: `server/src/middlewares/upload.middleware.js`
 - Implementation: `handleUploadError` middleware
 - Error responses:
@@ -29,7 +29,7 @@ This document describes the implementation of receipt upload functionality for e
   - 400 Bad Request: Other multer errors
 
 ### Requirement 20.5: Receipt Deletion on Expense Deletion
-✅ **Implemented**: Receipt files are deleted when expense is deleted
+**Implemented**: Receipt files are deleted when expense is deleted
 - Location: `server/src/service/expense.service.js`
 - Implementation: 
   - `deleteExpense`: Deletes receipt file from filesystem using fs.unlink()

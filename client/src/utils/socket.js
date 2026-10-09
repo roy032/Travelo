@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 
+// VITE_API_URL is the server origin (no /api suffix)
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 let socket = null;
@@ -10,7 +11,9 @@ let socket = null;
  * @returns {object} Socket instance
  */
 export const getSocket = () => {
-  if (!socket || !socket.connected) {
+  // Reuse a single instance; creating a new one whenever the current socket is
+  // not yet connected leaks connections
+  if (!socket) {
     socket = io(SOCKET_URL, {
       withCredentials: true,
       autoConnect: false,

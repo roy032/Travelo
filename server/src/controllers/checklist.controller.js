@@ -8,7 +8,39 @@ import {
 } from "#services/checklist.service.js";
 import Notification from "#models/notification.model.js";
 import Trip from "#models/trip.model.js";
+import ChecklistItem from "#models/checklist.model.js";
 import { checkIncompleteChecklists } from "../jobs/checklistNotifications.js";
+
+/**
+ * Ensure the user is a member of the (non-deleted) trip that owns a checklist item.
+ * Returns null and sends the error response when access is not allowed.
+ */
+const loadItemForMember = async (itemId, userId, res) => {
+  const item = await ChecklistItem.findById(itemId);
+  if (!item) {
+    res.status(404).json({
+      error: "Resource not found",
+      message: "Checklist item not found",
+    });
+    return null;
+  }
+
+  const trip = await Trip.findById(item.trip);
+  const isMember =
+    trip &&
+    !trip.isDeleted &&
+    trip.members.some((m) => m.toString() === userId.toString());
+
+  if (!isMember) {
+    res.status(403).json({
+      error: "Access denied",
+      message: "You are not a member of this trip",
+    });
+    return null;
+  }
+
+  return item;
+};
 
 /**
  * Create a new checklist item
@@ -73,6 +105,9 @@ export const toggleItemController = async (req, res, next) => {
   try {
     const { itemId } = req.params;
 
+    const allowed = await loadItemForMember(itemId, req.user.id, res);
+    if (!allowed) return;
+
     const checklistItem = await toggleChecklistItem(itemId, req.user.id);
 
     // Get all trip members for notifications
@@ -123,16 +158,9 @@ export const deleteItemController = async (req, res, next) => {
   try {
     const { itemId } = req.params;
 
-    // Get the item before deletion for notifications
-    const ChecklistItem = (await import("#models/checklist.model.js")).default;
-    const item = await ChecklistItem.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({
-        error: "Resource not found",
-        message: "Checklist item not found",
-      });
-    }
+    // Get the item before deletion (membership check + notifications)
+    const item = await loadItemForMember(itemId, req.user.id, res);
+    if (!item) return;
 
     const tripId = item.trip;
     const itemText = item.text;

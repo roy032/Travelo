@@ -19,10 +19,11 @@ export const signup = async (req, res, next) => {
       });
     }
 
-    const { name, email, password, role: userRole } = validationResult.data;
+    const { name, email, password } = validationResult.data;
 
+    // Role is never taken from the request body; only the first account becomes admin
     let verificationStatus = "unverified";
-    let role = userRole;
+    let role = "user";
 
     const getUsers = await getUserCount();
     if (getUsers === 0) {
@@ -30,9 +31,6 @@ export const signup = async (req, res, next) => {
       role = "admin";
       verificationStatus = "verified";
     }
-    console.log("User role assigned:", role);
-    console.log("Verification status assigned:", verificationStatus);
-    
 
     const user = await createUser({
       name,
@@ -116,6 +114,13 @@ export const signIn = async (req, res, next) => {
   } catch (e) {
     if (e.message === "User not found" || e.message === "Invalid password") {
       return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    if (e.message === "User is blocked") {
+      return res.status(403).json({
+        error: "Access denied",
+        message: "This account has been blocked",
+      });
     }
 
     next(e);

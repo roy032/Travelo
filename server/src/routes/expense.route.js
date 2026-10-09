@@ -7,7 +7,11 @@ import {
   getSplitsController,
 } from '#controllers/expense.controller.js';
 import { authenticateToken, isTripMember } from '#middlewares/auth.middleware.js';
-import { uploadReceipt, handleUploadError } from '#middlewares/upload.middleware.js';
+import {
+  uploadReceipt,
+  handleUploadError,
+  validateFileContent,
+} from '#middlewares/upload.middleware.js';
 
 const router = express.Router();
 
@@ -26,6 +30,7 @@ router.post(
   isTripMember,
   uploadReceipt,
   handleUploadError,
+  validateFileContent,
   createExpenseController
 );
 
@@ -35,6 +40,7 @@ router.put(
   isTripMember,
   uploadReceipt,
   handleUploadError,
+  validateFileContent,
   updateExpenseController
 );
 

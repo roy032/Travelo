@@ -17,7 +17,7 @@ export const sendInvitationController = async (req, res, next) => {
     const { tripId } = req.params;
     const { email } = req.body;
 
-    if (!email) {
+    if (typeof email !== "string" || !email.trim()) {
       return res.status(400).json({
         error: "Validation failed",
         message: "Email is required",

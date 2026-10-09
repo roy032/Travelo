@@ -30,10 +30,21 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Comma-separated list of allowed browser origins
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Needed for correct req.ip (rate limiting) behind a reverse proxy
+if (process.env.TRUST_PROXY === "true") {
+  app.set("trust proxy", 1);
+}
+
 app.use(helmet());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -41,7 +52,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Serve static files from uploads directory
+// Serve legacy locally stored files. Identity documents are never served publicly.
+app.use("/uploads/documents", (req, res) => {
+  res.status(404).json({ error: "Resource not found" });
+});
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Health check routes
@@ -55,6 +69,9 @@ app.get("/api", (req, res) => {
 
 // API routes
 app.use("/api/auth", authRoutes);
+// Public routes must be mounted before routers that are mounted at "/api" and
+// apply authenticateToken to every request passing through them
+app.use("/api/destinations", destinationRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/trips", tripRoutes); // Must be first to catch /explore before authenticated routes
@@ -65,7 +82,6 @@ app.use("/api", checklistRoutes);
 app.use("/api", noteRoutes);
 app.use("/api", expenseRoutes);
 app.use("/api", photoRoutes);
-app.use("/api/destinations", destinationRoutes);
 app.use("/api", packingRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api", notificationRoutes);

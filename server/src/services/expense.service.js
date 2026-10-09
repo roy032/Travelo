@@ -2,7 +2,48 @@ import Expense from '#models/expense.model.js';
 import Trip from '#models/trip.model.js';
 import Notification from '#models/notification.model.js';
 import fs from 'fs/promises';
-import path from 'path';
+import { deleteFiles } from '#config/uploadthing.config.js';
+
+/**
+ * Load an expense and verify it belongs to the given trip and that the user
+ * may modify it (expense creator, payer, or trip owner).
+ */
+const loadEditableExpense = async (expenseId, tripId, userId) => {
+  const expense = await Expense.findById(expenseId);
+
+  if (!expense || (tripId && expense.trip.toString() !== tripId.toString())) {
+    throw new Error('Expense not found');
+  }
+
+  const tripDoc = await Trip.findById(expense.trip);
+  const uid = userId.toString();
+  const canEdit =
+    expense.creator?.toString() === uid ||
+    expense.payer?.toString() === uid ||
+    tripDoc?.owner?.toString() === uid;
+
+  if (!canEdit) {
+    throw new Error('Access denied: You cannot modify this expense');
+  }
+
+  return expense;
+};
+
+/**
+ * Remove a stored receipt (UploadThing key, or legacy local file). Never throws.
+ */
+const removeReceipt = async (receipt) => {
+  if (!receipt) return;
+  try {
+    if (receipt.key) {
+      await deleteFiles(receipt.key);
+    } else if (receipt.path) {
+      await fs.unlink(receipt.path);
+    }
+  } catch (fileError) {
+    console.error('Failed to delete old receipt:', fileError.message);
+  }
+};
 
 /**
  * Create a new expense
@@ -104,17 +145,13 @@ export const createExpense = async (expenseData) => {
  * @param {string} expenseId - Expense ID
  * @param {string} userId - User ID attempting the update
  * @param {Object} updateData - Data to update
+ * @param {string} [tripId] - Trip ID from the route; the expense must belong to it
  * @returns {Promise<Object>} Updated expense object
- * @throws {Error} If expense not found
+ * @throws {Error} If expense not found or user may not edit it
  */
-export const updateExpense = async (expenseId, userId, updateData) => {
+export const updateExpense = async (expenseId, userId, updateData, tripId) => {
   try {
-    // Find the expense
-    const expense = await Expense.findById(expenseId);
-
-    if (!expense) {
-      throw new Error('Expense not found');
-    }
+    const expense = await loadEditableExpense(expenseId, tripId, userId);
 
     // Update allowed fields
     const allowedUpdates = ['amount', 'currency', 'category', 'description', 'payer', 'receipt'];
@@ -137,14 +174,8 @@ export const updateExpense = async (expenseId, userId, updateData) => {
     }
 
     // If a new receipt is being uploaded, delete the old one
-    if (updateData.receipt && expense.receipt && expense.receipt.path) {
-      try {
-        await fs.unlink(expense.receipt.path);
-      } catch (fileError) {
-        // Log the error but don't fail the update
-        console.error(`Failed to delete old receipt file: ${expense.receipt.path}`, fileError);
-        // Continue with expense update even if file deletion fails
-      }
+    if (updateData.receipt && expense.receipt) {
+      await removeReceipt(expense.receipt);
     }
 
     allowedUpdates.forEach((field) => {
@@ -200,31 +231,19 @@ export const updateExpense = async (expenseId, userId, updateData) => {
  * Delete an expense
  * @param {string} expenseId - Expense ID
  * @param {string} userId - User ID attempting the deletion
+ * @param {string} [tripId] - Trip ID from the route; the expense must belong to it
  * @returns {Promise<Object>} Deletion confirmation
- * @throws {Error} If expense not found
+ * @throws {Error} If expense not found or user may not delete it
  */
-export const deleteExpense = async (expenseId, userId) => {
+export const deleteExpense = async (expenseId, userId, tripId) => {
   try {
-    // Find the expense
-    const expense = await Expense.findById(expenseId);
-
-    if (!expense) {
-      throw new Error('Expense not found');
-    }
+    const expense = await loadEditableExpense(expenseId, tripId, userId);
 
     const tripId = expense.trip;
     const expenseDescription = expense.description;
 
     // Delete associated receipt file if exists
-    if (expense.receipt && expense.receipt.path) {
-      try {
-        await fs.unlink(expense.receipt.path);
-      } catch (fileError) {
-        // Log the error but don't fail the deletion
-        console.error(`Failed to delete receipt file: ${expense.receipt.path}`, fileError);
-        // Continue with expense deletion even if file deletion fails
-      }
-    }
+    await removeReceipt(expense.receipt);
 
     // Delete the expense
     await Expense.findByIdAndDelete(expenseId);

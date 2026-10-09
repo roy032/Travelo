@@ -27,7 +27,6 @@ export const createExpenseController = async (req, res, next) => {
 
     const validationResult = createExpenseSchema.safeParse(bodyData);
 
-    console.log(tripId);
     if (!validationResult.success) {
       return res.status(400).json({
         error: "Validation failed",
@@ -150,7 +149,12 @@ export const updateExpenseController = async (req, res, next) => {
       }
     }
 
-    const expense = await updateExpense(expenseId, req.user.id, updateData);
+    const expense = await updateExpense(
+      expenseId,
+      req.user.id,
+      updateData,
+      tripId
+    );
 
     res.status(200).json({
       message: "Expense updated successfully",
@@ -161,6 +165,13 @@ export const updateExpenseController = async (req, res, next) => {
       return res.status(404).json({
         error: "Resource not found",
         message: "Expense not found",
+      });
+    }
+
+    if (e.message === "Access denied: You cannot modify this expense") {
+      return res.status(403).json({
+        error: "Access denied",
+        message: "You cannot modify this expense",
       });
     }
 
@@ -189,7 +200,7 @@ export const deleteExpenseController = async (req, res, next) => {
   try {
     const { tripId, expenseId } = req.params;
 
-    const result = await deleteExpense(expenseId, req.user.id);
+    const result = await deleteExpense(expenseId, req.user.id, tripId);
 
     res.status(200).json(result);
   } catch (e) {
@@ -197,6 +208,13 @@ export const deleteExpenseController = async (req, res, next) => {
       return res.status(404).json({
         error: "Resource not found",
         message: "Expense not found",
+      });
+    }
+
+    if (e.message === "Access denied: You cannot modify this expense") {
+      return res.status(403).json({
+        error: "Access denied",
+        message: "You cannot modify this expense",
       });
     }
 
