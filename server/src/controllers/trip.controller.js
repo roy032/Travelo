@@ -536,7 +536,6 @@ export const getJoinRequestsController = async (req, res, next) => {
     const Trip = (await import("#models/trip.model.js")).default;
     const Notification = (await import("#models/notification.model.js"))
       .default;
-    const User = (await import("#models/user.model.js")).default;
 
     // Check if user is the owner
     const trip = await Trip.findById(tripId);

@@ -83,17 +83,6 @@ const ItineraryView = ({
     }
   };
 
-  const handleActivityCreated = (newActivity) => {
-    setActivities([...activities, newActivity]);
-  };
-
-  const handleActivityUpdated = (updatedActivity) => {
-    setActivities(
-      activities.map((a) =>
-        a._id === updatedActivity._id ? updatedActivity : a
-      )
-    );
-  };
 
   if (loading) {
     return (

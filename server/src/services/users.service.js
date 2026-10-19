@@ -1,5 +1,4 @@
 import User from "#models/user.model.js";
-import bcrypt from "bcrypt";
 
 export const getAllUsers = async () => {
   try {
@@ -41,13 +40,8 @@ export const getUserProfile = async (id) => {
 };
 
 export const getUserById = async (id) => {
-  try {
-    // TODO: get user by id
-
-    return user;
-  } catch (e) {
-    throw e;
-  }
+  // TODO: get user by id
+  return null;
 };
 
 /**

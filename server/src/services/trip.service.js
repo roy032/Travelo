@@ -1,6 +1,5 @@
 import Trip from "#models/trip.model.js";
 import Notification from "#models/notification.model.js";
-import User from "#models/user.model.js";
 
 /**
  * Create a new trip

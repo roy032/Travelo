@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { notificationApi } from "../../../services/api.service";
 import NotificationDropdown from "./NotificationDropdown";
-import toast from "react-hot-toast";
 
 /**
  * NotificationBell component with unread badge
@@ -12,7 +11,6 @@ import toast from "react-hot-toast";
 const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Fetch unread count on mount and periodically
   useEffect(() => {

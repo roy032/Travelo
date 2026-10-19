@@ -16,7 +16,6 @@ import {
 import {
   getWeatherForecast,
   generatePackingSuggestions,
-  getWeatherDescription,
 } from "../../../services/weather.service";
 import { activityApi } from "../../../services/api.service";
 import Loader from "../../ui/Loader";
@@ -29,7 +28,7 @@ import Loader from "../../ui/Loader";
 const PackageHelper = ({ tripId, startDate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [weatherData, setWeatherData] = useState(null);
+  const [, setWeatherData] = useState(null);
   const [suggestions, setSuggestions] = useState(null);
   const [showHelper, setShowHelper] = useState(false);
   const [location, setLocation] = useState(null);

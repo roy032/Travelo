@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import {
@@ -34,7 +34,6 @@ const ActivityForm = ({
   const [geocoding, setGeocoding] = useState(false);
   const [cachedCoordinates, setCachedCoordinates] = useState(null);
   const [geocodingStatus, setGeocodingStatus] = useState(""); // "loading", "success", "error", ""
-  const debounceTimerRef = useRef(null);
 
   // Debounced geocoding for real-time feedback
   const debouncedGeocode = useCallback(

@@ -30,8 +30,6 @@ const TripChat = ({ tripId }) => {
     error: messagesError,
     loadMoreMessages,
     addMessage,
-    addOptimisticMessage,
-    updateMessage,
   } = usePaginatedMessages(tripId);
 
   const [optimisticMessages, setOptimisticMessages] = useState([]);

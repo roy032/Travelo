@@ -9,7 +9,7 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
-import { tripApi, notificationApi } from "../services/api.service";
+import { tripApi } from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -22,7 +22,7 @@ const JoinRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingIds, setProcessingIds] = useState(new Set());
-  const [userTrips, setUserTrips] = useState([]);
+  const [, setUserTrips] = useState([]);
 
   useEffect(() => {
     if (!user) {

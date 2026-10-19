@@ -48,8 +48,6 @@ const AdminDashboardPage = () => {
     password: "",
     role: "user",
   });
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isActionMenuOpen, setIsActionMenuOpen] = useState(null);
 
   useEffect(() => {
     fetchStatistics();

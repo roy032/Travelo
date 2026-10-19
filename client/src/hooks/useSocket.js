@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getSocket, connectSocket, disconnectSocket } from "../utils/socket";
+import { getSocket, connectSocket } from "../utils/socket";
 
 /**
  * Custom hook for managing Socket.IO connection and trip chatroom
