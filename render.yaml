@@ -1,0 +1,21 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, then pick this repo.
+# See DEPLOY.md for the full setup steps.
+services:
+  - type: web
+    name: travelo
+    runtime: docker
+    plan: free
+    healthCheckPath: /api
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: UPLOADTHING_TOKEN
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: TRUST_PROXY
+        value: "true"

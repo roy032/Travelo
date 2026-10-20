@@ -121,7 +121,7 @@ docker run -p 3000:3000 \
   travelo
 ```
 
-Set `CLIENT_URL` to the public URL. `CLIENT_DIST` is set by the image; outside Docker, point it at `client/dist` to serve the built client from the server.
+Set `CLIENT_URL` to the public URL. `CLIENT_DIST` is set by the image; outside Docker, point it at `client/dist` to serve the built client from the server. See [DEPLOY.md](DEPLOY.md) for step-by-step Render setup and credential rotation.
 
 ## Project structure
 
