@@ -3,6 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import { existsSync } from "fs";
 import { fileURLToPath } from "url";
 import authRoutes from "#routes/auth.route.js";
 import documentRoutes from "#routes/document.route.js";
@@ -41,7 +42,22 @@ if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
 }
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        // Destination photos, map tiles and UploadThing files come from many hosts
+        "img-src": ["'self'", "data:", "blob:", "https:"],
+        "connect-src": [
+          "'self'",
+          "https://api.open-meteo.com",
+          "https://nominatim.openstreetmap.org",
+          "https://commons.wikimedia.org",
+        ],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: allowedOrigins,
@@ -51,6 +67,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// In production the built client is served from the same origin as the API,
+// so the strict SameSite auth cookie is sent with every request.
+const clientDist = process.env.CLIENT_DIST;
+const serveClient = Boolean(
+  clientDist && existsSync(path.join(clientDist, "index.html"))
+);
+if (serveClient) {
+  app.use(express.static(clientDist));
+}
 
 // Serve legacy locally stored files. Identity documents are never served publicly.
 app.use("/uploads/documents", (req, res) => {
@@ -86,6 +112,13 @@ app.use("/api", packingRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api", invitationRoutes);
+
+// Client-side routes fall back to index.html
+if (serveClient) {
+  app.get(/^\/(?!api\/|api$|socket\.io\/|uploads\/|assets\/).*/, (req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 // 404 handler - must be before error handler
 app.use(notFoundHandler);

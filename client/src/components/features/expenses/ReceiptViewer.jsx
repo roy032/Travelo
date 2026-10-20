@@ -25,7 +25,7 @@ const ReceiptViewer = ({ isOpen, onClose, expense }) => {
     }
     // Fallback: Construct from path for legacy receipts
     else if (expense.receipt?.path) {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
       return `${baseUrl}/${expense.receipt.path}`;
     }
     // Fallback: Direct receiptUrl property

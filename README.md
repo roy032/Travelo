@@ -109,6 +109,20 @@ Client (`client/`):
 - `npm run preview` - preview the production build
 - `npm run lint` - ESLint
 
+## Deployment
+
+The root `Dockerfile` builds the client and serves it from the API server, so the app and API share one origin (the auth cookie is `SameSite=strict`). It runs on any Docker host, such as Render, Railway or Fly.io.
+
+```bash
+docker build -t travelo .
+docker run -p 3000:3000 \
+  -e MONGODB_URI=... -e JWT_SECRET=... -e UPLOADTHING_TOKEN=... \
+  -e CLIENT_URL=https://your-domain -e TRUST_PROXY=true \
+  travelo
+```
+
+Set `CLIENT_URL` to the public URL. `CLIENT_DIST` is set by the image; outside Docker, point it at `client/dist` to serve the built client from the server.
+
 ## Project structure
 
 ```

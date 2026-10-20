@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 
 // VITE_API_URL is the server origin without the /api suffix
 const API_BASE_URL = `${
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
+  import.meta.env.VITE_API_URL ?? "http://localhost:3000"
 }/api`;
 
 /**
