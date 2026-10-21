@@ -83,7 +83,6 @@ const TripChat = ({ tripId }) => {
             prev.filter((msg) => msg.tempId !== tempId)
           );
         } else {
-          console.log("Message sent successfully:", response);
           // Remove optimistic message on success - the real message will come via socket
           setOptimisticMessages((prev) =>
             prev.filter((msg) => msg.tempId !== tempId)

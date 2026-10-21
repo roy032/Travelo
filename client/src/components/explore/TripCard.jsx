@@ -22,6 +22,7 @@ const TripCard = ({ trip }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requesting, setRequesting] = useState(false);
+  const [requested, setRequested] = useState(false);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -47,13 +48,15 @@ const TripCard = ({ trip }) => {
   const handleJoinRequest = async () => {
     if (!user) {
       toast.error("Please log in to request to join this trip");
-      navigate("/login");
+      // Come back to Explore after signing in
+      navigate("/login", { state: { from: { pathname: "/explore" } } });
       return;
     }
 
     try {
       setRequesting(true);
       await tripApi.requestToJoin(trip.id, user.id);
+      setRequested(true);
     } catch (error) {
       // Error handling is done in api.service.js
       console.error("Join request error:", error);
@@ -131,7 +134,7 @@ const TripCard = ({ trip }) => {
         <div className='pt-4 border-t border-gray-200 space-y-2'>
           <button
             onClick={handleJoinRequest}
-            disabled={requesting}
+            disabled={requesting || requested}
             className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2'
           >
             {requesting ? (
@@ -142,7 +145,13 @@ const TripCard = ({ trip }) => {
             ) : (
               <>
                 <UserPlus className='w-5 h-5' />
-                <span>{user ? "Request to Join" : "Log in to Join"}</span>
+                <span>
+                  {requested
+                    ? "Request Sent"
+                    : user
+                      ? "Request to Join"
+                      : "Log in to Join"}
+                </span>
               </>
             )}
           </button>

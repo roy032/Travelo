@@ -91,7 +91,6 @@ export async function fetchCoordinates(locationName, locationAddress = "") {
 
   try {
     // First attempt: Try to get coordinates from the full location
-    console.log(`Attempting to geocode: ${locationQuery}`);
     const coords = await getLatLng(locationQuery);
 
     if (coords) {
@@ -100,7 +99,6 @@ export async function fetchCoordinates(locationName, locationAddress = "") {
         lng: coords.lng,
       };
       country = coords.country;
-      console.log(`Successfully geocoded location: ${locationQuery}`);
     } else {
       // Second attempt: Try to extract and geocode just the country
       console.log(
@@ -109,7 +107,6 @@ export async function fetchCoordinates(locationName, locationAddress = "") {
       const extractedCountry = extractCountry(locationAddress || locationName);
 
       if (extractedCountry) {
-        console.log(`Attempting to geocode country: ${extractedCountry}`);
         const countryCoords = await getLatLng(extractedCountry);
 
         if (countryCoords) {
@@ -118,7 +115,6 @@ export async function fetchCoordinates(locationName, locationAddress = "") {
             lng: countryCoords.lng,
           };
           country = countryCoords.country || extractedCountry;
-          console.log(`Successfully geocoded country: ${extractedCountry}`);
         } else {
           console.warn(`Could not geocode country: ${extractedCountry}`);
         }
@@ -145,7 +141,6 @@ export async function fetchCoordinates(locationName, locationAddress = "") {
             lng: countryCoords.lng,
           };
           country = countryCoords.country || extractedCountry;
-          console.log(`Country fallback successful: ${extractedCountry}`);
         }
       }
     } catch (fallbackError) {

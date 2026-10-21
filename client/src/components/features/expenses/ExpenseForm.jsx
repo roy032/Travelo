@@ -16,7 +16,6 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
   });
   const [receiptFile, setReceiptFile] = useState(null);
   const [errors, setErrors] = useState({});
-  console.log(members);
 
   useEffect(() => {
     if (members && members.length > 0) {
@@ -44,7 +43,6 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
   };
 
   const handleReceiptChange = (file) => {
-    console.log("Receipt file changed:", file);
     setReceiptFile(file);
   };
 
@@ -82,7 +80,6 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
       payer: formData.payer,
     };
 
-    console.log("Submitting expense with receipt:", receiptFile);
     onSubmit(submitData, receiptFile);
   };
 

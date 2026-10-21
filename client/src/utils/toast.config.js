@@ -6,7 +6,8 @@
 export const toastConfig = {
   // Default options for all toasts
   duration: 4000,
-  position: 'top-right',
+  // Bottom, so toasts never cover the navigation and user menu
+  position: 'bottom-center',
 
   // Success toast styling
   success: {

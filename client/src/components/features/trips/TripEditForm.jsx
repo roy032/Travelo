@@ -94,13 +94,9 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
     setLoading(true);
 
     try {
-      const tripData = {
-        ...formData,
-        // Only include destinationType if it's selected
-        ...(formData.destinationType && {
-          destinationType: formData.destinationType,
-        }),
-      };
+      // Only include destinationType if it's selected; the API rejects ""
+      const { destinationType, ...rest } = formData;
+      const tripData = destinationType ? { ...rest, destinationType } : rest;
 
       const updatedTrip = await tripApi.updateTrip(
         trip.id || trip._id,

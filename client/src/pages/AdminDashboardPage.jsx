@@ -337,7 +337,12 @@ const AdminDashboardPage = () => {
 
         {/* Verification Queue */}
         <div className='mb-8'>
-          <VerificationQueue />
+          <VerificationQueue
+            onChange={() => {
+              fetchUsers();
+              fetchStatistics();
+            }}
+          />
         </div>
 
         {/* User Table */}

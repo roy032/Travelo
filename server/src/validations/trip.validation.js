@@ -22,9 +22,7 @@ export const createTripSchema = z
       .enum(["beach", "mountain", "city", "countryside", "other"])
       .optional(),
     tripCategory: z.enum(["domestic", "international"], {
-      errorMap: () => ({
-        message: "Trip category must be either domestic or international",
-      }),
+      error: "Trip category must be either domestic or international",
     }),
   })
   .refine(
@@ -86,7 +84,7 @@ export const updateTripSchema = z
 
 export const adminDeleteTripSchema = z.object({
   message: z
-    .string({ required_error: "Deletion message is required" })
+    .string({ error: "Deletion message is required" })
     .min(10, "Message must be at least 10 characters")
     .max(1000, "Message must not exceed 1000 characters")
     .trim(),

@@ -72,7 +72,6 @@ const ChecklistView = ({
     }
 
     try {
-      console.log(itemId);
       await checklistApi.deleteItem(tripId, itemId);
       setItems(items.filter((item) => item.id !== itemId));
       toast.success("Item deleted");

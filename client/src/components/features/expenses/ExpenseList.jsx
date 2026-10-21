@@ -59,7 +59,6 @@ const ExpenseList = ({
       .toFixed(2);
   };
 
-  console.log(expenses);
   if (loading) {
     return (
       <div className='space-y-4'>

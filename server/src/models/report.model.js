@@ -67,8 +67,9 @@ reportSchema.index(
   { trip: 1, reporter: 1 },
   {
     unique: true,
-    sparse: true,
-    partialFilterExpression: { reporter: { $ne: null } },
+    // MongoDB rejects sparse together with a partial filter, and $ne is not
+    // allowed in partial filters; anonymous reports store reporter: null
+    partialFilterExpression: { reporter: { $type: "objectId" } },
   }
 );
 

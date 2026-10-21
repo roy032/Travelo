@@ -11,7 +11,11 @@ import toast from "react-hot-toast";
  * VerificationQueue component
  * Displays pending verification requests for both domestic (NID) and international (Passport)
  */
-const VerificationQueue = () => {
+/**
+ * @param {Function} [onChange] - Called after a verification is approved or
+ *   rejected, so the page can refresh user statistics and lists
+ */
+const VerificationQueue = ({ onChange }) => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +46,7 @@ const VerificationQueue = () => {
       );
       // Refresh the list
       fetchPendingVerifications();
+      onChange?.();
     } catch (error) {
       console.error("Failed to approve verification:", error);
       toast.error("Failed to approve verification");
@@ -58,6 +63,7 @@ const VerificationQueue = () => {
       );
       // Refresh the list
       fetchPendingVerifications();
+      onChange?.();
     } catch (error) {
       console.error("Failed to reject verification:", error);
       toast.error("Failed to reject verification");
