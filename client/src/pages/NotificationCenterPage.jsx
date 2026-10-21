@@ -6,12 +6,14 @@ import Button from "../components/ui/Button";
 import Loader from "../components/ui/Loader";
 import Badge from "../components/ui/Badge";
 import { formatDistanceToNow } from "date-fns";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * NotificationCenter page
  * Full page view of all notifications with filtering
  */
 const NotificationCenterPage = () => {
+  usePageTitle("Notifications");
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);

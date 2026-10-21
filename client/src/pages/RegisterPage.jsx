@@ -4,8 +4,10 @@ import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const RegisterPage = () => {
+  usePageTitle("Create an account");
   const navigate = useNavigate();
   const { register } = useAuth();
 

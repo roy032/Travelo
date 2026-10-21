@@ -40,4 +40,8 @@ export default defineConfig([
     files: ['src/test/**', '**/*.test.{js,jsx}'],
     rules: { 'react-refresh/only-export-components': 'off' },
   },
+  {
+    files: ['public/sw.js'],
+    languageOptions: { globals: globals.serviceworker },
+  },
 ])

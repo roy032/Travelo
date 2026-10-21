@@ -42,7 +42,7 @@ const DaySection = ({
           <span className='text-2xl font-bold'>{getDay(date)}</span>
         </div>
         <div>
-          <h3 className='text-xl font-semibold text-gray-900'>
+          <h3 className='text-lg sm:text-xl font-semibold text-gray-900'>
             {formatDate(date)}
           </h3>
           <p className='text-sm text-gray-500'>
@@ -53,7 +53,7 @@ const DaySection = ({
       </div>
 
       {/* Activities List */}
-      <div className='ml-[76px] space-y-3'>
+      <div className='sm:ml-[76px] space-y-3'>
         {activities.map((activity) => (
           <ActivityCard
             key={activity.id}

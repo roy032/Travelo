@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/* Tailwind v4 defaults borders to currentColor; components here were written
+   for the v3 default of gray-200 (unstyled borders showed up black) */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+/* Horizontal scrollers such as the trip tabs, without a visible scrollbar */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Installed app: keep content clear of the notch and home indicator */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Accessibility Improvements */
 
 /* Screen reader only content */

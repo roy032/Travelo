@@ -35,9 +35,9 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
 
   return (
     <div className='bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow'>
-      <div className='flex items-start justify-between'>
-        <div className='flex-1'>
-          <div className='flex items-center gap-3 mb-2'>
+      <div className='flex items-start justify-between gap-2'>
+        <div className='flex-1 min-w-0'>
+          <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-2'>
             <span
               className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 categoryColors[expense.category]
@@ -45,7 +45,7 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
             >
               {categoryLabels[expense.category]}
             </span>
-            <span className='text-2xl font-bold text-gray-900 flex items-center gap-1'>
+            <span className='text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-1'>
               <span className='text-lg'>৳</span>
               {expense.amount.toFixed(2)}
             </span>
@@ -55,7 +55,7 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
             {expense.description}
           </p>
 
-          <div className='flex items-center gap-4 text-sm text-gray-600'>
+          <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600'>
             <div className='flex items-center gap-1'>
               <User size={16} />
               <span>Paid by: {expense.payer?.name || "Unknown"}</span>
@@ -64,7 +64,7 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
               <Calendar size={16} />
               <span>{formatDate(expense.createdAt)}</span>
             </div>
-            {expense.receipt && (
+            {(expense.receipt?.url || expense.receipt?.path) && (
               <button
                 onClick={() => onViewReceipt(expense)}
                 className='flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors'
@@ -76,7 +76,7 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
           </div>
         </div>
 
-        <div className='flex gap-2 ml-4'>
+        <div className='flex gap-2 shrink-0'>
           <Button
             onClick={onDelete}
             variant='ghost'

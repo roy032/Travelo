@@ -13,11 +13,13 @@ import { invitationApi } from "../services/api.service";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import { format } from "date-fns";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * PendingInvitationsPage - Shows all pending trip invitations for the user
  */
 const PendingInvitationsPage = () => {
+  usePageTitle("Invitations");
   const navigate = useNavigate();
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);

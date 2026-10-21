@@ -1,7 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Settings, Shield } from "lucide-react";
-import { useState } from "react";
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  Shield,
+  Download,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import NotificationBell from "../features/notifications/NotificationBell";
 import Avatar from "../ui/Avatar";
 
@@ -14,6 +23,20 @@ const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const installApp = useInstallPrompt();
+
+  // Close the user menu on a tap or click outside it
+  useEffect(() => {
+    if (!isUserMenuOpen) return undefined;
+    const handlePointerDown = (event) => {
+      if (!userMenuRef.current?.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isUserMenuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -56,22 +79,22 @@ const Navbar = () => {
             </div>
 
             {/* Public links and Auth buttons */}
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-1 sm:gap-4'>
               <Link
                 to='/explore'
-                className='px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+                className='px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
               >
                 Explore
               </Link>
               <Link
                 to='/login'
-                className='px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+                className='px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded whitespace-nowrap'
               >
                 Sign In
               </Link>
               <Link
                 to='/register'
-                className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='px-3 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap'
               >
                 Get Started
               </Link>
@@ -137,12 +160,12 @@ const Navbar = () => {
           </div>
 
           {/* Right side - Notifications and user menu */}
-          <div className='flex items-center gap-4'>
+          <div className='flex items-center gap-2 sm:gap-4'>
             {/* Notification Bell */}
             <NotificationBell />
 
             {/* User menu */}
-            <div className='relative'>
+            <div className='relative' ref={userMenuRef}>
               <button
                 onClick={toggleUserMenu}
                 className='flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -181,6 +204,19 @@ const Navbar = () => {
                     <Settings size={16} aria-hidden='true' />
                     Notifications
                   </Link>
+                  {installApp && (
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        installApp();
+                      }}
+                      className='flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100'
+                      role='menuitem'
+                    >
+                      <Download size={16} aria-hidden='true' />
+                      Install app
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
@@ -254,6 +290,19 @@ const Navbar = () => {
               >
                 Admin Dashboard
               </Link>
+            )}
+            {installApp && (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  installApp();
+                }}
+                className='flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                role='menuitem'
+              >
+                <Download size={18} aria-hidden='true' />
+                Install the Travelo app
+              </button>
             )}
           </div>
         </div>

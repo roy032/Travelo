@@ -4,8 +4,10 @@ import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const LoginPage = () => {
+  usePageTitle("Sign in");
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();

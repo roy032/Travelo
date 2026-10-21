@@ -11,6 +11,7 @@ import {
 } from "#services/expense.service.js";
 import { calculateSplits } from "#services/split.service.js";
 import { storeFile } from "#config/uploadthing.config.js";
+import { compressUpload } from "#utils/image.js";
 
 /**
  * Create a new expense
@@ -49,7 +50,7 @@ export const createExpenseController = async (req, res, next) => {
     // Add receipt information if file was uploaded
     if (req.file) {
       try {
-        const stored = await storeFile(req.file, { folder: "receipts" });
+        const stored = await storeFile(await compressUpload(req.file), { folder: "receipts" });
         expenseData.receipt = {
           filename: stored.name,
           key: stored.key,
@@ -117,7 +118,7 @@ export const updateExpenseController = async (req, res, next) => {
     // Add receipt information if file was uploaded
     if (req.file) {
       try {
-        const stored = await storeFile(req.file, { folder: "receipts" });
+        const stored = await storeFile(await compressUpload(req.file), { folder: "receipts" });
         updateData.receipt = {
           filename: stored.name,
           key: stored.key,

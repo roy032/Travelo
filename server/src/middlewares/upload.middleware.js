@@ -18,9 +18,9 @@ const documentFileFilter = (req, file, cb) => {
   } else {
     cb(
       new Error(
-        "Invalid file format. Only JPEG, PNG, and PDF files are allowed."
+        "Invalid file format. Only JPEG, PNG, and PDF files are allowed.",
       ),
-      false
+      false,
     );
   }
 };
@@ -39,15 +39,17 @@ const receiptStorage = multer.memoryStorage();
 
 // File filter for receipt uploads
 const receiptFileFilter = (req, file, cb) => {
-  // Accept JPEG and PNG formats only
-  const allowedMimeTypes = ["image/jpeg", "image/png"];
+  // Accept JPEG, PNG and WebP formats only
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file format. Only JPEG and PNG files are allowed."),
-      false
+      new Error(
+        "Invalid file format. Only JPEG, PNG and WebP files are allowed.",
+      ),
+      false,
     );
   }
 };
@@ -66,15 +68,17 @@ const photoStorage = multer.memoryStorage();
 
 // File filter for photo uploads
 const photoFileFilter = (req, file, cb) => {
-  // Accept JPEG and PNG formats only
-  const allowedMimeTypes = ["image/jpeg", "image/png"];
+  // Accept JPEG, PNG and WebP formats only
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file format. Only JPEG and PNG files are allowed."),
-      false
+      new Error(
+        "Invalid file format. Only JPEG, PNG and WebP files are allowed.",
+      ),
+      false,
     );
   }
 };
@@ -94,6 +98,10 @@ const FILE_SIGNATURES = {
   "image/jpeg": [[0xff, 0xd8, 0xff]],
   "image/png": [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]],
   "application/pdf": [[0x25, 0x50, 0x44, 0x46]], // %PDF
+  // "RIFF", 4 size bytes, "WEBP" (null matches any byte)
+  "image/webp": [
+    [0x52, 0x49, 0x46, 0x46, null, null, null, null, 0x57, 0x45, 0x42, 0x50],
+  ],
 };
 
 export const validateFileContent = (req, res, next) => {
@@ -104,7 +112,9 @@ export const validateFileContent = (req, res, next) => {
   const matches =
     signatures &&
     buffer &&
-    signatures.some((sig) => sig.every((byte, i) => buffer[i] === byte));
+    signatures.some((sig) =>
+      sig.every((byte, i) => byte === null || buffer[i] === byte),
+    );
 
   if (!matches) {
     return res.status(415).json({

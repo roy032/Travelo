@@ -10,11 +10,13 @@ import { EmptyTrips, EmptySearchResults } from "../components/ui/EmptyState";
 import Modal from "../components/ui/Modal";
 import TripCreateForm from "../components/features/trips/TripCreateForm";
 import { useAuth } from "../hooks/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * TripListPage component - displays user's trips with filtering and search
  */
 const TripListPage = () => {
+  usePageTitle("My trips");
   const { user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);

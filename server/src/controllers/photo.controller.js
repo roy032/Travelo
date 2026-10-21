@@ -4,6 +4,7 @@ import {
   getPhotosByTrip,
 } from "#services/photo.service.js";
 import { storeFile } from "#config/uploadthing.config.js";
+import { compressUpload } from "#utils/image.js";
 
 /**
  * Upload a photo to a trip
@@ -20,11 +21,13 @@ export const uploadPhotoController = async (req, res, next) => {
       });
     }
 
-    const stored = await storeFile(req.file, { folder: "photos" });
+    // Resize and re-encode the photo before storing it
+    const file = await compressUpload(req.file);
+    const stored = await storeFile(file, { folder: "photos" });
 
     const photoData = {
       trip: tripId,
-      filename: req.file.originalname,
+      filename: file.originalname,
       url: stored.url,
       fileKey: stored.key,
       caption: req.body.caption || "",

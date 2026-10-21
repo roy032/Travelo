@@ -12,11 +12,13 @@ import {
 import { tripApi } from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * JoinRequestsPage - Dedicated page for managing all join requests across all trips
  */
 const JoinRequestsPage = () => {
+  usePageTitle("Join requests");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);

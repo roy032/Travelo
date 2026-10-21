@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Compass, Loader2, AlertCircle } from "lucide-react";
 import TripCard from "../components/explore/TripCard";
 import { useAuth } from "../hooks/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * ExplorePage - Displays upcoming trips
@@ -9,6 +10,7 @@ import { useAuth } from "../hooks/useAuth";
  * For logged-in users, shows only trips they are NOT a member of
  */
 const ExplorePage = () => {
+  usePageTitle("Explore trips");
   const { user } = useAuth();
 
   // Trips state

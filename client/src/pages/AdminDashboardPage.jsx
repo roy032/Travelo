@@ -21,12 +21,14 @@ import {
   Flag,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * AdminDashboard page component
  * Displays user statistics, user table with filtering and search
  */
 const AdminDashboardPage = () => {
+  usePageTitle("Admin");
   const [statistics, setStatistics] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -373,7 +375,7 @@ const AdminDashboardPage = () => {
                 />
               </div>
 
-              <div className='flex gap-2'>
+              <div className='flex flex-wrap gap-2'>
                 <button
                   onClick={() => setFilterStatus("")}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${

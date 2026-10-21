@@ -24,6 +24,7 @@ export const useLocalStorage = () =>
 const EXTENSIONS = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
+  "image/webp": ".webp",
   "application/pdf": ".pdf",
 };
 

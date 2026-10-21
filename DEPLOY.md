@@ -78,6 +78,7 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 | `JWT_SECRET` | yes | Long random string |
 | `UPLOADTHING_TOKEN` | for uploads | UploadThing API token |
 | `CLIENT_URL` | yes in production | Public URL of the app, e.g. `https://travelo.onrender.com` |
+| `SITE_URL` | no | Public URL used in share previews, the sitemap and robots.txt; defaults to the first `CLIENT_URL` |
 | `TRUST_PROXY` | behind a proxy | `true` on Render, Railway and Fly.io |
 | `JWT_EXPIRES_IN` | no | Session length, default `1d` |
 | `ADMIN_EMAILS` | to have an admin | Comma-separated emails made admin on sign-in |
