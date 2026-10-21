@@ -70,7 +70,9 @@ app.use(cookieParser());
 
 // In production the built client is served from the same origin as the API,
 // so the strict SameSite auth cookie is sent with every request.
-const clientDist = process.env.CLIENT_DIST;
+const clientDist = process.env.CLIENT_DIST
+  ? path.resolve(process.env.CLIENT_DIST) // sendFile needs an absolute path
+  : undefined;
 const serveClient = Boolean(
   clientDist && existsSync(path.join(clientDist, "index.html"))
 );

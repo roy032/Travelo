@@ -1,5 +1,10 @@
 import { uploadVerificationDocument } from "#services/document.service.js";
-import { storeFile } from "#config/uploadthing.config.js";
+import path from "path";
+import { existsSync } from "fs";
+import {
+  storeFile,
+  localDocumentsDir,
+} from "#config/uploadthing.config.js";
 
 /**
  * Upload verification document (NID/Passport)
@@ -58,4 +63,23 @@ export const uploadDocument = async (req, res, next) => {
     console.error("Upload error:", e);
     next(e);
   }
+};
+
+/**
+ * Send a locally stored verification document (admin only)
+ */
+export const getLocalDocument = (req, res) => {
+  // basename() stops path traversal out of the documents folder
+  const fileName = path.basename(req.params.fileName);
+  const filePath = path.join(localDocumentsDir, fileName);
+
+  if (!existsSync(filePath)) {
+    return res.status(404).json({
+      error: "Resource not found",
+      message: "Document not found",
+    });
+  }
+
+  res.set("Cache-Control", "private, no-store");
+  res.sendFile(filePath);
 };

@@ -10,6 +10,7 @@ export default defineConfig({
     // by the API server; in production the client and API share an origin
     proxy: {
       "/uploads": process.env.VITE_API_URL || "http://localhost:3000",
+      "/api/documents/file": process.env.VITE_API_URL || "http://localhost:3000",
     },
   },
   test: {

@@ -15,6 +15,8 @@ const uploadsDir = path.join(
   "uploads"
 );
 
+export const localDocumentsDir = path.join(uploadsDir, "documents");
+
 export const useLocalStorage = () =>
   process.env.FILE_STORAGE === "local" ||
   (!process.env.UPLOADTHING_TOKEN && process.env.NODE_ENV !== "production");
@@ -77,7 +79,11 @@ export const storeFile = async (multerFile, { folder = "files", metadata } = {})
     await writeFile(path.join(dir, fileName), multerFile.buffer);
     return {
       key: `${LOCAL_PREFIX}${folder}/${fileName}`,
-      url: `/uploads/${folder}/${fileName}`,
+      // Identity documents are never public; admins view them through the API
+      url:
+        folder === "documents"
+          ? `/api/documents/file/${fileName}`
+          : `/uploads/${folder}/${fileName}`,
       name: multerFile.originalname,
       size: multerFile.size,
     };

@@ -341,3 +341,48 @@ describe.skipIf(!TEST_DB_URI)('Trip collaboration API', () => {
     });
   });
 });
+
+describe.skipIf(!TEST_DB_URI)('Verification documents API', () => {
+  beforeAll(connectTestDb);
+  afterAll(disconnectTestDb);
+  beforeEach(clearDb);
+
+  it('stores an uploaded NID privately and lets only admins view it', async () => {
+    const admin = await signUp(app);
+    const user = await signUp(app);
+
+    const upload = await user.agent
+      .post('/api/documents/upload')
+      .field('documentType', 'nid')
+      .attach('document', PNG_BYTES, { filename: 'nid.png', contentType: 'image/png' });
+    expect(upload.status, JSON.stringify(upload.body)).toBe(200);
+
+    const pending = await admin.agent.get('/api/admin/verifications/pending');
+    expect(pending.status).toBe(200);
+    const entry = JSON.stringify(pending.body);
+    const url = entry.match(/\/api\/documents\/file\/[\w.-]+/)[0];
+
+    // Not reachable through the public uploads folder
+    const fileName = url.split('/').pop();
+    expect((await request(app).get(`/uploads/documents/${fileName}`)).status).toBe(404);
+
+    expect((await request(app).get(url)).status).toBe(401);
+    expect((await user.agent.get(url)).status).toBe(403);
+    const asAdmin = await admin.agent.get(url);
+    expect(asAdmin.status).toBe(200);
+    expect(asAdmin.headers['content-type']).toMatch(/image\/png/);
+
+    const approve = await admin.agent
+      .post(`/api/admin/verifications/${user.user.id}/approve`)
+      .send({ verificationType: 'domestic' });
+    expect(approve.status, JSON.stringify(approve.body)).toBe(200);
+    const profile = await user.agent.get('/api/profile');
+    expect(profile.body.user.domesticVerification.status).toBe('verified');
+  });
+
+  it('does not let path tricks escape the documents folder', async () => {
+    const admin = await signUp(app);
+    const res = await admin.agent.get('/api/documents/file/..%2F..%2Fapp.js');
+    expect(res.status).toBe(404);
+  });
+});

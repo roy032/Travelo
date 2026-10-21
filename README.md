@@ -53,7 +53,8 @@ Server (`server/.env`):
 | --- | --- | --- |
 | `MONGODB_URI` | yes | MongoDB connection string |
 | `JWT_SECRET` | yes | Long random string used to sign auth tokens |
-| `UPLOADTHING_TOKEN` | for uploads | UploadThing API token |
+| `UPLOADTHING_TOKEN` | for uploads in production | UploadThing API token. Without it, development stores uploads in `server/src/uploads` |
+| `FILE_STORAGE` | no | Set to `local` to store uploads on disk even with a token (never use on hosts with ephemeral disks) |
 | `JWT_EXPIRES_IN` | no | Token and cookie lifetime, e.g. `1d`, `12h` (default `1d`) |
 | `PORT` | no | HTTP port (default `3000`) |
 | `NODE_ENV` | no | `development` or `production` (secure cookies in production) |
@@ -98,7 +99,7 @@ Server (`server/`):
 
 - `npm run dev` - start with nodemon
 - `npm start` - start with node
-- `npm test` - run tests (Vitest)
+- `npm test` - run tests (Vitest); set `MONGODB_TEST_URI` (e.g. `mongodb://localhost:27017`) to include the API tests, which use a throwaway database
 - `npm run seed:destinations` - seed destination data
 - `npm run lint` / `npm run format` - ESLint / Prettier
 
@@ -107,7 +108,19 @@ Client (`client/`):
 - `npm run dev` - start the Vite dev server
 - `npm run build` - production build
 - `npm run preview` - preview the production build
+- `npm test` - component and API client tests (Vitest + Testing Library)
 - `npm run lint` - ESLint
+
+End-to-end tests (`e2e/`, Playwright) build the client, start the server on port 3100 against a local MongoDB (`E2E_MONGODB_URI`, default `mongodb://127.0.0.1:27017/travelo_e2e`, wiped on every run) and drive Chromium through sign-up, login, trip creation, photo upload, Explore, NID verification and joining a trip:
+
+```bash
+cd e2e
+npm ci
+npx playwright install chromium
+npm test
+```
+
+CI runs all three suites with a MongoDB service container.
 
 ## Deployment
 
