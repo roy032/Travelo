@@ -7,8 +7,10 @@ import Card from "../components/ui/Card";
 import DocumentUpload from "../components/features/admin/DocumentUpload";
 import toast from "react-hot-toast";
 import { User, Mail, Calendar, Lock } from "lucide-react";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const ProfilePage = () => {
+  usePageTitle("Profile");
   const { user, updateUser } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);

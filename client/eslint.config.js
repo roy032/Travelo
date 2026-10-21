@@ -31,4 +31,8 @@ export default defineConfig([
       'react-hooks/use-memo': 'warn',
     },
   },
+  {
+    files: ['public/sw.js'],
+    languageOptions: { globals: globals.serviceworker },
+  },
 ])

@@ -29,6 +29,7 @@ import Modal from "../components/ui/Modal";
 import Loader from "../components/ui/Loader";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * TripDetailPage component - displays trip details with tab navigation
@@ -38,6 +39,7 @@ const TripDetailPage = () => {
 
   const { user } = useAuth();
   const [trip, setTrip] = useState(null);
+  usePageTitle(trip?.title);
   const [members, setMembers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMembers, setLoadingMembers] = useState(false);

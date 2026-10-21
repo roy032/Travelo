@@ -16,12 +16,14 @@ import {
 import { invitationApi } from "../services/api.service";
 import Button from "../components/ui/Button";
 import { format } from "date-fns";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * InvitationPreviewPage - Allows invited users to view trip details and accept/reject invitation
  * This page is accessible to invited users who are NOT yet members of the trip
  */
 const InvitationPreviewPage = () => {
+  usePageTitle("Trip invitation");
   const { invitationId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);

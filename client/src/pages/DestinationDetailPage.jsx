@@ -5,6 +5,7 @@ import Loader from "../components/ui/Loader";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * DestinationDetailPage displays full destination information with multiple photos
@@ -13,6 +14,7 @@ const DestinationDetailPage = () => {
   const { destinationId } = useParams();
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null);
+  usePageTitle(destination?.name);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 

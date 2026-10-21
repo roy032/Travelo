@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { Home, ArrowLeft } from "lucide-react";
 import Button from "../components/ui/Button";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * NotFoundPage component
  * Displays a 404 error page when route is not found
  */
 const NotFoundPage = () => {
+  usePageTitle("Page not found");
   return (
     <div className='min-h-screen bg-gray-50 flex items-center justify-center px-4'>
       <div className='max-w-md w-full text-center'>

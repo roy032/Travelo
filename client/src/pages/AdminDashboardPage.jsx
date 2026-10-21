@@ -21,12 +21,14 @@ import {
   Flag,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * AdminDashboard page component
  * Displays user statistics, user table with filtering and search
  */
 const AdminDashboardPage = () => {
+  usePageTitle("Admin");
   const [statistics, setStatistics] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);

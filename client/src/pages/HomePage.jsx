@@ -19,6 +19,7 @@ import JourneySection from "../components/landing/JourneySection";
 import CTASection from "../components/landing/CTASection";
 import FAQ from "../components/landing/FAQ";
 import LandingFooter from "../components/landing/LandingFooter";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * HomePage component
@@ -26,6 +27,7 @@ import LandingFooter from "../components/landing/LandingFooter";
  * Shows different content for authenticated vs unauthenticated users
  */
 const HomePage = () => {
+  usePageTitle();
   const { isAuthenticated, user } = useAuth();
 
   // Authenticated user view
