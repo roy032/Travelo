@@ -25,11 +25,11 @@ const formatDate = (date) =>
 const RatingSummary = ({ summary }) => (
   <div className='flex flex-col sm:flex-row gap-6 sm:items-center'>
     <div className='text-center sm:text-left'>
-      <p className='text-5xl font-bold text-gray-900'>
+      <p className='text-5xl font-bold text-gray-900 dark:text-gray-100'>
         {summary.ratingCount ? summary.ratingAverage.toFixed(1) : "–"}
       </p>
       <StarDisplay value={summary.ratingAverage} size={18} className='mt-1' />
-      <p className='text-sm text-gray-600 mt-1'>
+      <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
         {summary.ratingCount}{" "}
         {summary.ratingCount === 1 ? "review" : "reviews"}
       </p>
@@ -42,9 +42,9 @@ const RatingSummary = ({ summary }) => (
           : 0;
         return (
           <div key={star} className='flex items-center gap-2 text-sm'>
-            <span className='w-12 text-gray-600'>{star} star</span>
+            <span className='w-12 text-gray-600 dark:text-gray-400'>{star} star</span>
             <div
-              className='flex-1 h-2 bg-gray-200 rounded-full overflow-hidden'
+              className='flex-1 h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700'
               aria-hidden='true'
             >
               <div
@@ -52,7 +52,7 @@ const RatingSummary = ({ summary }) => (
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <span className='w-10 text-right text-gray-600'>{count}</span>
+            <span className='w-10 text-right text-gray-600 dark:text-gray-400'>{count}</span>
           </div>
         );
       })}
@@ -97,10 +97,10 @@ const ReviewForm = ({ initial, onSubmit, onCancel, saving }) => {
         maxLength={MAX_COMMENT}
         rows={4}
         placeholder='What did you like? Any tips for other travelers? (optional)'
-        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600'
       />
       <div className='flex items-center justify-between'>
-        <span className='text-xs text-gray-500'>
+        <span className='text-xs text-gray-500 dark:text-gray-400'>
           {comment.length}/{MAX_COMMENT}
         </span>
         <div className='flex gap-2'>
@@ -226,24 +226,24 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
     <section aria-labelledby='reviews-heading' className='mt-10'>
       <h2
         id='reviews-heading'
-        className='text-2xl font-semibold text-gray-900 mb-6'
+        className='text-2xl font-semibold text-gray-900 mb-6 dark:text-gray-100'
       >
         Reviews
       </h2>
 
       {loading ? (
         <div className='flex justify-center py-10'>
-          <Loader2 className='w-8 h-8 text-blue-600 animate-spin' />
+          <Loader2 className='w-8 h-8 text-blue-600 animate-spin dark:text-blue-400' />
         </div>
       ) : (
         <div className='space-y-8'>
           <RatingSummary summary={summary} />
 
           {/* The user's own review */}
-          <div className='p-5 bg-gray-50 rounded-lg border border-gray-200'>
+          <div className='p-5 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-950 dark:border-gray-700'>
             {!isAuthenticated ? (
-              <p className='text-gray-700'>
-                <Link to='/login' className='text-blue-600 font-medium hover:underline'>
+              <p className='text-gray-700 dark:text-gray-300'>
+                <Link to='/login' className='text-blue-600 font-medium hover:underline dark:text-blue-400'>
                   Log in
                 </Link>{" "}
                 to rate this destination and share your experience.
@@ -251,10 +251,10 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
             ) : myReview && !editing ? (
               <div className='flex items-start justify-between gap-4'>
                 <div>
-                  <p className='text-sm font-medium text-gray-900 mb-1'>Your review</p>
+                  <p className='text-sm font-medium text-gray-900 mb-1 dark:text-gray-100'>Your review</p>
                   <StarDisplay value={myReview.rating} />
                   {myReview.comment && (
-                    <p className='text-gray-700 mt-2 whitespace-pre-line'>
+                    <p className='text-gray-700 mt-2 whitespace-pre-line dark:text-gray-300'>
                       {myReview.comment}
                     </p>
                   )}
@@ -263,7 +263,7 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
                   <button
                     type='button'
                     onClick={() => setEditing(true)}
-                    className='p-2 rounded-lg text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    className='p-2 rounded-lg text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700'
                     aria-label='Edit your review'
                   >
                     <Pencil size={18} aria-hidden='true' />
@@ -271,7 +271,7 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
                   <button
                     type='button'
                     onClick={() => handleDelete(myReview)}
-                    className='p-2 rounded-lg text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                    className='p-2 rounded-lg text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-red-400 dark:hover:bg-red-950/40'
                     aria-label='Delete your review'
                   >
                     <Trash2 size={18} aria-hidden='true' />
@@ -280,7 +280,7 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
               </div>
             ) : (
               <>
-                <p className='text-sm font-medium text-gray-900 mb-3'>
+                <p className='text-sm font-medium text-gray-900 mb-3 dark:text-gray-100'>
                   {myReview ? "Edit your review" : "Rate this destination"}
                 </p>
                 <ReviewForm
@@ -296,28 +296,28 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
 
           {/* Everyone's reviews */}
           {reviews.length === 0 ? (
-            <div className='text-center py-8 text-gray-600'>
+            <div className='text-center py-8 text-gray-600 dark:text-gray-400'>
               <MessageSquare className='w-10 h-10 mx-auto mb-2 text-gray-400' />
               No reviews yet. Be the first to share your experience.
             </div>
           ) : (
-            <ul className='divide-y divide-gray-200'>
+            <ul className='divide-y divide-gray-200 dark:divide-gray-700'>
               {reviews.map((review) => (
                 <li key={review.id} className='py-5 flex gap-4'>
                   <Avatar name={review.author.name || "Traveler"} size='sm' />
                   <div className='flex-1 min-w-0'>
                     <div className='flex items-center justify-between gap-2'>
-                      <p className='font-medium text-gray-900 truncate'>
+                      <p className='font-medium text-gray-900 truncate dark:text-gray-100'>
                         {review.author.name || "Former member"}
                         {review.author.id === user?.id && (
-                          <span className='text-gray-500 font-normal'> (you)</span>
+                          <span className='text-gray-500 font-normal dark:text-gray-400'> (you)</span>
                         )}
                       </p>
                       {user?.role === "admin" && review.author.id !== user?.id && (
                         <button
                           type='button'
                           onClick={() => handleDelete(review)}
-                          className='p-1 rounded text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
+                          className='p-1 rounded text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-red-400 dark:hover:bg-red-950/40'
                           aria-label={`Delete review by ${review.author.name || "user"}`}
                         >
                           <Trash2 size={16} aria-hidden='true' />
@@ -326,13 +326,13 @@ const ReviewsSection = ({ destinationId, onRatingChange }) => {
                     </div>
                     <div className='flex items-center gap-2 mt-1'>
                       <StarDisplay value={review.rating} size={14} />
-                      <span className='text-xs text-gray-500'>
+                      <span className='text-xs text-gray-500 dark:text-gray-400'>
                         {formatDate(review.createdAt)}
                         {review.updatedAt !== review.createdAt && " · edited"}
                       </span>
                     </div>
                     {review.comment && (
-                      <p className='text-gray-700 mt-2 whitespace-pre-line break-words'>
+                      <p className='text-gray-700 mt-2 whitespace-pre-line break-words dark:text-gray-300'>
                         {review.comment}
                       </p>
                     )}

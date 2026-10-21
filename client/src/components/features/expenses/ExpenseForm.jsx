@@ -110,16 +110,16 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
       <div>
         <label
           htmlFor='category'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
-          Category <span className='text-red-500 ml-1'>*</span>
+          Category <span className='text-red-600 ml-1 dark:text-red-400'>*</span>
         </label>
         <select
           id='category'
           name='category'
           value={formData.category}
           onChange={handleChange}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         >
           {categories.map((cat) => (
             <option key={cat.value} value={cat.value}>
@@ -144,16 +144,16 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
       <div>
         <label
           htmlFor='payer'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
-          Paid By <span className='text-red-500 ml-1'>*</span>
+          Paid By <span className='text-red-600 ml-1 dark:text-red-400'>*</span>
         </label>
         <select
           id='payer'
           name='payer'
           value={formData.payer}
           onChange={handleChange}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
           required
         >
           <option value=''>Select member</option>
@@ -168,13 +168,13 @@ const ExpenseForm = ({ expense, members, onSubmit, onCancel, loading }) => {
             ))}
         </select>
         {errors.payer && (
-          <p className='mt-1 text-sm text-red-600'>{errors.payer}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.payer}</p>
         )}
       </div>
 
       <ReceiptUpload onFileChange={handleReceiptChange} />
 
-      <div className='flex justify-end gap-3 pt-4 border-t border-gray-200'>
+      <div className='flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
         <Button
           type='button'
           onClick={onCancel}

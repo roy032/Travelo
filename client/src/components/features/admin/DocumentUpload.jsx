@@ -166,28 +166,28 @@ const DocumentUpload = () => {
     switch (status) {
       case "verified":
         return {
-          icon: <CheckCircle className='w-5 h-5 text-green-600' />,
+          icon: <CheckCircle className='w-5 h-5 text-green-700 dark:text-green-300' />,
           text: "Verified",
-          color: "text-green-600",
-          bgColor: "bg-green-50",
-          borderColor: "border-green-200",
+          color: "text-green-700 dark:text-green-300",
+          bgColor: "bg-green-50 dark:bg-green-950/40",
+          borderColor: "border-green-200 dark:border-green-800",
         };
       case "pending":
         return {
-          icon: <Clock className='w-5 h-5 text-yellow-600' />,
+          icon: <Clock className='w-5 h-5 text-yellow-700 dark:text-yellow-300' />,
           text: "Pending Review",
-          color: "text-yellow-600",
-          bgColor: "bg-yellow-50",
-          borderColor: "border-yellow-200",
+          color: "text-yellow-700 dark:text-yellow-300",
+          bgColor: "bg-yellow-50 dark:bg-yellow-950/40",
+          borderColor: "border-yellow-200 dark:border-yellow-800",
         };
       case "unverified":
       default:
         return {
-          icon: <XCircle className='w-5 h-5 text-gray-600' />,
+          icon: <XCircle className='w-5 h-5 text-gray-600 dark:text-gray-400' />,
           text: "Not Verified",
-          color: "text-gray-600",
-          bgColor: "bg-gray-50",
-          borderColor: "border-gray-200",
+          color: "text-gray-600 dark:text-gray-400",
+          bgColor: "bg-gray-50 dark:bg-gray-950",
+          borderColor: "border-gray-200 dark:border-gray-700",
         };
     }
   };
@@ -211,10 +211,10 @@ const DocumentUpload = () => {
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div>
-              <h3 className='text-lg font-semibold text-gray-900'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
                 {docName} Verification
               </h3>
-              <p className='text-sm text-gray-500'>For {tripType} Trips</p>
+              <p className='text-sm text-gray-500 dark:text-gray-400'>For {tripType} Trips</p>
             </div>
             <div
               className={`flex items-center gap-2 px-3 py-1 rounded-full border ${statusDisplay.borderColor} ${statusDisplay.bgColor}`}
@@ -226,14 +226,14 @@ const DocumentUpload = () => {
             </div>
           </div>
 
-          <p className='text-sm text-gray-600'>
+          <p className='text-sm text-gray-600 dark:text-gray-400'>
             Upload your {docName} to get verified for {tripType.toLowerCase()}{" "}
             trips. Accepted formats: JPEG, PNG, PDF (max 5MB)
           </p>
 
           {status === "verified" && (
-            <div className='p-4 bg-green-50 border border-green-200 rounded-lg'>
-              <p className='text-sm text-green-800'>
+            <div className='p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950/40 dark:border-green-800'>
+              <p className='text-sm text-green-800 dark:text-green-200'>
                 Your {docName} is verified! You can create{" "}
                 {tripType.toLowerCase()} trips.
               </p>
@@ -241,8 +241,8 @@ const DocumentUpload = () => {
           )}
 
           {status === "pending" && (
-            <div className='p-4 bg-yellow-50 border border-yellow-200 rounded-lg'>
-              <p className='text-sm text-yellow-800'>
+            <div className='p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-950/40 dark:border-yellow-800'>
+              <p className='text-sm text-yellow-800 dark:text-yellow-200'>
                 Your {docName} is under review. You'll be notified once it's
                 approved.
               </p>
@@ -263,13 +263,13 @@ const DocumentUpload = () => {
                 />
                 <label
                   htmlFor={`${documentType}-upload`}
-                  className='flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors'
+                  className='flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors dark:border-gray-600 dark:hover:bg-blue-950/40'
                 >
                   <Upload className='w-8 h-8 text-gray-400 mb-2' />
-                  <span className='text-sm text-gray-600'>
+                  <span className='text-sm text-gray-600 dark:text-gray-400'>
                     Click to select {docName}
                   </span>
-                  <span className='text-xs text-gray-500 mt-1'>
+                  <span className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
                     JPEG, PNG, or PDF (max 5MB)
                   </span>
                 </label>
@@ -277,7 +277,7 @@ const DocumentUpload = () => {
 
               {/* File Preview */}
               {file && (
-                <div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
+                <div className='p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-950 dark:border-gray-700'>
                   <div className='flex items-start justify-between'>
                     <div className='flex items-start gap-3 flex-1'>
                       {preview ? (
@@ -290,17 +290,17 @@ const DocumentUpload = () => {
                         <FileText className='w-16 h-16 text-gray-400' />
                       )}
                       <div className='flex-1 min-w-0'>
-                        <p className='text-sm font-medium text-gray-900 truncate'>
+                        <p className='text-sm font-medium text-gray-900 truncate dark:text-gray-100'>
                           {file.name}
                         </p>
-                        <p className='text-xs text-gray-500'>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleClearSelection(documentType)}
-                      className='text-gray-400 hover:text-gray-600'
+                      className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                       disabled={uploading}
                     >
                       <XCircle className='w-5 h-5' />
@@ -329,8 +329,8 @@ const DocumentUpload = () => {
               )}
 
               {hasDoc && !file && (
-                <div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-                  <p className='text-sm text-blue-800'>
+                <div className='p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/40 dark:border-blue-800'>
+                  <p className='text-sm text-blue-800 dark:text-blue-200'>
                     You can upload a new {docName} to replace the existing one.
                   </p>
                 </div>

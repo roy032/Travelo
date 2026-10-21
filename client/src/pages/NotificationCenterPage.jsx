@@ -174,19 +174,19 @@ const NotificationCenterPage = () => {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950'>
       {/* Header */}
-      <div className='bg-white border-b border-gray-200'>
+      <div className='bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
         <div className='max-w-4xl mx-auto px-4 py-6'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-3'>
-              <Bell size={32} className='text-blue-600' />
+              <Bell size={32} className='text-blue-600 dark:text-blue-400' />
               <div>
-                <h1 className='text-2xl font-bold text-gray-900'>
+                <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                   Notifications
                 </h1>
                 {unreadCount > 0 && (
-                  <p className='text-sm text-gray-600 mt-1'>
+                  <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
                     {unreadCount} unread notification
                     {unreadCount !== 1 ? "s" : ""}
                   </p>
@@ -213,8 +213,8 @@ const NotificationCenterPage = () => {
               onClick={() => setFilter("all")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === "all"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               }`}
             >
               All
@@ -223,8 +223,8 @@ const NotificationCenterPage = () => {
               onClick={() => setFilter("unread")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === "unread"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               }`}
             >
               Unread
@@ -238,8 +238,8 @@ const NotificationCenterPage = () => {
               onClick={() => setFilter("read")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === "read"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               }`}
             >
               Read
@@ -255,12 +255,12 @@ const NotificationCenterPage = () => {
             <Loader />
           </div>
         ) : notifications.length === 0 ? (
-          <div className='bg-white rounded-lg shadow-sm p-12 text-center'>
+          <div className='bg-white rounded-lg shadow-sm p-12 text-center dark:bg-gray-900'>
             <Bell size={48} className='mx-auto text-gray-400 mb-4' />
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+            <h2 className='text-lg font-semibold text-gray-900 mb-2 dark:text-gray-100'>
               No notifications
-            </h3>
-            <p className='text-gray-600'>
+            </h2>
+            <p className='text-gray-600 dark:text-gray-400'>
               {filter === "unread"
                 ? "You're all caught up!"
                 : filter === "read"
@@ -269,7 +269,7 @@ const NotificationCenterPage = () => {
             </p>
           </div>
         ) : (
-          <div className='bg-white rounded-lg shadow-sm divide-y divide-gray-100'>
+          <div className='bg-white rounded-lg shadow-sm divide-y divide-gray-100 dark:bg-gray-900 dark:divide-gray-800'>
             {notifications.map((notification) => {
               const timeAgo = formatDistanceToNow(
                 new Date(notification.createdAt),
@@ -281,16 +281,15 @@ const NotificationCenterPage = () => {
               return (
                 <div
                   key={notification._id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 hover:bg-gray-50 ${
+                  className={`relative p-4 hover:bg-gray-50 focus-within:bg-gray-50 dark:hover:bg-gray-800 dark:focus-within:bg-gray-800 ${
                     notification.type !== "trip_invite" ? "cursor-pointer" : ""
                   } transition-colors ${
-                    !notification.isRead ? "bg-blue-50" : ""
+                    !notification.isRead ? "bg-blue-50 dark:bg-blue-950/40" : ""
                   }`}
                 >
                   <div className='flex items-start gap-4'>
                     {/* Icon */}
-                    <div className='shrink-0 text-3xl'>
+                    <div className='shrink-0 text-3xl' aria-hidden='true'>
                       {getNotificationIcon(notification.type)}
                     </div>
 
@@ -299,19 +298,26 @@ const NotificationCenterPage = () => {
                       <div className='flex items-start justify-between gap-4'>
                         <div className='flex-1'>
                           <div className='flex items-center gap-2 mb-1'>
-                            <h3 className='text-base font-semibold text-gray-900'>
-                              {notification.title}
-                            </h3>
+                            <h2 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                              {/* The whole row is clickable through this button */}
+                              <button
+                                type='button'
+                                onClick={() => handleNotificationClick(notification)}
+                                className='text-left focus:outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-blue-500'
+                              >
+                                {notification.title}
+                              </button>
+                            </h2>
                             {!notification.isRead && (
                               <Badge variant='primary' size='sm'>
                                 New
                               </Badge>
                             )}
                           </div>
-                          <p className='text-sm text-gray-600 mb-2'>
+                          <p className='text-sm text-gray-600 mb-2 dark:text-gray-400'>
                             {notification.message}
                           </p>
-                          <p className='text-xs text-gray-500'>{timeAgo}</p>
+                          <p className='text-xs text-gray-500 dark:text-gray-400'>{timeAgo}</p>
 
                           {/* Invitation Actions */}
                           {notification.type === "trip_invite" && (
@@ -328,9 +334,9 @@ const NotificationCenterPage = () => {
                                 loading={
                                   processingInvitation === notification._id
                                 }
-                                className='flex items-center gap-1'
+                                className='relative z-10 flex items-center gap-1'
                               >
-                                <CheckCircle size={14} />
+                                <CheckCircle size={14} aria-hidden='true' />
                                 Accept
                               </Button>
                               <Button
@@ -342,9 +348,9 @@ const NotificationCenterPage = () => {
                                 disabled={
                                   processingInvitation === notification._id
                                 }
-                                className='flex items-center gap-1'
+                                className='relative z-10 flex items-center gap-1'
                               >
-                                <XCircle size={14} />
+                                <XCircle size={14} aria-hidden='true' />
                                 Decline
                               </Button>
                             </div>
@@ -357,10 +363,10 @@ const NotificationCenterPage = () => {
                             e.stopPropagation();
                             handleDelete(notification._id);
                           }}
-                          className='text-gray-400 hover:text-red-600 transition-colors'
-                          aria-label='Delete notification'
+                          className='relative z-10 p-1 rounded text-gray-500 hover:text-red-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-400 dark:hover:text-red-400'
+                          aria-label={`Delete notification: ${notification.title}`}
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={18} aria-hidden='true' />
                         </button>
                       </div>
                     </div>

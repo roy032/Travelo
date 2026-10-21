@@ -40,12 +40,12 @@ const FavoriteButton = ({ itemType, itemId, label, className = "", size = "md" }
       aria-pressed={saved}
       aria-label={saved ? `Remove${name} from saved` : `Save${name}`}
       title={saved ? "Remove from saved" : "Save"}
-      className={`inline-flex items-center justify-center rounded-full bg-white/95 shadow-md p-2 transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:opacity-60 ${className}`}
+      className={`inline-flex items-center justify-center rounded-full bg-white/95 shadow-md p-2 transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:opacity-60 dark:bg-gray-900/95 dark:hover:bg-gray-800 ${className}`}
     >
       <Heart
         size={iconSize}
         aria-hidden='true'
-        className={saved ? "fill-pink-500 text-pink-500" : "text-gray-600"}
+        className={saved ? "fill-pink-500 text-pink-500" : "text-gray-600 dark:text-gray-400"}
       />
     </button>
   );

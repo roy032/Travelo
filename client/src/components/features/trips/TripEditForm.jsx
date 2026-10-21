@@ -128,7 +128,7 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor='description'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Description
         </label>
@@ -139,10 +139,10 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
           onChange={handleChange}
           placeholder='Tell us about your trip...'
           rows={4}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         />
         {errors.description && (
-          <p className='mt-1 text-sm text-red-600'>{errors.description}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.description}</p>
         )}
       </div>
 
@@ -171,7 +171,7 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor='destinationType'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Destination Type
         </label>
@@ -180,7 +180,7 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
           name='destinationType'
           value={formData.destinationType}
           onChange={handleChange}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         >
           {destinationTypes.map((type) => (
             <option key={type.value} value={type.value}>
@@ -189,7 +189,7 @@ const TripEditForm = ({ trip, onSuccess, onCancel }) => {
           ))}
         </select>
         {errors.destinationType && (
-          <p className='mt-1 text-sm text-red-600'>{errors.destinationType}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.destinationType}</p>
         )}
       </div>
 

@@ -13,9 +13,9 @@ const DestinationListCard = ({ destination }) => {
   return (
     <Link
       to={`/destinations/${destination.id}`}
-      className='group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500'
+      className='group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900'
     >
-      <div className='relative h-48 bg-gray-200 overflow-hidden'>
+      <div className='relative h-48 bg-gray-200 overflow-hidden dark:bg-gray-700'>
         {image && (
           <img
             src={image}
@@ -24,7 +24,7 @@ const DestinationListCard = ({ destination }) => {
             className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
           />
         )}
-        <span className='absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 text-xs font-semibold text-gray-800 capitalize'>
+        <span className='absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 text-xs font-semibold text-gray-800 capitalize dark:bg-gray-900/95 dark:text-gray-200'>
           {destination.category}
         </span>
         <FavoriteButton
@@ -36,10 +36,10 @@ const DestinationListCard = ({ destination }) => {
         />
       </div>
       <div className='p-5'>
-        <h3 className='text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors'>
+        <h2 className='text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors dark:text-gray-100 dark:group-hover:text-blue-400'>
           {destination.name}
-        </h3>
-        <div className='flex items-center gap-1.5 text-sm text-gray-600 mt-1'>
+        </h2>
+        <div className='flex items-center gap-1.5 text-sm text-gray-600 mt-1 dark:text-gray-400'>
           <MapPin size={14} className='text-blue-500' aria-hidden='true' />
           {destination.country}
         </div>
@@ -47,17 +47,17 @@ const DestinationListCard = ({ destination }) => {
           {destination.ratingCount > 0 ? (
             <>
               <StarDisplay value={destination.ratingAverage} size={14} />
-              <span className='text-gray-700 font-medium'>
+              <span className='text-gray-700 font-medium dark:text-gray-300'>
                 {destination.ratingAverage.toFixed(1)}
               </span>
-              <span className='text-gray-500'>({destination.ratingCount})</span>
+              <span className='text-gray-500 dark:text-gray-400'>({destination.ratingCount})</span>
             </>
           ) : (
-            <span className='text-gray-500'>No reviews yet</span>
+            <span className='text-gray-500 dark:text-gray-400'>No reviews yet</span>
           )}
         </div>
         {destination.description && (
-          <p className='text-sm text-gray-600 mt-3 line-clamp-2'>
+          <p className='text-sm text-gray-600 mt-3 line-clamp-2 dark:text-gray-400'>
             {destination.description}
           </p>
         )}

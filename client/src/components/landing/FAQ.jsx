@@ -33,14 +33,14 @@ const FAQ = () => {
   };
 
   return (
-    <div className='bg-gradient-to-b from-gray-50 to-white py-20'>
+    <div className='bg-gradient-to-b from-gray-50 to-white py-20 dark:from-gray-950 dark:to-gray-900'>
       <div className='max-w-4xl mx-auto px-6'>
         {/* Section Header */}
         <div className='text-center mb-12'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
             Frequently Asked Question
           </h2>
-          <p className='text-lg text-gray-600'>
+          <p className='text-lg text-gray-600 dark:text-gray-400'>
             Find answers to common questions about our services
           </p>
         </div>
@@ -50,28 +50,37 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg'
+              className='bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg dark:bg-gray-900'
             >
               <button
+                type='button'
                 onClick={() => toggleFAQ(index)}
-                className='w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-gray-50'
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-answer-${index}`}
+                id={`faq-question-${index}`}
+                className='w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'
               >
-                <span className='text-lg font-semibold text-gray-900 pr-8'>
+                <span className='text-lg font-semibold text-gray-900 pr-8 dark:text-gray-100'>
                   {faq.question}
                 </span>
                 <ChevronDown
-                  className={`flex-shrink-0 w-6 h-6 text-blue-600 transition-transform duration-300 ${
+                  className={`flex-shrink-0 w-6 h-6 text-blue-600 transition-transform duration-300 dark:text-blue-400 ${
                     openIndex === index ? "transform rotate-180" : ""
                   }`}
+                  aria-hidden='true'
                 />
               </button>
 
               <div
+                id={`faq-answer-${index}`}
+                role='region'
+                aria-labelledby={`faq-question-${index}`}
+                inert={openIndex !== index}
                 className={`overflow-hidden transition-all duration-300 ${
-                  openIndex === index ? "max-h-96" : "max-h-0"
+                  openIndex === index ? "max-h-96" : "max-h-0 invisible"
                 }`}
               >
-                <div className='px-6 pb-6 text-gray-600 leading-relaxed'>
+                <div className='px-6 pb-6 text-gray-600 leading-relaxed dark:text-gray-400'>
                   {faq.answer}
                 </div>
               </div>

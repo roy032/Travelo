@@ -76,7 +76,7 @@ export const StarInput = ({ value, onChange, size = 28 }) => {
           </button>
         ))}
       </div>
-      <span className='text-sm text-gray-600 min-w-20'>{LABELS[shown]}</span>
+      <span className='text-sm text-gray-600 min-w-20 dark:text-gray-400'>{LABELS[shown]}</span>
     </div>
   );
 };

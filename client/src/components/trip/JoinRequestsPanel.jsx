@@ -70,19 +70,19 @@ const JoinRequestsPanel = ({ tripId, isOwner }) => {
 
   if (loading) {
     return (
-      <div className='bg-white rounded-lg shadow-md p-6'>
+      <div className='bg-white rounded-lg shadow-md p-6 dark:bg-gray-900'>
         <div className='flex items-center justify-center py-8'>
-          <Loader2 className='w-8 h-8 text-blue-600 animate-spin' />
+          <Loader2 className='w-8 h-8 text-blue-600 animate-spin dark:text-blue-400' />
         </div>
       </div>
     );
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md p-6'>
+    <div className='bg-white rounded-lg shadow-md p-6 dark:bg-gray-900'>
       <div className='flex items-center gap-3 mb-6'>
-        <Users className='w-6 h-6 text-blue-600' />
-        <h2 className='text-2xl font-bold text-gray-900'>
+        <Users className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
           Join Requests ({requests.length})
         </h2>
       </div>
@@ -91,20 +91,20 @@ const JoinRequestsPanel = ({ tripId, isOwner }) => {
         {requests.map((request) => (
           <div
             key={request._id}
-            className='flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200'
+            className='flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-950 dark:border-gray-700'
           >
             <div className='flex items-center gap-4'>
-              <div className='bg-blue-100 p-3 rounded-full'>
-                <UserPlus className='w-6 h-6 text-blue-600' />
+              <div className='bg-blue-100 p-3 rounded-full dark:bg-blue-900/40'>
+                <UserPlus className='w-6 h-6 text-blue-600 dark:text-blue-400' />
               </div>
               <div>
-                <p className='font-semibold text-gray-900'>
+                <p className='font-semibold text-gray-900 dark:text-gray-100'>
                   {request.relatedResource?.name}
                 </p>
-                <p className='text-sm text-gray-600'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>
                   {request.relatedResource?.email}
                 </p>
-                <p className='text-xs text-gray-500 mt-1'>
+                <p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
                   {new Date(request.createdAt).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -120,7 +120,7 @@ const JoinRequestsPanel = ({ tripId, isOwner }) => {
               <button
                 onClick={() => handleAccept(request._id)}
                 disabled={processingIds.has(request._id)}
-                className='flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors'
+                className='flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors dark:disabled:bg-gray-600'
               >
                 {processingIds.has(request._id) ? (
                   <Loader2 className='w-4 h-4 animate-spin' />
@@ -132,7 +132,7 @@ const JoinRequestsPanel = ({ tripId, isOwner }) => {
               <button
                 onClick={() => handleReject(request._id)}
                 disabled={processingIds.has(request._id)}
-                className='flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors'
+                className='flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors dark:disabled:bg-gray-600'
               >
                 {processingIds.has(request._id) ? (
                   <Loader2 className='w-4 h-4 animate-spin' />

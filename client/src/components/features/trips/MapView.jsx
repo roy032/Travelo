@@ -97,10 +97,10 @@ const MapView = ({ tripId }) => {
 
   if (!mapData || !mapData.activities || mapData.activities.length === 0) {
     return (
-      <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
+      <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 dark:bg-gray-950 dark:border-gray-600'>
         <MapPin size={48} className='mx-auto text-gray-400 mb-4' />
-        <p className='text-gray-600 mb-2'>No activities with location data</p>
-        <p className='text-sm text-gray-500'>
+        <p className='text-gray-600 mb-2 dark:text-gray-400'>No activities with location data</p>
+        <p className='text-sm text-gray-500 dark:text-gray-400'>
           Add coordinates to your activities to see them on the map
         </p>
       </div>
@@ -116,14 +116,14 @@ const MapView = ({ tripId }) => {
   return (
     <div>
       <div className='mb-4'>
-        <h2 className='text-2xl font-bold text-gray-900'>Map View</h2>
-        <p className='text-gray-600 mt-1'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>Map View</h2>
+        <p className='text-gray-600 mt-1 dark:text-gray-400'>
           {mapData.activities.length}{" "}
           {mapData.activities.length === 1 ? "location" : "locations"} on map
         </p>
       </div>
 
-      <div className='rounded-lg overflow-hidden border border-gray-300 shadow-sm'>
+      <div className='rounded-lg overflow-hidden border border-gray-300 shadow-sm dark:border-gray-600'>
         <MapContainer
           center={center}
           zoom={zoom}
@@ -145,18 +145,18 @@ const MapView = ({ tripId }) => {
             >
               <Popup>
                 <div className='p-2'>
-                  <h3 className='font-semibold text-gray-900 mb-1'>
+                  <h3 className='font-semibold text-gray-900 mb-1 dark:text-gray-100'>
                     {activity.title}
                   </h3>
-                  <p className='text-sm text-gray-600 mb-2'>
+                  <p className='text-sm text-gray-600 mb-2 dark:text-gray-400'>
                     {formatDate(activity.date)} at {formatTime(activity.time)}
                   </p>
-                  <p className='text-sm text-gray-700'>
+                  <p className='text-sm text-gray-700 dark:text-gray-300'>
                     <MapPin size={14} className='inline mr-1' />
                     {activity.location.name}
                   </p>
                   {activity.location.address && (
-                    <p className='text-xs text-gray-500 mt-1'>
+                    <p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
                       {activity.location.address}
                     </p>
                   )}
@@ -169,25 +169,25 @@ const MapView = ({ tripId }) => {
 
       {/* Activity List */}
       <div className='mt-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-3'>
+        <h3 className='text-lg font-semibold text-gray-900 mb-3 dark:text-gray-100'>
           Activities on Map
         </h3>
         <div className='space-y-2'>
           {mapData.activities.map((activity) => (
             <div
               key={activity.id}
-              className='flex items-start p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow'
+              className='flex items-start p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-700'
             >
               <MapPin
                 size={20}
-                className='text-blue-600 mr-3 mt-0.5 shrink-0'
+                className='text-blue-600 mr-3 mt-0.5 shrink-0 dark:text-blue-400'
               />
               <div className='flex-1'>
-                <h4 className='font-medium text-gray-900'>{activity.title}</h4>
-                <p className='text-sm text-gray-600'>
+                <h4 className='font-medium text-gray-900 dark:text-gray-100'>{activity.title}</h4>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>
                   {formatDate(activity.date)} at {formatTime(activity.time)}
                 </p>
-                <p className='text-sm text-gray-500'>
+                <p className='text-sm text-gray-500 dark:text-gray-400'>
                   {activity.location.name}
                 </p>
               </div>

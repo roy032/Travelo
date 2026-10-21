@@ -25,7 +25,7 @@ test.describe("Trips, uploads and browsing", () => {
       page.getByRole("heading", { name: "Sundarbans boat trip" })
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Photos", exact: true }).click();
+    await page.getByRole("tab", { name: "Photos" }).click();
     await page.getByRole("button", { name: /Add Photo/ }).click();
     const dialog = page.getByRole("dialog");
     await dialog.locator('input[type="file"]').setInputFiles(PNG);
@@ -85,7 +85,7 @@ test.describe("Trips, uploads and browsing", () => {
     await page.reload();
     await createTrip(page, { title: "Srimangal tea trail", destinationType: "countryside" });
     await page.getByText("Srimangal tea trail").click();
-    await page.getByRole("button", { name: "Photos", exact: true }).click();
+    await page.getByRole("tab", { name: "Photos" }).click();
     await page.getByRole("button", { name: /Add Photo/ }).click();
     await page.getByRole("dialog").locator('input[type="file"]').setInputFiles(PNG);
     await page.getByRole("dialog").getByRole("button", { name: /^Upload/ }).click();
@@ -157,7 +157,7 @@ test.describe("Trips, uploads and browsing", () => {
     // The guest now has the trip and can see its photos
     await page.goto("/trips");
     await page.getByText("Srimangal tea trail").click();
-    await page.getByRole("button", { name: "Photos", exact: true }).click();
+    await page.getByRole("tab", { name: "Photos" }).click();
     await expect(page.getByText("(1 photo)")).toBeVisible();
 
     await adminPage.close();

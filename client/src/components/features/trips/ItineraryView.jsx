@@ -89,10 +89,10 @@ const ItineraryView = ({
       <div className='space-y-4'>
         <div className='flex items-center justify-between mb-6'>
           <div>
-            <div className='h-8 w-32 bg-gray-200 rounded animate-pulse'></div>
-            <div className='h-4 w-48 bg-gray-200 rounded animate-pulse mt-2'></div>
+            <div className='h-8 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
+            <div className='h-4 w-48 bg-gray-200 rounded animate-pulse mt-2 dark:bg-gray-700'></div>
           </div>
-          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse'></div>
+          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
         </div>
         <SkeletonList count={3} />
       </div>
@@ -106,8 +106,8 @@ const ItineraryView = ({
     <div>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h2 className='text-2xl font-bold text-gray-900'>Itinerary</h2>
-          <p className='text-gray-600 mt-1'>
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>Itinerary</h2>
+          <p className='text-gray-600 mt-1 dark:text-gray-400'>
             {activities.length}{" "}
             {activities.length === 1 ? "activity" : "activities"} planned
           </p>

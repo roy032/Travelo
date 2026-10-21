@@ -10,11 +10,11 @@ import { usePageTitle } from "../hooks/usePageTitle";
 const NotFoundPage = () => {
   usePageTitle("Page not found");
   return (
-    <div className='min-h-screen bg-gray-50 flex items-center justify-center px-4'>
+    <div className='min-h-screen bg-gray-50 flex items-center justify-center px-4 dark:bg-gray-950'>
       <div className='max-w-md w-full text-center'>
         {/* 404 Illustration */}
         <div className='mb-8'>
-          <h1 className='text-9xl font-bold text-blue-600'>404</h1>
+          <h1 className='text-9xl font-bold text-blue-600 dark:text-blue-400'>404</h1>
           <div className='mt-4'>
             <svg
               className='mx-auto h-32 w-32 text-gray-400'
@@ -34,10 +34,10 @@ const NotFoundPage = () => {
         </div>
 
         {/* Error Message */}
-        <h2 className='text-3xl font-bold text-gray-900 mb-4'>
+        <h2 className='text-3xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
           Page Not Found
         </h2>
-        <p className='text-lg text-gray-600 mb-8'>
+        <p className='text-lg text-gray-600 mb-8 dark:text-gray-400'>
           Sorry, we couldn't find the page you're looking for. The page might
           have been moved or doesn't exist.
         </p>
@@ -61,12 +61,12 @@ const NotFoundPage = () => {
         </div>
 
         {/* Help Text */}
-        <div className='mt-12 text-sm text-gray-500'>
+        <div className='mt-12 text-sm text-gray-500 dark:text-gray-400'>
           <p>
             If you believe this is an error, please{" "}
             <a
               href='mailto:support@travelo.com'
-              className='text-blue-600 hover:underline'
+              className='text-blue-700 underline hover:no-underline dark:text-blue-300'
             >
               contact support
             </a>

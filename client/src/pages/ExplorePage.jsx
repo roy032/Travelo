@@ -134,27 +134,27 @@ const ExplorePage = () => {
   };
 
   const fieldClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+    "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600 dark:bg-gray-900";
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300";
 
   return (
-    <div className='min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 py-8'>
+    <div className='min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 py-8 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Page Header */}
         <div className='mb-8 text-center'>
           <div className='flex items-center justify-center mb-4'>
-            <Compass className='w-12 h-12 text-blue-600' aria-hidden='true' />
+            <Compass className='w-12 h-12 text-blue-600 dark:text-blue-400' aria-hidden='true' />
           </div>
-          <h1 className='text-4xl font-bold text-gray-900 mb-2'>
+          <h1 className='text-4xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
             Explore Trips
           </h1>
-          <p className='text-lg text-gray-600'>
+          <p className='text-lg text-gray-600 dark:text-gray-400'>
             Discover upcoming trips and join amazing adventures
           </p>
         </div>
 
         {/* Filters */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-4'>
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-4 dark:bg-gray-900 dark:border-gray-700'>
           <div className='relative'>
             <Search
               className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400'
@@ -169,12 +169,12 @@ const ExplorePage = () => {
               placeholder='Search trips by title or description...'
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600'
             />
           </div>
 
           <div>
-            <span className='block text-sm font-medium text-gray-700 mb-2'>
+            <span className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
               Destination type
             </span>
             <div className='flex flex-wrap gap-2' role='group' aria-label='Destination type'>
@@ -187,7 +187,7 @@ const ExplorePage = () => {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     destinationType === option.value
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   }`}
                 >
                   {option.label}
@@ -280,11 +280,11 @@ const ExplorePage = () => {
           </div>
 
           {hasFilters && (
-            <div className='pt-3 border-t border-gray-200'>
+            <div className='pt-3 border-t border-gray-200 dark:border-gray-700'>
               <button
                 type='button'
                 onClick={clearFilters}
-                className='inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50'
+                className='inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800'
               >
                 <X size={16} aria-hidden='true' />
                 Clear all filters
@@ -297,19 +297,19 @@ const ExplorePage = () => {
           {/* Loading State */}
           {loading && (
             <div className='flex flex-col items-center justify-center py-20'>
-              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4' />
-              <p className='text-gray-600'>Loading trips...</p>
+              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4 dark:text-blue-400' />
+              <p className='text-gray-600 dark:text-gray-400'>Loading trips...</p>
             </div>
           )}
 
           {/* Error State */}
           {error && !loading && (
-            <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-8'>
+            <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-8 dark:bg-red-950/40 dark:border-red-800'>
               <div className='flex items-center space-x-3'>
-                <AlertCircle className='w-6 h-6 text-red-600' aria-hidden='true' />
+                <AlertCircle className='w-6 h-6 text-red-600 dark:text-red-400' aria-hidden='true' />
                 <div>
-                  <h2 className='text-red-900 font-semibold'>Error</h2>
-                  <p className='text-red-700 text-sm'>
+                  <h2 className='text-red-900 font-semibold dark:text-red-200'>Error</h2>
+                  <p className='text-red-700 text-sm dark:text-red-300'>
                     {error.message || "Failed to load trips"}
                   </p>
                 </div>
@@ -326,7 +326,7 @@ const ExplorePage = () => {
 
           {/* Results Count */}
           {!loading && !error && trips.length > 0 && (
-            <p className='mb-6 text-sm text-gray-600'>
+            <p className='mb-6 text-sm text-gray-600 dark:text-gray-400'>
               {trips.length} {trips.length === 1 ? "trip" : "trips"}
               {hasFilters ? " match your filters" : ""}
             </p>
@@ -336,10 +336,10 @@ const ExplorePage = () => {
           {!loading && !error && trips.length === 0 && (
             <div className='text-center py-20'>
               <Compass className='w-16 h-16 text-gray-400 mx-auto mb-4' aria-hidden='true' />
-              <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+              <h2 className='text-xl font-semibold text-gray-900 mb-2 dark:text-gray-100'>
                 No Trips Found
               </h2>
-              <p className='text-gray-600 mb-4'>
+              <p className='text-gray-600 mb-4 dark:text-gray-400'>
                 {hasFilters
                   ? "Try adjusting your filters to see more results"
                   : "Check back later to discover new travel plans!"}
@@ -348,7 +348,7 @@ const ExplorePage = () => {
                 <button
                   type='button'
                   onClick={clearFilters}
-                  className='text-blue-600 hover:text-blue-700 font-medium'
+                  className='text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300'
                 >
                   Clear filters
                 </button>

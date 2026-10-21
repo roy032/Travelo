@@ -1,6 +1,6 @@
 // Travelo service worker: makes the app installable and keeps the app shell
 // and static files available offline. API calls always go to the network.
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL_CACHE = `travelo-shell-${VERSION}`;
 const STATIC_CACHE = `travelo-static-${VERSION}`;
 const SHELL_URL = "/";
@@ -35,7 +35,8 @@ const isStaticAsset = (url) =>
   url.pathname.startsWith("/assets/") ||
   url.pathname.startsWith("/icons/") ||
   url.pathname.startsWith("/main/") ||
-  url.pathname === "/favicon.svg";
+  url.pathname === "/favicon.svg" ||
+  url.pathname === "/theme-init.js";
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;

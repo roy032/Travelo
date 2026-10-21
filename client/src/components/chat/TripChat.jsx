@@ -109,10 +109,10 @@ const TripChat = ({ tripId }) => {
   return (
     <Card className='flex flex-col h-[600px] '>
       {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b bg-gray-50'>
+      <div className='flex items-center justify-between p-4 border-b bg-gray-50 dark:bg-gray-950'>
         <div className='flex items-center gap-2'>
           <MessageCircle className='w-5 h-5 text-blue-500' />
-          <h3 className='font-semibold text-gray-900'>Trip Chat</h3>
+          <h2 className='font-semibold text-gray-900 dark:text-gray-100'>Trip Chat</h2>
         </div>
 
         {/* Connection status */}

@@ -41,28 +41,28 @@ const ReceiptViewer = ({ isOpen, onClose, expense }) => {
     <Modal isOpen={isOpen} onClose={onClose} title='Receipt Details' size='lg'>
       <div className='space-y-4'>
         {/* Expense Details */}
-        <div className='bg-gray-50 rounded-lg p-4 space-y-3'>
+        <div className='bg-gray-50 rounded-lg p-4 space-y-3 dark:bg-gray-950'>
           <div className='flex items-center justify-between'>
-            <span className='text-sm font-medium text-gray-600'>Amount</span>
-            <span className='text-lg font-bold text-gray-900 flex items-center gap-1'>
+            <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>Amount</span>
+            <span className='text-lg font-bold text-gray-900 flex items-center gap-1 dark:text-gray-100'>
               <span>৳</span>
               {expense.amount.toFixed(2)}
             </span>
           </div>
 
           <div className='flex items-center justify-between'>
-            <span className='text-sm font-medium text-gray-600'>
+            <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>
               Description
             </span>
-            <span className='text-sm text-gray-900'>{expense.description}</span>
+            <span className='text-sm text-gray-900 dark:text-gray-100'>{expense.description}</span>
           </div>
 
-          <div className='flex items-center gap-2 text-sm text-gray-600'>
+          <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
             <User size={16} />
             <span>Paid by: {expense.payer?.name || "Unknown"}</span>
           </div>
 
-          <div className='flex items-center gap-2 text-sm text-gray-600'>
+          <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
             <Calendar size={16} />
             <span>{formatDate(expense.createdAt)}</span>
           </div>
@@ -70,27 +70,27 @@ const ReceiptViewer = ({ isOpen, onClose, expense }) => {
 
         {/* Receipt Image */}
         {receiptUrl ? (
-          <div className='border border-gray-200 rounded-lg overflow-hidden'>
+          <div className='border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700'>
             <img
               src={receiptUrl}
               alt='Receipt'
-              className='w-full h-auto max-h-[500px] object-contain bg-gray-50'
+              className='w-full h-auto max-h-[500px] object-contain bg-gray-50 dark:bg-gray-950'
               onError={(e) => {
                 e.target.src = "";
                 e.target.alt = "Failed to load receipt image";
                 e.target.className =
-                  "w-full h-48 flex items-center justify-center bg-gray-100 text-gray-500";
+                  "w-full h-48 flex items-center justify-center bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
               }}
             />
           </div>
         ) : (
-          <div className='border border-gray-200 rounded-lg p-8 text-center bg-gray-50'>
-            <p className='text-gray-500'>No receipt image available</p>
+          <div className='border border-gray-200 rounded-lg p-8 text-center bg-gray-50 dark:border-gray-700 dark:bg-gray-950'>
+            <p className='text-gray-500 dark:text-gray-400'>No receipt image available</p>
           </div>
         )}
 
         {expense.receipt?.uploadedAt && (
-          <p className='text-xs text-gray-500 text-center'>
+          <p className='text-xs text-gray-500 text-center dark:text-gray-400'>
             Receipt uploaded on {formatDate(expense.receipt.uploadedAt)}
           </p>
         )}
