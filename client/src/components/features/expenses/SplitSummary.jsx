@@ -120,21 +120,23 @@ const SplitSummary = ({ tripId, refreshKey = 0 }) => {
               key={split.user.id}
               className='bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow'
             >
-              <div className='flex items-center justify-between mb-3'>
-                <div className='flex items-center gap-3'>
+              <div className='flex items-center justify-between gap-3 mb-3'>
+                <div className='flex items-center gap-3 min-w-0'>
                   <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
                     <span className='text-blue-700 font-semibold text-sm'>
                       {split.user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <div>
-                    <p className='font-medium text-gray-900'>
+                  <div className='min-w-0'>
+                    <p className='font-medium text-gray-900 truncate'>
                       {split.user.name}
                     </p>
-                    <p className='text-sm text-gray-500'>{split.user.email}</p>
+                    <p className='text-sm text-gray-500 truncate'>
+                      {split.user.email}
+                    </p>
                   </div>
                 </div>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 shrink-0'>
                   {getBalanceIcon(split.netBalance)}
                   <span
                     className={`font-semibold ${getBalanceColor(

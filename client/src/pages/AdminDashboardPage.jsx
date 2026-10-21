@@ -370,7 +370,7 @@ const AdminDashboardPage = () => {
                 />
               </div>
 
-              <div className='flex gap-2'>
+              <div className='flex flex-wrap gap-2'>
                 <button
                   onClick={() => setFilterStatus("")}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${

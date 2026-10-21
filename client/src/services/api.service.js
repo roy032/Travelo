@@ -155,6 +155,8 @@ export const profileApi = {
       const response = await fetchWithAuth("/profile");
       return response;
     } catch (error) {
+      // Signed-out visitors get a 401 on every page load; don't toast it
+      if (error instanceof ApiError && error.status === 401) throw error;
       return handleApiError(error);
     }
   },

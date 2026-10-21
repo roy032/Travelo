@@ -368,11 +368,22 @@ const TripDetailPage = () => {
       {/* Tab Navigation */}
       <div className='bg-white border-b border-gray-200'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <nav className='flex space-x-8 overflow-x-auto' aria-label='Tabs'>
+          <nav
+            className='flex space-x-6 sm:space-x-8 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0'
+            aria-label='Tabs'
+          >
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={(event) => {
+                  setActiveTab(tab.id);
+                  event.currentTarget.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center",
+                  });
+                }}
+                aria-current={activeTab === tab.id ? "page" : undefined}
                 className={`
                   py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
                   ${
@@ -390,14 +401,14 @@ const TripDetailPage = () => {
       </div>
 
       {/* Tab Content */}
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'>
         {activeTab === "overview" && (
           <div className='space-y-6'>
             {/* Join Requests Panel - Only visible to owner */}
             <JoinRequestsPanel tripId={tripId} isOwner={isOwner} />
 
             {/* Trip Overview */}
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
               <h2 className='text-xl font-semibold text-gray-900 mb-4'>
                 Trip Overview
               </h2>
@@ -423,7 +434,7 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "itinerary" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             <ItineraryView
               tripId={tripId}
               tripStartDate={trip.startDate}
@@ -436,13 +447,13 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "map" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             <MapView tripId={tripId} />
           </div>
         )}
 
         {activeTab === "members" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             {loadingMembers ? (
               <div className='flex justify-center py-8'>
                 <Loader />
@@ -468,7 +479,7 @@ const TripDetailPage = () => {
 
         {activeTab === "expenses" && (
           <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
               <ExpenseList
                 tripId={tripId}
                 onAddExpense={handleAddExpense}
@@ -476,20 +487,20 @@ const TripDetailPage = () => {
                 refreshKey={expenseRefreshKey}
               />
             </div>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
               <SplitSummary tripId={tripId} refreshKey={expenseRefreshKey} />
             </div>
           </div>
         )}
 
         {activeTab === "checklist" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             <ChecklistView tripId={tripId} canEdit={true} />
           </div>
         )}
 
         {activeTab === "notes" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             <NotesList
               key={noteRefreshKey}
               tripId={tripId}
@@ -502,13 +513,13 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "package-helper" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             <PackageHelper tripId={tripId} startDate={trip.startDate} />
           </div>
         )}
 
         {activeTab === "photos" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
             {/* Header with Upload Button */}
             <div className='flex items-center justify-between mb-6'>
               <h2 className='text-xl font-semibold text-gray-900'>
@@ -537,7 +548,7 @@ const TripDetailPage = () => {
 
         {activeTab === "place-images" && (
           <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
               <div className='mb-6'>
                 <h2 className='text-2xl font-bold text-gray-900 mb-2'>
                   Place Images from Wikimedia Commons
