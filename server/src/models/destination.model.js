@@ -52,6 +52,18 @@ const destinationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // Kept in sync with the Review collection by review.service.js
+    ratingAverage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    ratingCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
@@ -61,6 +73,8 @@ const destinationSchema = new mongoose.Schema(
 // Create indexes for efficient queries
 destinationSchema.index({ name: 1 });
 destinationSchema.index({ category: 1 });
+destinationSchema.index({ country: 1 });
+destinationSchema.index({ ratingAverage: -1 });
 
 const Destination = mongoose.model('Destination', destinationSchema);
 
