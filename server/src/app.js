@@ -1,5 +1,5 @@
 import express from "express";
-import helmet from "helmet";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -21,6 +21,12 @@ import packingRoutes from "#routes/packing.route.js";
 import profileRoutes from "#routes/profile.route.js";
 import notificationRoutes from "#routes/notification.route.js";
 import invitationRoutes from "#routes/invitation.route.js";
+import healthRoutes from "#routes/health.route.js";
+import {
+  securityHeaders,
+  permissionsPolicy,
+} from "#middlewares/security.middleware.js";
+import { apiRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -42,22 +48,8 @@ if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
 }
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        // Destination photos, map tiles and UploadThing files come from many hosts
-        "img-src": ["'self'", "data:", "blob:", "https:"],
-        "connect-src": [
-          "'self'",
-          "https://api.open-meteo.com",
-          "https://nominatim.openstreetmap.org",
-          "https://commons.wikimedia.org",
-        ],
-      },
-    },
-  })
-);
+app.use(securityHeaders);
+app.use(permissionsPolicy);
 app.use(
   cors({
     origin: allowedOrigins,
@@ -93,6 +85,11 @@ app.get("/api", (req, res) => {
   res.status(200).json({ message: "travelo API is running!" });
 });
 
+// Uptime monitors poll this; it is mounted before the API rate limiter
+app.use("/api/health", healthRoutes);
+
+app.use("/api", apiRateLimiter);
+
 // API routes
 app.use("/api/auth", authRoutes);
 // Public routes must be mounted before routers that are mounted at "/api" and
@@ -122,6 +119,9 @@ if (serveClient) {
 
 // 404 handler - must be before error handler
 app.use(notFoundHandler);
+
+// Reports unexpected (5xx) errors to Sentry; a no-op when SENTRY_DSN is unset
+Sentry.setupExpressErrorHandler(app);
 
 // Error handler - must be last
 app.use(errorHandler);

@@ -16,10 +16,11 @@
     "#errors/*": "./src/errors/*"
   },
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node --import ./src/instrument.js src/index.js",
     "dev": "nodemon src/index.js",
     "test": "vitest",
     "seed:destinations": "node seed-destinations.js",
+    "make-admin": "node make-admin.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -30,6 +31,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@sentry/node": "^10.76.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

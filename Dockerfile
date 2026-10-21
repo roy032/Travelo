@@ -8,6 +8,10 @@ RUN npm ci
 COPY client/ ./
 # Empty API URL: the client calls the API on its own origin
 ENV VITE_API_URL=""
+# Optional browser error tracking; passed as a build arg (Render does this
+# automatically for environment variables with the same name)
+ARG VITE_SENTRY_DSN=""
+ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 RUN npm run build
 
 FROM node:22-slim
@@ -20,4 +24,4 @@ COPY --from=client /app/client/dist /app/client/dist
 ENV CLIENT_DIST=/app/client/dist
 EXPOSE 3000
 USER node
-CMD ["node", "src/index.js"]
+CMD ["node", "--import", "./src/instrument.js", "src/index.js"]

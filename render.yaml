@@ -5,13 +5,16 @@ services:
     name: travelo
     runtime: docker
     plan: free
-    healthCheckPath: /api
+    healthCheckPath: /api/health
     envVars:
       - key: MONGODB_URI
         sync: false
       - key: UPLOADTHING_TOKEN
         sync: false
       - key: CLIENT_URL
+        sync: false
+      # Comma-separated emails that become admins when they sign in
+      - key: ADMIN_EMAILS
         sync: false
       - key: JWT_SECRET
         generateValue: true
