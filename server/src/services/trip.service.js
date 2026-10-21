@@ -219,6 +219,7 @@ export const getTripById = async (tripId, userId) => {
       tripCategory: trip.tripCategory,
       owner: trip.owner,
       members: trip.members,
+      shareToken: trip.shareToken ?? null,
       createdAt: trip.createdAt,
       updatedAt: trip.updatedAt,
     };
