@@ -2,6 +2,7 @@ import {
   createTripSchema,
   updateTripSchema,
 } from "#validations/trip.validation.js";
+import { exploreQuerySchema } from "#validations/search.validation.js";
 import { formatValidationError } from "#utils/format.js";
 import {
   createTrip,
@@ -388,11 +389,20 @@ export const getTripMembersController = async (req, res, next) => {
 
 /**
  * Get all upcoming trips for public exploration (NO AUTH REQUIRED)
- * Returns sanitized trip data with activities and checklist only
+ * Returns sanitized trip summaries, filtered by the query string
  */
 export const getPublicTripsController = async (req, res, next) => {
   try {
-    const trips = await getPublicUpcomingTrips();
+    const validationResult = exploreQuerySchema.safeParse(req.query);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: formatValidationError(validationResult.error),
+      });
+    }
+
+    const trips = await getPublicUpcomingTrips(validationResult.data);
 
     res.status(200).json({
       trips,

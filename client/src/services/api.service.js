@@ -103,6 +103,16 @@ export function getErrorMessage(error) {
 }
 
 /**
+ * Build a query string from an object, skipping empty values
+ */
+function toQueryString(params) {
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null && value !== ""
+  );
+  return new URLSearchParams(entries).toString();
+}
+
+/**
  * Handle API errors with toast notifications
  */
 function handleApiError(error) {
@@ -361,21 +371,24 @@ export const adminApi = {
 // ============================================================================
 
 export const tripApi = {
-  // Public endpoint - no authentication required
-  getPublicTrips: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/trips/explore`);
+  // Public endpoint - no authentication required.
+  // params: search, destinationType, tripCategory, from, to, minDays, maxDays, sort
+  getPublicTrips: async (params = {}) => {
+    const queryString = toQueryString(params);
+    const response = await fetch(
+      `${API_BASE_URL}/trips/explore${queryString ? `?${queryString}` : ""}`
+    );
+    const data = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch public trips");
-      }
-
-      const data = await response.json();
-      return data.trips || [];
-    } catch (error) {
-      console.error("Error fetching public trips:", error);
-      return [];
+    if (!response.ok) {
+      throw new ApiError(
+        data.details || data.message || "Failed to load trips",
+        response.status,
+        data
+      );
     }
+
+    return data.trips || [];
   },
 
   getUserTrips: async (params = {}) => {
@@ -1015,9 +1028,10 @@ export const invitationApi = {
 // ============================================================================
 
 export const destinationApi = {
+  // params: search, category, country, minRating, sort
   getDestinations: async (params = {}) => {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = toQueryString(params);
       const response = await fetchWithAuth(
         `/destinations${queryString ? `?${queryString}` : ""}`
       );
@@ -1027,10 +1041,117 @@ export const destinationApi = {
     }
   },
 
+  getCountries: async () => {
+    try {
+      const response = await fetchWithAuth("/destinations/countries");
+      return response.countries || [];
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   getDestinationById: async (destinationId) => {
     try {
       const response = await fetchWithAuth(`/destinations/${destinationId}`);
       return response.destination;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Review Endpoints
+// ============================================================================
+
+export const reviewApi = {
+  // Returns { reviews, summary, pagination }
+  getReviews: async (destinationId, params = {}) => {
+    try {
+      const queryString = toQueryString(params);
+      return await fetchWithAuth(
+        `/destinations/${destinationId}/reviews${queryString ? `?${queryString}` : ""}`
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // The signed-in user's review, or null
+  getMyReview: async (destinationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/destinations/${destinationId}/reviews/me`
+      );
+      return response.review;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Creates the review, or updates it if the user already wrote one
+  saveReview: async (destinationId, { rating, comment }) => {
+    try {
+      return await fetchWithAuth(`/destinations/${destinationId}/reviews`, {
+        method: "PUT",
+        body: JSON.stringify({ rating, comment }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteReview: async (destinationId, reviewId) => {
+    try {
+      return await fetchWithAuth(
+        `/destinations/${destinationId}/reviews/${reviewId}`,
+        { method: "DELETE" }
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Favorite Endpoints
+// ============================================================================
+
+export const favoriteApi = {
+  // Returns { destinations, trips } with details
+  getFavorites: async () => {
+    try {
+      return await fetchWithAuth("/favorites");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Returns { destination: [ids], trip: [ids] }
+  getFavoriteIds: async () => {
+    try {
+      return await fetchWithAuth("/favorites/ids");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  addFavorite: async (itemType, itemId) => {
+    try {
+      return await fetchWithAuth("/favorites", {
+        method: "POST",
+        body: JSON.stringify({ itemType, itemId }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  removeFavorite: async (itemType, itemId) => {
+    try {
+      return await fetchWithAuth(`/favorites/${itemType}/${itemId}`, {
+        method: "DELETE",
+      });
     } catch (error) {
       return handleApiError(error);
     }
@@ -1182,6 +1303,8 @@ export default {
   notification: notificationApi,
   invitation: invitationApi,
   destination: destinationApi,
+  review: reviewApi,
+  favorite: favoriteApi,
   packing: packingApi,
   report: reportApi,
   message: messageApi,

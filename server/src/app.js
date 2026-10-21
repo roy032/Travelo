@@ -30,6 +30,7 @@ import {
 import { apiRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import seoRoutes from "#routes/seo.route.js";
 import { getSiteUrl, renderIndexHtml } from "#utils/seo.js";
+import favoriteRoutes from "#routes/favorite.route.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -118,6 +119,7 @@ app.use("/api/auth", authRoutes);
 // Public routes must be mounted before routers that are mounted at "/api" and
 // apply authenticateToken to every request passing through them
 app.use("/api/destinations", destinationRoutes);
+app.use("/api/favorites", favoriteRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/trips", tripRoutes); // Must be first to catch /explore before authenticated routes
