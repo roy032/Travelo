@@ -156,6 +156,45 @@ export const authApi = {
       return handleApiError(error);
     }
   },
+
+  forgotPassword: async (email) => {
+    try {
+      return await fetchWithAuth("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  resetPassword: async ({ token, password }) => {
+    try {
+      return await fetchWithAuth("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token, password }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // No toast: the verify page shows the outcome itself
+  verifyEmail: (token) =>
+    fetchWithAuth("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  resendVerification: async () => {
+    try {
+      return await fetchWithAuth("/auth/resend-verification", {
+        method: "POST",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 // ============================================================================

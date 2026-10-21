@@ -95,6 +95,7 @@ export const createUser = async ({
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: user.domesticVerification,
       internationalVerification: user.internationalVerification,
@@ -148,6 +149,7 @@ export const authenticateUser = async ({ email, password }) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: { status: user.domesticVerification?.status },
       internationalVerification: {

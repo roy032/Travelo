@@ -7,11 +7,15 @@ import ProtectedRoute from "./components/shared/ProtectedRoute";
 import AdminRoute from "./components/shared/AdminRoute";
 import ErrorBoundary from "./components/layout/ErrorBoundary";
 import Navbar from "./components/layout/Navbar";
+import EmailVerificationBanner from "./components/auth/EmailVerificationBanner";
 import { toastConfig } from "./utils/toast.config";
 import Loader from "./components/ui/Loader";
 
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
 const AdminReportsPage = lazy(() => import("./pages/AdminReportsPage"));
@@ -50,12 +54,22 @@ function App() {
                 }}
               />
               <Navbar />
+              <EmailVerificationBanner />
               <main id='main-content'>
                 <Suspense fallback={<Loader />}>
                   <Routes>
                     <Route path='/' element={<HomePage />} />
                     <Route path='/login' element={<LoginPage />} />
                     <Route path='/register' element={<RegisterPage />} />
+                    <Route
+                      path='/forgot-password'
+                      element={<ForgotPasswordPage />}
+                    />
+                    <Route
+                      path='/reset-password'
+                      element={<ResetPasswordPage />}
+                    />
+                    <Route path='/verify-email' element={<VerifyEmailPage />} />
                     <Route
                       path='/profile'
                       element={

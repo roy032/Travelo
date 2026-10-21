@@ -6,7 +6,7 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import DocumentUpload from "../components/features/admin/DocumentUpload";
 import toast from "react-hot-toast";
-import { User, Mail, Calendar, Lock } from "lucide-react";
+import { User, Mail, Calendar, Lock, Bell } from "lucide-react";
 import { usePageTitle } from "../hooks/usePageTitle";
 
 const ProfilePage = () => {
@@ -30,6 +30,7 @@ const ProfilePage = () => {
   const [passwordErrors, setPasswordErrors] = useState({});
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [notificationsSaving, setNotificationsSaving] = useState(false);
 
   // Profile validation
   const validateProfile = () => {
@@ -115,14 +116,37 @@ const ProfilePage = () => {
     setProfileLoading(true);
 
     try {
+      const emailChanged = profileData.email !== user?.email;
       const response = await profileApi.updateProfile(profileData);
       updateUser(response.user);
-      toast.success("Profile updated successfully");
+      toast.success(
+        emailChanged
+          ? "Profile updated. Check your new inbox to confirm the address."
+          : "Profile updated successfully"
+      );
       setIsEditingProfile(false);
     } catch (error) {
       console.error("Profile update error:", error);
     } finally {
       setProfileLoading(false);
+    }
+  };
+
+  const handleEmailNotificationsChange = async (e) => {
+    const enabled = e.target.checked;
+    setNotificationsSaving(true);
+    try {
+      const response = await profileApi.updateProfile({
+        emailNotifications: enabled,
+      });
+      updateUser(response.user);
+      toast.success(
+        enabled ? "Email notifications turned on" : "Email notifications turned off"
+      );
+    } catch (error) {
+      console.error("Notification setting error:", error);
+    } finally {
+      setNotificationsSaving(false);
     }
   };
 
@@ -270,7 +294,19 @@ const ProfilePage = () => {
                     <Mail className='w-5 h-5 text-gray-400' />
                     <div>
                       <p className='text-sm text-gray-500'>Email</p>
-                      <p className='font-medium'>{user?.email}</p>
+                      <p className='font-medium'>
+                        {user?.email}
+                        {user?.emailVerified === true && (
+                          <span className='ml-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800'>
+                            Confirmed
+                          </span>
+                        )}
+                        {user?.emailVerified === false && (
+                          <span className='ml-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800'>
+                            Not confirmed
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -285,6 +321,38 @@ const ProfilePage = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </Card>
+
+          {/* Email notifications */}
+          <Card>
+            <div className='space-y-3'>
+              <div className='flex items-center gap-2'>
+                <Bell className='w-5 h-5 text-gray-700' aria-hidden='true' />
+                <h2 className='text-xl font-semibold text-gray-900'>
+                  Email Notifications
+                </h2>
+              </div>
+              <label className='flex items-start gap-3 cursor-pointer'>
+                <input
+                  type='checkbox'
+                  className='mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                  checked={user?.emailNotifications !== false}
+                  onChange={handleEmailNotificationsChange}
+                  disabled={notificationsSaving}
+                />
+                <span>
+                  <span className='block font-medium text-gray-900'>
+                    Email me about my trips
+                  </span>
+                  <span className='block text-sm text-gray-600'>
+                    Join requests, accepted or declined requests and trip
+                    invitations. Password reset emails are always sent.
+                    {user?.emailVerified === false &&
+                      " Confirm your email address to start getting these."}
+                  </span>
+                </span>
+              </label>
             </div>
           </Card>
 

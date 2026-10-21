@@ -4,7 +4,8 @@ A collaborative trip planning application built with React, Node.js/Express, Mon
 
 ## Features
 
-- Authentication with HTTP-only JWT cookies
+- Authentication with HTTP-only JWT cookies, email confirmation and password reset by email
+- Email notifications for join requests and invitations (Resend, any SMTP server, or the server log in development)
 - NID/passport upload and admin verification (required to create or join domestic/international trips)
 - Trips: create, edit, invite members, join requests
 - Real-time group chat per trip (Socket.IO) and in-app notifications
@@ -60,6 +61,11 @@ Server (`server/.env`):
 | `NODE_ENV` | no | `development` or `production` (secure cookies in production) |
 | `CLIENT_URL` | no | Allowed client origin(s) for CORS and Socket.IO, comma-separated (default `http://localhost:5173`) |
 | `TRUST_PROXY` | no | Set to `true` when running behind a reverse proxy |
+| `EMAIL_PROVIDER` | no | `console` (default, writes emails to the server log), `resend` or `smtp` |
+| `EMAIL_FROM` | no | Sender address for emails |
+| `RESEND_API_KEY` | no | Needed with `EMAIL_PROVIDER=resend` |
+| `SMTP_URL` | no | Needed with `EMAIL_PROVIDER=smtp` (or `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`) |
+| `APP_URL` | no | Base URL for links in emails (default `SITE_URL`, then the first `CLIENT_URL`) |
 
 Client (`client/.env`):
 

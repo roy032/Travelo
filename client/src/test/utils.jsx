@@ -33,7 +33,7 @@ export const LocationDisplay = () => {
 
 /**
  * Render a page inside a router and a stubbed auth context.
- * `path` is the route pattern, `route` the URL to start at.
+ * `path` is the route pattern, `route` the URL to start at (may include ?query).
  */
 export const renderWithProviders = (
   ui,
@@ -45,11 +45,13 @@ export const renderWithProviders = (
     initialState,
   } = {},
 ) => {
+  const [pathname, query] = route.split("?");
+  const search = query ? `?${query}` : "";
   const result = render(
     <AuthContext.Provider value={auth}>
       <FavoritesContext.Provider value={favorites}>
         <MemoryRouter
-          initialEntries={[{ pathname: route, state: initialState }]}
+          initialEntries={[{ pathname, search, state: initialState }]}
         >
           <Routes>
             <Route path={path} element={ui} />
