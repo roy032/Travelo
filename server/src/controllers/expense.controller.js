@@ -11,6 +11,7 @@ import {
 } from "#services/expense.service.js";
 import { calculateSplits } from "#services/split.service.js";
 import { utapi } from "#config/uploadthing.config.js";
+import { toCompressedUploadFile } from "#utils/image.js";
 
 /**
  * Create a new expense
@@ -51,9 +52,7 @@ export const createExpenseController = async (req, res, next) => {
       try {
         // Upload file to UploadThing
         const uploadedFile = await utapi.uploadFiles(
-          new File([req.file.buffer], req.file.originalname, {
-            type: req.file.mimetype,
-          })
+          await toCompressedUploadFile(req.file)
         );
 
         if (uploadedFile.data) {
@@ -127,9 +126,7 @@ export const updateExpenseController = async (req, res, next) => {
       try {
         // Upload file to UploadThing
         const uploadedFile = await utapi.uploadFiles(
-          new File([req.file.buffer], req.file.originalname, {
-            type: req.file.mimetype,
-          })
+          await toCompressedUploadFile(req.file)
         );
 
         if (uploadedFile.data) {

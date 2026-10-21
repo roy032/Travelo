@@ -15,9 +15,9 @@ const ReceiptUpload = ({ existingReceipt, onFileChange }) => {
     if (!file) return;
 
     // Validate file type
-    const validTypes = ["image/jpeg", "image/png"];
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      setError("Please upload a JPEG or PNG image");
+      setError("Please upload a JPEG, PNG or WebP image");
       return;
     }
 
@@ -59,7 +59,7 @@ const ReceiptUpload = ({ existingReceipt, onFileChange }) => {
           <input
             type='file'
             id='receipt-upload'
-            accept='image/jpeg,image/png'
+            accept='image/jpeg,image/png,image/webp'
             onChange={handleFileSelect}
             className='hidden'
           />
@@ -71,7 +71,7 @@ const ReceiptUpload = ({ existingReceipt, onFileChange }) => {
             <span className='text-sm text-gray-600 mb-1'>
               Click to upload receipt
             </span>
-            <span className='text-xs text-gray-500'>JPEG or PNG, max 5MB</span>
+            <span className='text-xs text-gray-500'>JPEG, PNG or WebP, max 5MB</span>
           </label>
         </div>
       )}

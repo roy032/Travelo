@@ -35,9 +35,9 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
 
   const handleFileSelect = (file) => {
     // Validate file type
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      alert("Please select a JPEG or PNG image");
+      alert("Please select a JPEG, PNG or WebP image");
       return;
     }
 
@@ -160,14 +160,14 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
                   </span>{" "}
                   or drag and drop
                 </p>
-                <p className='text-xs text-gray-500'>JPEG or PNG (max 10MB)</p>
+                <p className='text-xs text-gray-500'>JPEG, PNG or WebP (max 10MB)</p>
               </div>
 
               {/* Hidden File Input */}
               <input
                 ref={fileInputRef}
                 type='file'
-                accept='image/jpeg,image/jpg,image/png'
+                accept='image/jpeg,image/jpg,image/png,image/webp'
                 onChange={handleFileInputChange}
                 className='hidden'
               />

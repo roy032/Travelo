@@ -4,6 +4,7 @@ import {
   getPhotosByTrip,
 } from "#services/photo.service.js";
 import { utapi } from "#config/uploadthing.config.js";
+import { toCompressedUploadFile } from "#utils/image.js";
 
 /**
  * Upload a photo to a trip
@@ -20,10 +21,8 @@ export const uploadPhotoController = async (req, res, next) => {
       });
     }
 
-    // Upload file to UploadThing using proper File format
-    const file = new File([req.file.buffer], req.file.originalname, {
-      type: req.file.mimetype,
-    });
+    // Resize and re-encode the photo, then upload it to UploadThing
+    const file = await toCompressedUploadFile(req.file);
 
     const uploadResult = await utapi.uploadFiles([file]);
 
@@ -40,7 +39,7 @@ export const uploadPhotoController = async (req, res, next) => {
 
     const photoData = {
       trip: tripId,
-      filename: req.file.originalname,
+      filename: file.name,
       url: result.data.url,
       fileKey: result.data.key,
       caption: req.body.caption || "",
