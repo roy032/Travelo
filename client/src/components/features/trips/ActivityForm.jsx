@@ -177,7 +177,6 @@ const ActivityForm = ({
 
       // If no cached coordinates or geocoding failed, try fetching again
       if (!coordinates || !coordinates.lat || !coordinates.lng) {
-        console.log("No cached coordinates, fetching...");
         const result = await fetchCoordinates(
           formData.location.name,
           formData.location.address
@@ -226,7 +225,6 @@ const ActivityForm = ({
         submitData.location.country = country;
       }
 
-      console.log("Submitting activity data:", submitData);
 
       setGeocoding(false);
       onSubmit(submitData);

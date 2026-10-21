@@ -8,7 +8,7 @@ const API_BASE_URL = `${
 /**
  * Custom error class for API errors
  */
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
     this.name = "ApiError";
@@ -71,42 +71,42 @@ async function fetchWithAuth(endpoint, options = {}) {
 }
 
 /**
+ * Pick the message to show the user for a failed request. Prefer what the
+ * server said (e.g. "You must upload and verify your NID...") and fall back
+ * to a generic message per status.
+ */
+export function getErrorMessage(error) {
+  if (!(error instanceof ApiError)) {
+    return "Network error. Please check your connection.";
+  }
+
+  switch (error.status) {
+    case 0:
+      return error.message;
+    case 401:
+      // Wrong email or password on sign-in, otherwise an expired session
+      return error.data?.error === "Invalid credentials"
+        ? "Invalid email or password"
+        : "Please log in to continue";
+    case 413:
+      return "File is too large";
+    case 415:
+      return error.data?.message || "Unsupported file type";
+    case 429:
+      return error.message || "Too many attempts. Please try again later";
+    default:
+      if (error.status >= 500) return "Server error. Please try again later";
+      return error.message && error.message !== "An error occurred"
+        ? error.message
+        : "Something went wrong. Please try again";
+  }
+}
+
+/**
  * Handle API errors with toast notifications
  */
 function handleApiError(error) {
-  if (error instanceof ApiError) {
-    // Show user-friendly error messages
-    switch (error.status) {
-      case 400:
-        toast.error(error.message || "Invalid request");
-        break;
-      case 401:
-        toast.error("Please log in to continue");
-        break;
-      case 403:
-        toast.error("You do not have permission to perform this action");
-        break;
-      case 404:
-        toast.error(error.message || "Resource not found");
-        break;
-      case 409:
-        toast.error(error.message || "Conflict occurred");
-        break;
-      case 413:
-        toast.error("File is too large");
-        break;
-      case 415:
-        toast.error("Unsupported file type");
-        break;
-      case 500:
-        toast.error("Server error. Please try again later");
-        break;
-      default:
-        toast.error(error.message || "An unexpected error occurred");
-    }
-  } else {
-    toast.error("Network error. Please check your connection.");
-  }
+  toast.error(getErrorMessage(error));
   throw error;
 }
 
@@ -713,7 +713,6 @@ export const expenseApi = {
 
   createExpense: async (tripId, expenseData, receiptFile = null) => {
     try {
-      console.log("Creating expense with receipt file:", receiptFile);
       let body;
       if (receiptFile) {
         // Use FormData for file upload
@@ -724,7 +723,6 @@ export const expenseApi = {
         formData.append("description", expenseData.description);
         formData.append("payer", expenseData.payer);
         formData.append("receipt", receiptFile);
-        console.log("FormData created with receipt");
         body = formData;
       } else {
         body = JSON.stringify(expenseData);
@@ -734,7 +732,6 @@ export const expenseApi = {
         method: "POST",
         body,
       });
-      console.log("Expense created response:", response);
       return response.expense;
     } catch (error) {
       return handleApiError(error);
@@ -863,7 +860,6 @@ export const notificationApi = {
       const response = await fetchWithAuth(
         `/notifications${queryString ? `?${queryString}` : ""}`
       );
-      console.log(response);
       return response;
     } catch (error) {
       return handleApiError(error);

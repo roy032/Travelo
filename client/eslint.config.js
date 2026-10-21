@@ -31,4 +31,13 @@ export default defineConfig([
       'react-hooks/use-memo': 'warn',
     },
   },
+  {
+    files: ['vite.config.js'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    // Test helpers are never hot-reloaded
+    files: ['src/test/**', '**/*.test.{js,jsx}'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

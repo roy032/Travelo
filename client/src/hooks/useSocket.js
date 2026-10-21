@@ -23,13 +23,11 @@ const useSocket = (tripId) => {
 
     // Connection event handlers
     const handleConnect = () => {
-      console.log("Socket connected");
       setIsConnected(true);
       setError(null);
     };
 
     const handleDisconnect = () => {
-      console.log("Socket disconnected");
       setIsConnected(false);
       setIsJoined(false);
     };

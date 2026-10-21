@@ -16,7 +16,6 @@ const MemberCard = ({
 }) => {
   const isSelf = member._id === currentUserId;
   const isMemberOwner = member._id === isOwner || member.isOwner;
-  console.log(member);
 
   return (
     <div className='flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow'>

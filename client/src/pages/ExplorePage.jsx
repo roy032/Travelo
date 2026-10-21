@@ -23,9 +23,11 @@ const ExplorePage = () => {
     fetchPublicTrips();
   }, []);
 
+  // Re-run when the user changes: the session check may finish after the
+  // trips have loaded, and the user's own trips must then be hidden
   useEffect(() => {
     applyTripFilters();
-  }, [trips, tripFilter, tripSearch]);
+  }, [trips, tripFilter, tripSearch, user?.id]);
 
   const fetchPublicTrips = async () => {
     try {
@@ -41,26 +43,9 @@ const ExplorePage = () => {
       }
 
       const data = await response.json();
-      let tripsData = data.trips || [];
-
-      // If user is logged in, filter out trips where user is a member or owner
-      if (user && user.id) {
-        tripsData = tripsData.filter((trip) => {
-          // Check if user is the owner
-          const isOwner = trip.ownerId === user.id;
-
-          // Check if user is in members array
-          const isMember = trip.members?.some(
-            (memberId) => memberId === user.id
-          );
-
-          // Show only trips where user is NOT owner and NOT member
-          return !isOwner && !isMember;
-        });
-      }
+      const tripsData = data.trips || [];
 
       setTrips(tripsData);
-      setFilteredTrips(tripsData);
     } catch (err) {
       console.error("Error fetching public trips:", err);
       setTripsError(err.message || "Failed to load trips");
@@ -71,6 +56,15 @@ const ExplorePage = () => {
 
   const applyTripFilters = () => {
     let filtered = [...trips];
+
+    // For a logged-in user, show only trips they do not own or belong to
+    if (user?.id) {
+      filtered = filtered.filter(
+        (trip) =>
+          trip.ownerId !== user.id &&
+          !trip.members?.some((memberId) => memberId === user.id)
+      );
+    }
 
     // Apply destination type filter
     if (tripFilter) {

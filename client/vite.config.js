@@ -12,4 +12,10 @@ export default defineConfig({
       "/uploads": process.env.VITE_API_URL || "http://localhost:3000",
     },
   },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.js"],
+    include: ["src/**/*.test.{js,jsx}"],
+    css: false,
+  },
 });

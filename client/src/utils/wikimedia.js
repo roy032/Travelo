@@ -51,7 +51,6 @@ export async function fetchWikimediaImages(categoryName, limit = 10) {
     }
 
     const data = await response.json();
-    console.log("Wikimedia API response for", categoryName, ":", data);
 
     if (!data.query || !data.query.pages) {
       console.warn("No images found for category:", categoryName);
@@ -68,7 +67,6 @@ export async function fetchWikimediaImages(categoryName, limit = 10) {
         return url ? decodeURIComponent(url) : null;
       })
       .filter(Boolean); // Remove null/undefined
-    console.log("Extracted image URLs:", images);
 
     return images;
   } catch (error) {
