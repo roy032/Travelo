@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "../ui/Button";
+import { reportError } from "../../utils/monitoring";
 
 /**
  * Error Boundary component to catch React component errors
@@ -29,8 +30,7 @@ class ErrorBoundary extends React.Component {
       errorInfo,
     });
 
-    // You can also log the error to an error reporting service here
-    // Example: logErrorToService(error, errorInfo);
+    reportError(error, errorInfo);
   }
 
   handleReset = () => {

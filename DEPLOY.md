@@ -33,13 +33,14 @@ The Render blueprint generates a new random `JWT_SECRET`. If you deploy elsewher
    - `MONGODB_URI`: the connection string from step 1.
    - `UPLOADTHING_TOKEN`: the new token from step 1.
    - `CLIENT_URL`: `https://travelo.onrender.com`. If Render gives the service a different URL, update this value to match after the first deploy.
-4. Click **Apply**. The first build takes a few minutes. The service is healthy when `https://<your-service>.onrender.com/api` returns `{"message":"travelo API is running!"}`.
+   - `ADMIN_EMAILS`: the email you will register with, e.g. `you@example.com`. Accounts listed here become admins when they sign in.
+4. Click **Apply**. The first build takes a few minutes. The service is healthy when `https://<your-service>.onrender.com/api/health` returns `{"status":"ok","database":"connected",...}`. It returns 503 when the database is unreachable, and Render uses it as the health check.
 
 The free plan sleeps after 15 minutes without traffic and takes about a minute to wake. Use a paid instance if that matters for launch.
 
 ## 3. Right after the first deploy
 
-1. **Register your own account immediately.** The first account registered becomes the admin.
+1. **Register your own account immediately** with the email in `ADMIN_EMAILS`, then sign out and back in to get admin access. Signing up never grants admin, so if registration says the email already exists, someone else took it: remove it from `ADMIN_EMAILS` and register with another address. You can also promote an existing account from your machine with `MONGODB_URI="..." npm run make-admin -- you@example.com` in `server/`.
 2. Seed the destination explorer from your machine:
 
    ```bash
@@ -48,6 +49,26 @@ The free plan sleeps after 15 minutes without traffic and takes about a minute t
    ```
 
 3. Check login, trip creation, chat (open a trip in two browsers) and a photo upload.
+
+## 4. Monitoring
+
+**Error tracking (Sentry).** Create a free project at [sentry.io](https://sentry.io) (platform: Node.js, plus a second React project if you want browser errors). In the Render service, open **Environment** and add:
+
+- `SENTRY_DSN`: the Node.js project's DSN. Server crashes and 5xx errors are reported.
+- `VITE_SENTRY_DSN`: the React project's DSN. It is baked into the client at build time, so trigger a new deploy after adding it.
+
+Leave both unset to disable error tracking. Cookies, auth headers and IP addresses are never sent.
+
+**Uptime check.** Pick one or both:
+
+- In GitHub, open **Settings > Secrets and variables > Actions > Variables** and add `HEALTHCHECK_URL` = `https://<your-service>.onrender.com/api/health`. The `Uptime check` workflow polls it every 10 minutes, and GitHub emails you when a run fails. It also keeps a free instance from sleeping.
+- Or add an HTTP monitor for the same URL at [uptimerobot.com](https://uptimerobot.com) (free, 5-minute interval, email or SMS alerts).
+
+## Security notes
+
+- Sign-up and sign-in are limited to 10 attempts per IP and per account every 15 minutes, and the API to 300 requests per IP per minute. Override with `AUTH_RATE_LIMIT_MAX` and `API_RATE_LIMIT_MAX`. The limits are kept in memory, so they are per instance.
+- CI runs gitleaks over the full git history on every push and pull request, and fails if a secret is committed. Previously leaked, rotated secrets are listed in `.gitleaksignore`.
+- Dependabot opens weekly pull requests for vulnerable dependencies.
 
 ## Environment variables
 
@@ -59,6 +80,12 @@ The free plan sleeps after 15 minutes without traffic and takes about a minute t
 | `CLIENT_URL` | yes in production | Public URL of the app, e.g. `https://travelo.onrender.com` |
 | `TRUST_PROXY` | behind a proxy | `true` on Render, Railway and Fly.io |
 | `JWT_EXPIRES_IN` | no | Session length, default `1d` |
+| `ADMIN_EMAILS` | to have an admin | Comma-separated emails made admin on sign-in |
+| `SENTRY_DSN` | no | Server error tracking |
+| `VITE_SENTRY_DSN` | no | Browser error tracking (build time) |
+| `SENTRY_TRACES_SAMPLE_RATE` | no | Performance tracing sample rate, default `0` |
+| `AUTH_RATE_LIMIT_MAX` | no | Auth attempts per 15 minutes, default `10` |
+| `API_RATE_LIMIT_MAX` | no | API requests per minute, default `300` |
 | `PORT` | no | Set by the host; defaults to `3000` |
 
 `NODE_ENV=production` and `CLIENT_DIST` are set inside the Docker image.

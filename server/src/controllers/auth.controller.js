@@ -1,10 +1,6 @@
 import { signupSchema, signInSchema } from "#validations/auth.validation.js";
 import { formatValidationError } from "#utils/format.js";
-import {
-  createUser,
-  authenticateUser,
-  getUserCount,
-} from "#services/auth.service.js";
+import { createUser, authenticateUser } from "#services/auth.service.js";
 import { jwtToken } from "#utils/jwt.js";
 import { cookies } from "#utils/cookies.js";
 
@@ -21,16 +17,10 @@ export const signup = async (req, res, next) => {
 
     const { name, email, password } = validationResult.data;
 
-    // Role is never taken from the request body; only the first account becomes admin
-    let verificationStatus = "unverified";
-    let role = "user";
-
-    const getUsers = await getUserCount();
-    if (getUsers === 0) {
-      // First user to register becomes admin
-      role = "admin";
-      verificationStatus = "verified";
-    }
+    // Role is never taken from the request body. New accounts are always
+    // regular users; ADMIN_EMAILS accounts are promoted when they sign in.
+    const verificationStatus = "unverified";
+    const role = "user";
 
     const user = await createUser({
       name,

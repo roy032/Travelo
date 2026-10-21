@@ -90,7 +90,7 @@ npm run dev
 - Client: http://localhost:5173
 - API: http://localhost:3000/api
 
-The first account registered becomes the admin.
+To make yourself an admin, register an account, then either list its email in `ADMIN_EMAILS` in `server/.env` and sign in again, or run `npm run make-admin -- you@example.com` in `server/`.
 
 ## Scripts
 
@@ -98,6 +98,7 @@ Server (`server/`):
 
 - `npm run dev` - start with nodemon
 - `npm start` - start with node
+- `npm run make-admin -- <email>` - promote an existing account to admin
 - `npm test` - run tests (Vitest)
 - `npm run seed:destinations` - seed destination data
 - `npm run lint` / `npm run format` - ESLint / Prettier
