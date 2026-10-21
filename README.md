@@ -8,7 +8,9 @@ A collaborative trip planning application built with React, Node.js/Express, Mon
 - NID/passport upload and admin verification (required to create or join domestic/international trips)
 - Trips: create, edit, invite members, join requests
 - Real-time group chat per trip (Socket.IO) and in-app notifications
-- Day-by-day itinerary with map view
+- Day-by-day itinerary with a map of numbered stops and daily routes (OpenStreetMap, no API key)
+- Calendar export (.ics) of a trip and its activities
+- Opt-in public share links: a read-only trip plan with link previews and a subscribable calendar
 - Shared checklist and packing suggestions
 - Expense logging with receipts and equal split calculation
 - Photo gallery and private/shared notes

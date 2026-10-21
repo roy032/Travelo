@@ -24,6 +24,7 @@ const DestinationDetailPage = lazy(() => import("./pages/DestinationDetailPage")
 const DestinationsPage = lazy(() => import("./pages/DestinationsPage"));
 const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
+const SharedTripPage = lazy(() => import("./pages/SharedTripPage"));
 const JoinRequestsPage = lazy(() => import("./pages/JoinRequestsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -114,6 +115,7 @@ function App() {
                     />
                     {/* PUBLIC ROUTE - No authentication required */}
                     <Route path='/explore' element={<ExplorePage />} />
+                    <Route path='/share/:token' element={<SharedTripPage />} />
                     <Route path='/destinations' element={<DestinationsPage />} />
                     <Route
                       path='/destinations/:destinationId'

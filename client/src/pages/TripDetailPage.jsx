@@ -448,7 +448,7 @@ const TripDetailPage = () => {
 
         {activeTab === "map" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
-            <MapView tripId={tripId} />
+            <MapView tripId={tripId} tripStartDate={trip.startDate} />
           </div>
         )}
 
