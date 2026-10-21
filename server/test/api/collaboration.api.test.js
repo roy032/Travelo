@@ -11,6 +11,7 @@ import {
   disconnectTestDb,
   futureDate,
   signUp,
+  signUpAdmin,
   verifyUser,
 } from '../helpers.js';
 
@@ -31,6 +32,7 @@ describe.skipIf(!TEST_DB_URI)('Trip collaboration API', () => {
     owner = await signUp(app, { name: 'Owner' });
     member = await signUp(app, { name: 'Member' });
     outsider = await signUp(app, { name: 'Outsider' });
+    await verifyUser(owner.user.id);
 
     const trip = await owner.agent.post('/api/trips').send({
       title: 'Sylhet tea gardens',
@@ -209,7 +211,9 @@ describe.skipIf(!TEST_DB_URI)('Trip collaboration API', () => {
       expect(upload.status, JSON.stringify(upload.body)).toBe(201);
       const photo = upload.body.photo;
       expect(photo.caption).toBe('Tea garden at sunrise');
-      expect(photo.url).toMatch(/^\/uploads\/photos\/.+\.png$/);
+      // Photos are re-encoded as WebP before they are stored
+      expect(photo.url).toMatch(/^\/uploads\/photos\/.+\.webp$/);
+      expect(photo.filename).toBe('sunrise.webp');
 
       const filePath = path.join(srcDir, photo.url);
       expect(existsSync(filePath)).toBe(true);
@@ -217,7 +221,7 @@ describe.skipIf(!TEST_DB_URI)('Trip collaboration API', () => {
       // The stored file is served back
       const served = await request(app).get(photo.url);
       expect(served.status).toBe(200);
-      expect(served.headers['content-type']).toMatch(/image\/png/);
+      expect(served.headers['content-type']).toMatch(/image\/webp/);
 
       const list = await owner.agent.get(`/api/trips/${tripId}/photos`);
       expect(list.body.photos).toHaveLength(1);
@@ -331,11 +335,13 @@ describe.skipIf(!TEST_DB_URI)('Trip collaboration API', () => {
         .post(`/api/trips/${tripId}/report`)
         .send({ category: 'fake', description: 'Fake listing for sure' });
 
-      // The first account is the admin
-      const admin = await owner.agent.get('/api/admin/reports');
+      const { agent: adminAgent } = await signUpAdmin(app);
+      const admin = await adminAgent.get('/api/admin/reports');
       expect(admin.status).toBe(200);
       expect(admin.body.reports).toHaveLength(1);
 
+      // Owning the first account no longer makes anyone an admin
+      expect((await owner.agent.get('/api/admin/reports')).status).toBe(403);
       const user = await member.agent.get('/api/admin/reports');
       expect(user.status).toBe(403);
     });
@@ -348,7 +354,7 @@ describe.skipIf(!TEST_DB_URI)('Verification documents API', () => {
   beforeEach(clearDb);
 
   it('stores an uploaded NID privately and lets only admins view it', async () => {
-    const admin = await signUp(app);
+    const admin = await signUpAdmin(app);
     const user = await signUp(app);
 
     const upload = await user.agent
@@ -381,7 +387,7 @@ describe.skipIf(!TEST_DB_URI)('Verification documents API', () => {
   });
 
   it('does not let path tricks escape the documents folder', async () => {
-    const admin = await signUp(app);
+    const admin = await signUpAdmin(app);
     const res = await admin.agent.get('/api/documents/file/..%2F..%2Fapp.js');
     expect(res.status).toBe(404);
   });

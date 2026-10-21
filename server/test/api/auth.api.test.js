@@ -33,13 +33,28 @@ describe.skipIf(!TEST_DB_URI)('Auth API', () => {
     expect(cookie).toMatch(/HttpOnly/i);
   });
 
-  it('makes only the first account an admin', async () => {
+  it('never makes a new account an admin, even the first one', async () => {
     const first = await signUp(app);
-    const second = await signUp(app);
 
-    expect(first.user.role).toBe('admin');
-    expect(second.user.role).toBe('user');
-    expect(second.user.verificationStatus).toBe('unverified');
+    expect(first.user.role).toBe('user');
+    expect(first.user.verificationStatus).toBe('unverified');
+  });
+
+  it('promotes an ADMIN_EMAILS account when it signs in, not when it signs up', async () => {
+    process.env.ADMIN_EMAILS = 'owner@example.com';
+    try {
+      const { agent, user } = await signUp(app, { email: 'Owner@Example.com' });
+      expect(user.role).toBe('user');
+
+      const res = await agent
+        .post('/api/auth/sign-in')
+        .send({ email: 'owner@example.com', password: 'password123' });
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe('admin');
+      expect((await agent.get('/api/admin/reports')).status).toBe(200);
+    } finally {
+      delete process.env.ADMIN_EMAILS;
+    }
   });
 
   it('ignores a role sent in the sign-up body', async () => {

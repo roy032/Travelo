@@ -10,7 +10,7 @@ export const MONGODB_URI =
 
 export default defineConfig({
   testDir: "./tests",
-  // Tests share one database (the first account becomes admin), so run in order
+  // Tests share one database (and the admin account), so run in order
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
@@ -41,6 +41,9 @@ export default defineConfig({
       CLIENT_URL: BASE_URL,
       FILE_STORAGE: "local",
       AUTH_RATE_LIMIT_MAX: "1000",
+      API_RATE_LIMIT_MAX: "10000",
+      // Must match ADMIN.email in tests/support.js
+      ADMIN_EMAILS: "admin@travelo.test",
     },
   },
 });

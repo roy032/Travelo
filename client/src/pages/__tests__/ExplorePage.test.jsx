@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AuthContext } from "../../context/auth-context";
 import userEvent from "@testing-library/user-event";
 import ExplorePage from "../ExplorePage";
-import { makeAuth, renderWithProviders } from "../../test/utils";
+import { FavoritesContext } from "../../context/favorites-context";
+import { makeAuth, makeFavorites, renderWithProviders } from "../../test/utils";
 
 const trips = [
   {
@@ -48,17 +49,28 @@ const trips = [
   },
 ];
 
+// Answers like the server: filtering happens there, not in the page
+const exploreResponse = async (url) => {
+  const params = new URL(url, "http://localhost").searchParams;
+  const type = params.get("destinationType");
+  const search = params.get("search")?.toLowerCase();
+  const matches = trips.filter(
+    (trip) =>
+      (!type || trip.destinationType === type) &&
+      (!search ||
+        `${trip.title} ${trip.description}`.toLowerCase().includes(search))
+  );
+  return new Response(JSON.stringify({ trips: matches }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+const lastRequest = () => new URL(fetch.mock.calls.at(-1)[0], "http://localhost");
+
 describe("ExplorePage", () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockImplementation(async () =>
-        new Response(JSON.stringify({ trips }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        })
-      )
-    );
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(exploreResponse));
   });
 
   it("shows every upcoming trip to signed-out visitors", async () => {
@@ -83,9 +95,11 @@ describe("ExplorePage", () => {
   it("hides the user's trips once the session check finishes", async () => {
     const view = (auth) => (
       <AuthContext.Provider value={auth}>
-        <MemoryRouter>
-          <ExplorePage />
-        </MemoryRouter>
+        <FavoritesContext.Provider value={makeFavorites()}>
+          <MemoryRouter>
+            <ExplorePage />
+          </MemoryRouter>
+        </FavoritesContext.Provider>
       </AuthContext.Provider>
     );
     const { rerender } = render(view(makeAuth({ loading: true })));
@@ -103,22 +117,28 @@ describe("ExplorePage", () => {
     await screen.findByText("Cox's Bazar beach week");
 
     await userEvent.click(screen.getByRole("button", { name: "Mountain" }));
-    expect(screen.getByText("Bandarban hills")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(lastRequest().searchParams.get("destinationType")).toBe("mountain")
+    );
+    expect(await screen.findByText("Bandarban hills")).toBeInTheDocument();
     expect(screen.queryByText("Cox's Bazar beach week")).not.toBeInTheDocument();
+    expect(lastRequest().searchParams.get("destinationType")).toBe("mountain");
 
     await userEvent.click(screen.getByRole("button", { name: "All Types" }));
-    await userEvent.type(
-      screen.getByPlaceholderText("Search trips by title..."),
-      "street"
+    await userEvent.type(screen.getByLabelText("Search trips"), "street");
+    await waitFor(() =>
+      expect(lastRequest().searchParams.get("search")).toBe("street")
     );
-    expect(screen.getByText("Dhaka food tour")).toBeInTheDocument();
+    expect(await screen.findByText("Dhaka food tour")).toBeInTheDocument();
     expect(screen.queryByText("Bandarban hills")).not.toBeInTheDocument();
+    expect(lastRequest().searchParams.get("search")).toBe("street");
+    expect(lastRequest().searchParams.has("destinationType")).toBe(false);
   });
 
   it("shows an error when trips cannot be loaded", async () => {
     fetch.mockImplementation(async () => new Response("oops", { status: 500 }));
     renderWithProviders(<ExplorePage />);
 
-    expect(await screen.findByText(/Failed to fetch trips/)).toBeInTheDocument();
+    expect(await screen.findByText(/Failed to load trips/)).toBeInTheDocument();
   });
 });

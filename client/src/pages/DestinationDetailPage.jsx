@@ -4,7 +4,6 @@ import { destinationApi } from "../services/api.service";
 import Loader from "../components/ui/Loader";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
-import toast from "react-hot-toast";
 import { usePageTitle } from "../hooks/usePageTitle";
 import FavoriteButton from "../components/favorites/FavoriteButton";
 import ReviewsSection from "../components/reviews/ReviewsSection";

@@ -71,7 +71,7 @@ test.describe("Trips, uploads and browsing", () => {
     await expect(visitor.getByText("Cox's Bazar beach days")).toHaveCount(0);
 
     await visitor.getByRole("button", { name: "All Types" }).click();
-    await visitor.getByPlaceholder("Search trips by title...").fill("beach");
+    await visitor.getByLabel("Search trips").fill("beach");
     await expect(visitor.getByText("Cox's Bazar beach days")).toBeVisible();
     await expect(visitor.getByText("Bandarban hill hike")).toHaveCount(0);
     await visitor.close();

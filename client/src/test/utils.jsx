@@ -2,6 +2,7 @@ import { render } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { vi } from "vitest";
 import { AuthContext } from "../context/auth-context";
+import { FavoritesContext } from "../context/favorites-context";
 
 export const makeAuth = (overrides = {}) => ({
   user: null,
@@ -15,10 +16,19 @@ export const makeAuth = (overrides = {}) => ({
   ...overrides,
 });
 
+// Nothing saved; favorites tests render FavoritesProvider themselves
+export const makeFavorites = (overrides = {}) => ({
+  isFavorite: () => false,
+  isPending: () => false,
+  toggleFavorite: vi.fn(),
+  savedCount: 0,
+  ...overrides,
+});
+
 // Shows the current path so tests can assert on navigation
 export const LocationDisplay = () => {
   const location = useLocation();
-  return <div data-testid='location'>{location.pathname}</div>;
+  return <div data-testid="location">{location.pathname}</div>;
 };
 
 /**
@@ -27,18 +37,28 @@ export const LocationDisplay = () => {
  */
 export const renderWithProviders = (
   ui,
-  { auth = makeAuth(), route = "/", path = "*", initialState } = {}
+  {
+    auth = makeAuth(),
+    favorites = makeFavorites(),
+    route = "/",
+    path = "*",
+    initialState,
+  } = {},
 ) => {
   const result = render(
     <AuthContext.Provider value={auth}>
-      <MemoryRouter initialEntries={[{ pathname: route, state: initialState }]}>
-        <Routes>
-          <Route path={path} element={ui} />
-          <Route path='*' element={null} />
-        </Routes>
-        <LocationDisplay />
-      </MemoryRouter>
-    </AuthContext.Provider>
+      <FavoritesContext.Provider value={favorites}>
+        <MemoryRouter
+          initialEntries={[{ pathname: route, state: initialState }]}
+        >
+          <Routes>
+            <Route path={path} element={ui} />
+            <Route path="*" element={null} />
+          </Routes>
+          <LocationDisplay />
+        </MemoryRouter>
+      </FavoritesContext.Provider>
+    </AuthContext.Provider>,
   );
   return { ...result, auth };
 };

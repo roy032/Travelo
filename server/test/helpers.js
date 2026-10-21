@@ -53,6 +53,29 @@ export const signUp = async (app, overrides = {}) => {
 };
 
 /**
+ * Sign up an account listed in ADMIN_EMAILS and sign it in, which is when the
+ * server promotes it to admin
+ */
+export const signUpAdmin = async (app, overrides = {}) => {
+  const email = `admin-${randomUUID().slice(0, 8)}@example.com`;
+  const previous = process.env.ADMIN_EMAILS;
+  process.env.ADMIN_EMAILS = email;
+  try {
+    const admin = await signUp(app, { email, ...overrides });
+    const res = await admin.agent
+      .post('/api/auth/sign-in')
+      .send({ email, password: admin.credentials.password });
+    if (res.status !== 200) {
+      throw new Error(`sign-in failed: ${res.status} ${JSON.stringify(res.body)}`);
+    }
+    return { ...admin, user: res.body.user };
+  } finally {
+    if (previous === undefined) delete process.env.ADMIN_EMAILS;
+    else process.env.ADMIN_EMAILS = previous;
+  }
+};
+
+/**
  * Mark a user verified for both trip categories (normally done by an admin)
  */
 export const verifyUser = async (userId) => {

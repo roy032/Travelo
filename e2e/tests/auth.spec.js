@@ -15,7 +15,7 @@ test.describe("Sign up, log in and log out", () => {
 
     await expect(page.getByRole("heading", { name: "My Trips" })).toBeVisible();
     await expect(page.getByText("No trips yet")).toBeVisible();
-    // Only the first account is an admin
+    // Only ADMIN_EMAILS accounts are admins
     await expect(page.getByRole("link", { name: "Admin" })).toHaveCount(0);
   });
 

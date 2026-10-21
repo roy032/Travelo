@@ -38,6 +38,7 @@ describe.skipIf(!TEST_DB_URI)('Trips API', () => {
     await clearDb();
     owner = await signUp(app, { name: 'Owner' });
     other = await signUp(app, { name: 'Other' });
+    await verifyUser(owner.user.id);
     await verifyUser(other.user.id);
   });
 
