@@ -4,7 +4,9 @@ import { destinationApi } from "../services/api.service";
 import Loader from "../components/ui/Loader";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
-import toast from "react-hot-toast";
+import FavoriteButton from "../components/favorites/FavoriteButton";
+import ReviewsSection from "../components/reviews/ReviewsSection";
+import { StarDisplay } from "../components/reviews/StarRating";
 
 /**
  * DestinationDetailPage displays full destination information with multiple photos
@@ -17,19 +19,30 @@ const DestinationDetailPage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
-    fetchDestination();
+    let cancelled = false;
+    destinationApi
+      .getDestinationById(destinationId)
+      .then((data) => {
+        if (!cancelled) setDestination(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching destination:", error);
+        if (!cancelled) setDestination(null);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSelectedImageIndex(0);
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [destinationId]);
 
-  const fetchDestination = async () => {
-    try {
-      setLoading(true);
-      const data = await destinationApi.getDestinationById(destinationId);
-      setDestination(data);
-    } catch (error) {
-      console.error("Error fetching destination:", error);
-      toast.error("Failed to load destination details");
-    } finally {
-      setLoading(false);
+  const handleRatingChange = (rating) => {
+    if (rating) {
+      setDestination((prev) => (prev ? { ...prev, ...rating } : prev));
     }
   };
 
@@ -135,9 +148,32 @@ const DestinationDetailPage = () => {
           <div className='p-8'>
             {/* Header */}
             <div className='mb-6'>
-              <h1 className='text-4xl font-bold text-gray-900 mb-2'>
-                {destination.name}
-              </h1>
+              <div className='flex items-start justify-between gap-4'>
+                <h1 className='text-4xl font-bold text-gray-900 mb-2'>
+                  {destination.name}
+                </h1>
+                <FavoriteButton
+                  itemType='destination'
+                  itemId={String(destination.id)}
+                  label={destination.name}
+                  className='shrink-0 border border-gray-200'
+                />
+              </div>
+              <a
+                href='#reviews-heading'
+                className='inline-flex items-center gap-2 mb-2 text-sm text-gray-700 hover:text-blue-600'
+              >
+                <StarDisplay value={destination.ratingAverage || 0} />
+                {destination.ratingCount > 0 ? (
+                  <span>
+                    {destination.ratingAverage.toFixed(1)} ·{" "}
+                    {destination.ratingCount}{" "}
+                    {destination.ratingCount === 1 ? "review" : "reviews"}
+                  </span>
+                ) : (
+                  <span>No reviews yet</span>
+                )}
+              </a>
               {destination.country && (
                 <p className='text-lg text-gray-600 flex items-center gap-2'>
                   <svg
@@ -228,6 +264,11 @@ const DestinationDetailPage = () => {
                 </ul>
               </div>
             )}
+
+            <ReviewsSection
+              destinationId={destinationId}
+              onRatingChange={handleRatingChange}
+            />
           </div>
         </div>
       </div>

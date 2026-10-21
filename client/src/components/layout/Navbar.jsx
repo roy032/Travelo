@@ -58,6 +58,12 @@ const Navbar = () => {
             {/* Public links and Auth buttons */}
             <div className='flex items-center gap-4'>
               <Link
+                to='/destinations'
+                className='hidden sm:inline px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+              >
+                Destinations
+              </Link>
+              <Link
                 to='/explore'
                 className='px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
               >
@@ -115,6 +121,20 @@ const Navbar = () => {
                 role='menuitem'
               >
                 Explore
+              </Link>
+              <Link
+                to='/destinations'
+                className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+                role='menuitem'
+              >
+                Destinations
+              </Link>
+              <Link
+                to='/favorites'
+                className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+                role='menuitem'
+              >
+                Saved
               </Link>
               <Link
                 to='/join-requests'
@@ -236,6 +256,22 @@ const Navbar = () => {
               role='menuitem'
             >
               Explore
+            </Link>
+            <Link
+              to='/destinations'
+              onClick={() => setIsMobileMenuOpen(false)}
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
+              role='menuitem'
+            >
+              Destinations
+            </Link>
+            <Link
+              to='/favorites'
+              onClick={() => setIsMobileMenuOpen(false)}
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
+              role='menuitem'
+            >
+              Saved
             </Link>
             <Link
               to='/join-requests'

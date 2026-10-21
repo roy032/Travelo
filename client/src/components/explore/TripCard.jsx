@@ -8,11 +8,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { tripApi } from "../../services/api.service";
 import toast from "react-hot-toast";
 import ReportButton from "../report/ReportButton";
+import FavoriteButton from "../favorites/FavoriteButton";
 
 /**
  * TripCard - Displays a single trip in the public explore view
@@ -22,6 +23,12 @@ const TripCard = ({ trip }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requesting, setRequesting] = useState(false);
+  // Saved trips can include ones the user has since joined or that have started
+  const isMember = Boolean(
+    user?.id &&
+      (trip.ownerId === user.id || trip.members?.includes(user.id))
+  );
+  const hasStarted = new Date(trip.startDate) <= new Date();
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -75,9 +82,17 @@ const TripCard = ({ trip }) => {
               </p>
             )}
           </div>
-          <span className='text-4xl ml-4'>
-            {destinationTypeIcons[trip.destinationType] || "🗺️"}
-          </span>
+          <div className='flex flex-col items-center gap-3 ml-4'>
+            <span className='text-4xl' aria-hidden='true'>
+              {destinationTypeIcons[trip.destinationType] || "🗺️"}
+            </span>
+            <FavoriteButton
+              itemType='trip'
+              itemId={trip.id}
+              label={trip.title}
+              size='sm'
+            />
+          </div>
         </div>
       </div>
 
@@ -91,7 +106,7 @@ const TripCard = ({ trip }) => {
               {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
             </span>
             <span className='text-gray-500 ml-2'>
-              ({getDurationDays(trip.startDate, trip.endDate)} days)
+              ({trip.durationDays ?? getDurationDays(trip.startDate, trip.endDate)} days)
             </span>
           </div>
         </div>
@@ -109,43 +124,58 @@ const TripCard = ({ trip }) => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className='flex items-center space-x-6 pt-2 border-t border-gray-200'>
-          <div className='flex items-center space-x-2 text-sm text-gray-600'>
-            <Activity className='w-4 h-4 text-green-500' />
-            <span>
-              {trip.activityCount}{" "}
-              {trip.activityCount === 1 ? "activity" : "activities"}
-            </span>
+        {/* Stats (not included for saved trips) */}
+        {trip.activityCount !== undefined && (
+          <div className='flex items-center space-x-6 pt-2 border-t border-gray-200'>
+            <div className='flex items-center space-x-2 text-sm text-gray-600'>
+              <Activity className='w-4 h-4 text-green-500' />
+              <span>
+                {trip.activityCount}{" "}
+                {trip.activityCount === 1 ? "activity" : "activities"}
+              </span>
+            </div>
+            <div className='flex items-center space-x-2 text-sm text-gray-600'>
+              <ListChecks className='w-4 h-4 text-orange-500' />
+              <span>
+                {trip.checklistCount}{" "}
+                {trip.checklistCount === 1 ? "item" : "items"}
+              </span>
+            </div>
           </div>
-          <div className='flex items-center space-x-2 text-sm text-gray-600'>
-            <ListChecks className='w-4 h-4 text-orange-500' />
-            <span>
-              {trip.checklistCount}{" "}
-              {trip.checklistCount === 1 ? "item" : "items"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Join Request Button */}
         <div className='pt-4 border-t border-gray-200 space-y-2'>
-          <button
-            onClick={handleJoinRequest}
-            disabled={requesting}
-            className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2'
-          >
-            {requesting ? (
-              <>
-                <Loader2 className='w-5 h-5 animate-spin' />
-                <span>Sending Request...</span>
-              </>
-            ) : (
-              <>
-                <UserPlus className='w-5 h-5' />
-                <span>{user ? "Request to Join" : "Log in to Join"}</span>
-              </>
-            )}
-          </button>
+          {isMember ? (
+            <Link
+              to={`/trips/${trip.id}`}
+              className='w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center'
+            >
+              Open Trip
+            </Link>
+          ) : hasStarted ? (
+            <p className='w-full text-center text-sm text-gray-500 py-3'>
+              This trip has already started
+            </p>
+          ) : (
+            <button
+              onClick={handleJoinRequest}
+              disabled={requesting}
+              className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2'
+            >
+              {requesting ? (
+                <>
+                  <Loader2 className='w-5 h-5 animate-spin' />
+                  <span>Sending Request...</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className='w-5 h-5' />
+                  <span>{user ? "Request to Join" : "Log in to Join"}</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Report Button */}
           <div className='flex justify-center'>
@@ -171,8 +201,9 @@ TripCard.propTypes = {
     endDate: PropTypes.string.isRequired,
     destinationType: PropTypes.string,
     tripCategory: PropTypes.string,
-    activities: PropTypes.array,
-    checklist: PropTypes.array,
+    durationDays: PropTypes.number,
+    ownerId: PropTypes.string,
+    members: PropTypes.arrayOf(PropTypes.string),
     activityCount: PropTypes.number,
     checklistCount: PropTypes.number,
   }).isRequired,
