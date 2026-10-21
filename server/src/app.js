@@ -2,8 +2,9 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import path from "path";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import authRoutes from "#routes/auth.route.js";
 import documentRoutes from "#routes/document.route.js";
@@ -21,6 +22,8 @@ import packingRoutes from "#routes/packing.route.js";
 import profileRoutes from "#routes/profile.route.js";
 import notificationRoutes from "#routes/notification.route.js";
 import invitationRoutes from "#routes/invitation.route.js";
+import seoRoutes from "#routes/seo.route.js";
+import { getSiteUrl, renderIndexHtml } from "#utils/seo.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -56,14 +59,15 @@ app.use(
         ],
       },
     },
-  })
+  }),
 );
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
-  })
+  }),
 );
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -72,10 +76,23 @@ app.use(cookieParser());
 // so the strict SameSite auth cookie is sent with every request.
 const clientDist = process.env.CLIENT_DIST;
 const serveClient = Boolean(
-  clientDist && existsSync(path.join(clientDist, "index.html"))
+  clientDist && existsSync(path.join(clientDist, "index.html")),
 );
 if (serveClient) {
-  app.use(express.static(clientDist));
+  app.use(
+    express.static(clientDist, {
+      // index.html is rendered per page by the fallback route below
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          // Vite build output has content hashes in its file names
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else if (path.basename(filePath) === "sw.js") {
+          res.setHeader("Cache-Control", "no-cache");
+        }
+      },
+    }),
+  );
 }
 
 // Serve legacy locally stored files. Identity documents are never served publicly.
@@ -84,14 +101,18 @@ app.use("/uploads/documents", (req, res) => {
 });
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Health check routes
-app.get("/", (req, res) => {
-  res.status(200).send("Hello from travelo!");
-});
+// Health check routes ("/" is the landing page when the client is served)
+if (!serveClient) {
+  app.get("/", (req, res) => {
+    res.status(200).send("Hello from travelo!");
+  });
+}
 
 app.get("/api", (req, res) => {
   res.status(200).json({ message: "travelo API is running!" });
 });
+
+app.use(seoRoutes);
 
 // API routes
 app.use("/api/auth", authRoutes);
@@ -115,8 +136,15 @@ app.use("/api", invitationRoutes);
 
 // Client-side routes fall back to index.html
 if (serveClient) {
+  const indexTemplate = readFileSync(
+    path.join(clientDist, "index.html"),
+    "utf8",
+  );
   app.get(/^\/(?!api\/|api$|socket\.io\/|uploads\/|assets\/).*/, (req, res) => {
-    res.sendFile(path.join(clientDist, "index.html"));
+    res
+      .type("html")
+      .set("Cache-Control", "no-cache")
+      .send(renderIndexHtml(indexTemplate, req.path, getSiteUrl(req)));
   });
 }
 
