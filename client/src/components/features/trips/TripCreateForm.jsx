@@ -166,13 +166,9 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
     setLoading(true);
 
     try {
-      const tripData = {
-        ...formData,
-        // Only include destinationType if it's selected
-        ...(formData.destinationType && {
-          destinationType: formData.destinationType,
-        }),
-      };
+      // Only include destinationType if it's selected; the API rejects ""
+      const { destinationType, ...rest } = formData;
+      const tripData = destinationType ? { ...rest, destinationType } : rest;
 
       const newTrip = await tripApi.createTrip(tripData);
       toast.success("Trip created successfully!");

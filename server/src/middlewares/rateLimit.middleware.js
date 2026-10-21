@@ -43,8 +43,9 @@ export const createRateLimiter = ({
 };
 
 // Brute-force protection for credential endpoints
+// (AUTH_RATE_LIMIT_MAX raises the limit for test runs that sign in many times)
 export const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 10,
   message: "Too many authentication attempts, please try again later",
 });

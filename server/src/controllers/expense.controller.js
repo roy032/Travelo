@@ -10,7 +10,7 @@ import {
   getExpensesByTrip,
 } from "#services/expense.service.js";
 import { calculateSplits } from "#services/split.service.js";
-import { utapi } from "#config/uploadthing.config.js";
+import { storeFile } from "#config/uploadthing.config.js";
 
 /**
  * Create a new expense
@@ -49,21 +49,13 @@ export const createExpenseController = async (req, res, next) => {
     // Add receipt information if file was uploaded
     if (req.file) {
       try {
-        // Upload file to UploadThing
-        const uploadedFile = await utapi.uploadFiles(
-          new File([req.file.buffer], req.file.originalname, {
-            type: req.file.mimetype,
-          })
-        );
-
-        if (uploadedFile.data) {
-          expenseData.receipt = {
-            filename: uploadedFile.data.name,
-            key: uploadedFile.data.key,
-            url: uploadedFile.data.url,
-            uploadedAt: new Date(),
-          };
-        }
+        const stored = await storeFile(req.file, { folder: "receipts" });
+        expenseData.receipt = {
+          filename: stored.name,
+          key: stored.key,
+          url: stored.url,
+          uploadedAt: new Date(),
+        };
       } catch (uploadError) {
         console.error("Receipt upload error:", uploadError);
         return res.status(500).json({
@@ -125,21 +117,13 @@ export const updateExpenseController = async (req, res, next) => {
     // Add receipt information if file was uploaded
     if (req.file) {
       try {
-        // Upload file to UploadThing
-        const uploadedFile = await utapi.uploadFiles(
-          new File([req.file.buffer], req.file.originalname, {
-            type: req.file.mimetype,
-          })
-        );
-
-        if (uploadedFile.data) {
-          updateData.receipt = {
-            filename: uploadedFile.data.name,
-            key: uploadedFile.data.key,
-            url: uploadedFile.data.url,
-            uploadedAt: new Date(),
-          };
-        }
+        const stored = await storeFile(req.file, { folder: "receipts" });
+        updateData.receipt = {
+          filename: stored.name,
+          key: stored.key,
+          url: stored.url,
+          uploadedAt: new Date(),
+        };
       } catch (uploadError) {
         console.error("Receipt upload error:", uploadError);
         return res.status(500).json({

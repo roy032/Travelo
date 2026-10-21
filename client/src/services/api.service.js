@@ -50,7 +50,11 @@ async function fetchWithAuth(endpoint, options = {}) {
 
     // Handle error responses
     if (!response.ok) {
-      const errorMessage = data?.message || data?.error || "An error occurred";
+      // Validation failures put the readable reason in `details`
+      const details =
+        typeof data?.details === "string" ? data.details : undefined;
+      const errorMessage =
+        data?.message || details || data?.error || "An error occurred";
       throw new ApiError(errorMessage, response.status, data);
     }
 
@@ -113,7 +117,6 @@ function handleApiError(error) {
 export const authApi = {
   register: async (userData) => {
     try {
-      console.log("register api hit");
       return await fetchWithAuth("/auth/sign-up", {
         method: "POST",
         body: JSON.stringify(userData),
@@ -136,7 +139,7 @@ export const authApi = {
 
   logout: async () => {
     try {
-      return await fetchWithAuth("/auth/signout", {
+      return await fetchWithAuth("/auth/sign-out", {
         method: "POST",
       });
     } catch (error) {
@@ -150,11 +153,14 @@ export const authApi = {
 // ============================================================================
 
 export const profileApi = {
-  getProfile: async () => {
+  // silent: skip the error toast (used for the session check on page load,
+  // where a 401 just means the visitor is signed out)
+  getProfile: async ({ silent = false } = {}) => {
     try {
       const response = await fetchWithAuth("/profile");
       return response;
     } catch (error) {
+      if (silent) throw error;
       return handleApiError(error);
     }
   },

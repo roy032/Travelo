@@ -1,5 +1,5 @@
 import { uploadVerificationDocument } from "#services/document.service.js";
-import { UTApi } from "uploadthing/server";
+import { storeFile } from "#config/uploadthing.config.js";
 
 /**
  * Upload verification document (NID/Passport)
@@ -29,46 +29,19 @@ export const uploadDocument = async (req, res, next) => {
       });
     }
 
-    const utapi = new UTApi({ token: process.env.UPLOADTHING_TOKEN });
-
-    // Convert Buffer → File (proper format for UploadThing)
-    const file = new File([req.file.buffer], req.file.originalname, {
-      type: req.file.mimetype,
-    });
-
-    let uploadResult;
+    let fileInfo;
     try {
-      uploadResult = await utapi.uploadFiles([file], {
+      fileInfo = await storeFile(req.file, {
+        folder: "documents",
         metadata: { userId: req.user.id, documentType },
-        contentDisposition: "inline",
       });
     } catch (err) {
-      console.error("UploadThing API error:", err);
+      console.error("Document upload error:", err);
       return res.status(500).json({
         error: "Upload failed",
-        message: "Failed to upload file to UploadThing",
+        message: "Failed to upload document",
       });
     }
-
-    // UploadThing returns array when passed array, get first result
-    const result = Array.isArray(uploadResult) ? uploadResult[0] : uploadResult;
-
-    // Check for errors
-    if (result?.error || !result?.data) {
-      console.error("UploadThing error:", result?.error?.message);
-      return res.status(500).json({
-        error: "Upload failed",
-        message:
-          result?.error?.message || "Failed to upload file to UploadThing",
-      });
-    }
-
-    const fileInfo = {
-      key: result.data.key,
-      url: result.data.url,
-      name: result.data.name,
-      size: result.data.size,
-    };
 
     const updatedUser = await uploadVerificationDocument(
       req.user.id,

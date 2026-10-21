@@ -101,7 +101,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // Create indexes
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ verificationStatus: 1 });
 
 // Pre-save hook for password hashing

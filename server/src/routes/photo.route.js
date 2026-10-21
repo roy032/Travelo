@@ -33,6 +33,10 @@ router.post(
 );
 
 // Delete a photo (uploader only - enforced in controller)
-router.delete("/trips/:tripId/photos/:photoId", deletePhotoController);
+router.delete(
+  "/trips/:tripId/photos/:photoId",
+  isTripMember,
+  deletePhotoController
+);
 
 export default router;
