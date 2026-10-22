@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# A new push replaces the run still going for the same branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   secret-scan:
     runs-on: ubuntu-latest
@@ -66,6 +71,8 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    # A hung apt mirror once kept the browser install running for hours
+    timeout-minutes: 30
     needs: [server, client]
     services:
       mongo:
@@ -85,6 +92,7 @@ jobs:
         working-directory: e2e
       - run: npx playwright install --with-deps chromium
         working-directory: e2e
+        timeout-minutes: 10
       - run: npx playwright test
         working-directory: e2e
         env:
