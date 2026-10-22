@@ -89,6 +89,6 @@ export async function createTrip(page, { title, destinationType, days = 30 }) {
 
 export async function logOut(page) {
   await page.getByRole("button", { name: /^Account menu/ }).click();
-  await page.getByRole("button", { name: "Logout" }).click();
+  await page.getByRole("button", { name: "Logout", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
 }

@@ -29,7 +29,10 @@ for (const colorScheme of ["light", "dark"]) {
     test.use({ colorScheme });
 
     test("public pages", async ({ page }) => {
-      for (const path of ["/", "/login", "/register", "/explore", "/destinations", "/no-such-page"]) {
+      for (const path of [
+        "/", "/login", "/register", "/forgot-password", "/reset-password?token=e2e",
+        "/explore", "/destinations", "/no-such-page",
+      ]) {
         await page.goto(path);
         await expect(page.locator("html")).toHaveClass(
           colorScheme === "dark" ? /dark/ : /^(?!.*dark)/
@@ -54,6 +57,7 @@ for (const colorScheme of ["light", "dark"]) {
       await page.goto("/trips");
       await page.getByText(`Sylhet tea trail ${colorScheme}`).click();
       const tabs = page.getByRole("tab");
+      await expect(tabs.first()).toBeVisible();
       const count = await tabs.count();
       expect(count).toBeGreaterThan(5);
       for (let index = 0; index < count; index += 1) {

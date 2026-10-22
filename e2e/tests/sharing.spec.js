@@ -41,7 +41,7 @@ test.describe("Trip map, calendar and share links", () => {
 
     // Map tab: numbered stops in visiting order
     await page.reload();
-    await page.getByRole("button", { name: "Map", exact: true }).click();
+    await page.getByRole("tab", { name: "Map" }).click();
     await expect(page.locator('.leaflet-marker-icon[title="1. Ratargul swamp forest"]')).toBeVisible();
     await expect(page.locator('.leaflet-marker-icon[title="2. Jaflong stone collection"]')).toBeVisible();
 

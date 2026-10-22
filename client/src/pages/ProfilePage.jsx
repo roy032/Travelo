@@ -328,24 +328,24 @@ const ProfilePage = () => {
           <Card>
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
-                <Bell className='w-5 h-5 text-gray-700' aria-hidden='true' />
-                <h2 className='text-xl font-semibold text-gray-900'>
+                <Bell className='w-5 h-5 text-gray-700 dark:text-gray-300' aria-hidden='true' />
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                   Email Notifications
                 </h2>
               </div>
               <label className='flex items-start gap-3 cursor-pointer'>
                 <input
                   type='checkbox'
-                  className='mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                  className='mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400'
                   checked={user?.emailNotifications !== false}
                   onChange={handleEmailNotificationsChange}
                   disabled={notificationsSaving}
                 />
                 <span>
-                  <span className='block font-medium text-gray-900'>
+                  <span className='block font-medium text-gray-900 dark:text-gray-100'>
                     Email me about my trips
                   </span>
-                  <span className='block text-sm text-gray-600'>
+                  <span className='block text-sm text-gray-600 dark:text-gray-400'>
                     Join requests, accepted or declined requests and trip
                     invitations. Password reset emails are always sent.
                     {user?.emailVerified === false &&

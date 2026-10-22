@@ -124,7 +124,7 @@ const LoginPage = () => {
             <div className='-mt-3 text-right text-sm'>
               <Link
                 to='/forgot-password'
-                className='font-medium text-blue-600 hover:text-blue-500'
+                className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
               >
                 Forgot your password?
               </Link>
