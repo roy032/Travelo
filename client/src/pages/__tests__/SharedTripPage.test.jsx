@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import SharedTripPage from "../SharedTripPage";
 import { makeAuth, renderWithProviders } from "../../test/utils";
 
@@ -58,7 +58,7 @@ describe("SharedTripPage", () => {
     expect(screen.getByText("3 travellers")).toBeInTheDocument();
     expect(screen.getByText("Ratargul swamp forest")).toBeInTheDocument();
     expect(screen.getAllByTestId("marker")).toHaveLength(1);
-    expect(document.title).toBe("Sylhet tea gardens | Travelo");
+    await waitFor(() => expect(document.title).toBe("Sylhet tea gardens | Travelo"));
 
     const calendar = screen.getByRole("link", { name: /Add to calendar/ });
     expect(calendar.getAttribute("href")).toMatch(

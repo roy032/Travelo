@@ -1,4 +1,5 @@
 import { formatValidationError } from '#utils/format.js';
+import { recordServerError } from '#services/analytics.service.js';
 
 /**
  * Centralized error handling middleware
@@ -15,6 +16,7 @@ export const errorHandler = (err, req, res, next) => {
 
   // Handle operational errors (known errors)
   if (err.isOperational) {
+    if (err.statusCode >= 500) recordServerError(err, req, err.statusCode);
     return res.status(err.statusCode).json({
       error: err.error || 'Error',
       message: err.message,
@@ -101,6 +103,7 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Handle unknown/unexpected errors (500)
+  recordServerError(err, req, 500);
   res.status(500).json({
     error: 'Internal server error',
     message:
