@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
 import Trip from "#models/trip.model.js";
 import { createMessage } from "#services/message.service.js";
+import { registerTripLiveHandlers, setTripLiveServer } from "./tripLive.js";
 
 let io;
 
@@ -47,9 +48,14 @@ export const initializeSocket = (httpServer) => {
     }
   });
 
+  setTripLiveServer(io);
+
   // Connection handler
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.userId}`);
+
+    // Presence and change notifications for the trip page
+    registerTripLiveHandlers(socket);
 
     // Handle joining a trip chatroom
     // Payloads come from the client: never destructure them in the parameter

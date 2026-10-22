@@ -28,6 +28,8 @@ import {
   permissionsPolicy,
 } from "#middlewares/security.middleware.js";
 import { apiRateLimiter } from "#middlewares/rateLimit.middleware.js";
+import { tripLiveUpdates } from "#src/socket/tripLive.js";
+import aiPlannerRoutes from "#routes/aiPlanner.route.js";
 import favoriteRoutes from "#routes/favorite.route.js";
 import shareRoutes from "#routes/share.route.js";
 import seoRoutes from "#routes/seo.route.js";
@@ -118,6 +120,9 @@ app.use("/api/health", healthRoutes);
 
 app.use("/api", apiRateLimiter);
 
+// Tells other members viewing a trip when one of its sections changes
+app.use("/api", tripLiveUpdates);
+
 app.use(seoRoutes);
 
 // API routes
@@ -132,6 +137,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/trips", tripRoutes); // Must be first to catch /explore before authenticated routes
 app.use("/api/trips", reportRoutes); // Must be before other trip routes to match /trips/:tripId/report
 app.use("/api/trips", messageRoutes); // Chat endpoints
+app.use("/api", aiPlannerRoutes);
 app.use("/api", activityRoutes);
 app.use("/api", checklistRoutes);
 app.use("/api", noteRoutes);
