@@ -18,6 +18,28 @@ const expenseSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
+    // The amount in the trip's base currency at the time it was recorded
+    convertedAmount: {
+      type: Number,
+    },
+    baseCurrency: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
+    exchangeRate: {
+      type: Number,
+    },
+    rateSource: {
+      type: String,
+    },
+    // Members sharing this expense; empty means every trip member
+    splitBetween: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     category: {
       type: String,
       required: [true, "Category is required"],

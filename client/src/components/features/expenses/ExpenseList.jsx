@@ -8,12 +8,16 @@ import { EmptyExpenses } from "../../ui/EmptyState";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { successMessages } from "../../../utils/toast.config";
+import { DEFAULT_CURRENCY, formatMoney } from "../../../utils/currency";
 
 /**
  * ExpenseList component - displays all expenses for a trip in a table layout
  */
 const ExpenseList = ({
   tripId,
+  baseCurrency = DEFAULT_CURRENCY,
+  members = [],
+  onChange,
   onAddExpense,
   onViewReceipt,
   refreshKey = 0,
@@ -47,17 +51,22 @@ const ExpenseList = ({
       await expenseApi.deleteExpense(tripId, expenseId);
       toast.success(successMessages.deleted);
       fetchExpenses();
+      onChange?.();
     } catch (error) {
       console.error("Error deleting expense:", error);
       toast.error("Failed to delete expense");
     }
   };
 
-  const calculateTotal = () => {
-    return expenses
-      .reduce((sum, expense) => sum + expense.amount, 0)
-      .toFixed(2);
-  };
+  // In the trip currency; older expenses have no convertedAmount
+  const calculateTotal = () =>
+    formatMoney(
+      expenses.reduce(
+        (sum, expense) => sum + (expense.convertedAmount ?? expense.amount),
+        0
+      ),
+      baseCurrency
+    );
 
   if (loading) {
     return (
@@ -81,7 +90,7 @@ const ExpenseList = ({
           <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Expenses</h2>
           <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
             {expenses.length} {expenses.length === 1 ? "expense" : "expenses"} •
-            Total: ৳{calculateTotal()}
+            Total: {calculateTotal()}
           </p>
         </div>
         <Button onClick={() => onAddExpense()} variant='primary' size='md'>
@@ -98,6 +107,7 @@ const ExpenseList = ({
             <ExpenseCard
               key={expense.id}
               expense={expense}
+              members={members}
               onDelete={() => handleDelete(expense.id)}
               onViewReceipt={onViewReceipt}
             />

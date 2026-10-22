@@ -45,6 +45,8 @@ export const createTripController = async (req, res, next) => {
       endDate,
       destinationType,
       tripCategory,
+      baseCurrency,
+      budget,
     } = validationResult.data;
 
     // Fetch user to check trip-specific verification
@@ -88,6 +90,8 @@ export const createTripController = async (req, res, next) => {
       endDate: new Date(endDate),
       destinationType,
       tripCategory,
+      baseCurrency,
+      budget,
       owner: req.user.id, // From authentication middleware
     };
 

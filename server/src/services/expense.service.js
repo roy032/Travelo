@@ -3,6 +3,70 @@ import Trip from '#models/trip.model.js';
 import Notification from '#models/notification.model.js';
 import fs from 'fs/promises';
 import { deleteFiles } from '#config/uploadthing.config.js';
+import { convertAmount } from '#services/currency.service.js';
+
+/**
+ * Shape an expense document for API responses
+ */
+const toExpenseResponse = (expense) => ({
+  id: expense._id,
+  trip: expense.trip,
+  amount: expense.amount,
+  currency: expense.currency,
+  // Expenses saved before currency support were recorded in the base currency
+  convertedAmount: expense.convertedAmount ?? expense.amount,
+  baseCurrency: expense.baseCurrency || expense.currency,
+  exchangeRate: expense.exchangeRate ?? 1,
+  rateSource: expense.rateSource,
+  splitBetween: expense.splitBetween || [],
+  category: expense.category,
+  description: expense.description,
+  payer: expense.payer,
+  receipt: expense.receipt,
+  creator: expense.creator,
+  createdAt: expense.createdAt,
+  updatedAt: expense.updatedAt,
+});
+
+/**
+ * Convert an expense amount into the trip's base currency
+ */
+const conversionFields = async (amount, currency, baseCurrency) => {
+  const result = await convertAmount(amount, currency, baseCurrency);
+  return {
+    convertedAmount: result.converted,
+    baseCurrency: result.to,
+    exchangeRate: result.rate,
+    rateSource: result.approximate ? `${result.source} (approximate)` : result.source,
+  };
+};
+
+/**
+ * Check that every member in splitBetween belongs to the trip
+ */
+const assertSplitMembers = (tripDoc, splitBetween) => {
+  if (!splitBetween) return;
+  const memberIds = new Set(tripDoc.members.map((id) => id.toString()));
+  if (splitBetween.some((id) => !memberIds.has(id.toString()))) {
+    throw new Error('Split members must be members of the trip');
+  }
+};
+
+/**
+ * Re-convert every expense of a trip after its base currency changes.
+ * Uses current rates, since historical rates are not stored per currency pair.
+ */
+export const reconvertTripExpenses = async (tripId, baseCurrency) => {
+  const expenses = await Expense.find({ trip: tripId });
+  for (const expense of expenses) {
+    Object.assign(
+      expense,
+      await conversionFields(expense.amount, expense.currency || 'BDT', baseCurrency)
+    );
+    await expense.save();
+  }
+  return expenses.length;
+};
 
 /**
  * Load an expense and verify it belongs to the given trip and that the user
@@ -50,7 +114,8 @@ const removeReceipt = async (receipt) => {
  * @param {Object} expenseData - Expense creation data
  * @param {string} expenseData.trip - Trip ID
  * @param {number} expenseData.amount - Expense amount
- * @param {string} expenseData.currency - Currency code (default: USD)
+ * @param {string} expenseData.currency - Currency code (default: the trip's base currency)
+ * @param {Array<string>} expenseData.splitBetween - Members sharing it (default: everyone)
  * @param {string} expenseData.category - Expense category
  * @param {string} expenseData.description - Expense description
  * @param {string} expenseData.payer - User ID of the payer
@@ -70,6 +135,7 @@ export const createExpense = async (expenseData) => {
       payer,
       receipt,
       creator,
+      splitBetween,
     } = expenseData;
 
     // Verify trip exists and payer is a member
@@ -88,11 +154,18 @@ export const createExpense = async (expenseData) => {
       throw new Error('Payer must be a member of the trip');
     }
 
+    assertSplitMembers(tripDoc, splitBetween);
+
+    const tripCurrency = tripDoc.baseCurrency || 'BDT';
+    const expenseCurrency = currency || tripCurrency;
+
     // Create new expense
     const expense = new Expense({
       trip,
       amount,
-      currency,
+      currency: expenseCurrency,
+      ...(await conversionFields(amount, expenseCurrency, tripCurrency)),
+      splitBetween: splitBetween || [],
       category,
       description,
       payer,
@@ -113,7 +186,7 @@ export const createExpense = async (expenseData) => {
         user: member,
         type: 'expense_added',
         title: 'New Expense Added',
-        message: `A new expense of ${currency} ${amount} for "${description}" has been added to the trip`,
+        message: `A new expense of ${expenseCurrency} ${amount} for "${description}" has been added to the trip`,
         relatedTrip: trip,
         relatedResource: expense._id,
       }));
@@ -122,19 +195,7 @@ export const createExpense = async (expenseData) => {
       await Notification.insertMany(notifications);
     }
 
-    return {
-      id: expense._id,
-      trip: expense.trip,
-      amount: expense.amount,
-      currency: expense.currency,
-      category: expense.category,
-      description: expense.description,
-      payer: expense.payer,
-      receipt: expense.receipt,
-      creator: expense.creator,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
-    };
+    return toExpenseResponse(expense);
   } catch (e) {
     throw e;
   }
@@ -154,7 +215,19 @@ export const updateExpense = async (expenseId, userId, updateData, tripId) => {
     const expense = await loadEditableExpense(expenseId, tripId, userId);
 
     // Update allowed fields
-    const allowedUpdates = ['amount', 'currency', 'category', 'description', 'payer', 'receipt'];
+    const allowedUpdates = [
+      'amount',
+      'currency',
+      'category',
+      'description',
+      'payer',
+      'receipt',
+      'splitBetween',
+    ];
+
+    if (updateData.splitBetween) {
+      assertSplitMembers(await Trip.findById(expense.trip), updateData.splitBetween);
+    }
 
     // If payer is being updated, validate they are a trip member
     if (updateData.payer && updateData.payer !== expense.payer.toString()) {
@@ -184,6 +257,18 @@ export const updateExpense = async (expenseId, userId, updateData, tripId) => {
       }
     });
 
+    if (updateData.amount !== undefined || updateData.currency !== undefined) {
+      const tripDoc = await Trip.findById(expense.trip);
+      Object.assign(
+        expense,
+        await conversionFields(
+          expense.amount,
+          expense.currency || 'BDT',
+          tripDoc?.baseCurrency || 'BDT'
+        )
+      );
+    }
+
     await expense.save();
     await expense.populate('payer', 'name email');
     await expense.populate('creator', 'name email');
@@ -209,19 +294,7 @@ export const updateExpense = async (expenseId, userId, updateData, tripId) => {
       }
     }
 
-    return {
-      id: expense._id,
-      trip: expense.trip,
-      amount: expense.amount,
-      currency: expense.currency,
-      category: expense.category,
-      description: expense.description,
-      payer: expense.payer,
-      receipt: expense.receipt,
-      creator: expense.creator,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
-    };
+    return toExpenseResponse(expense);
   } catch (e) {
     throw e;
   }
@@ -239,7 +312,7 @@ export const deleteExpense = async (expenseId, userId, tripId) => {
   try {
     const expense = await loadEditableExpense(expenseId, tripId, userId);
 
-    const tripId = expense.trip;
+    const expenseTripId = expense.trip;
     const expenseDescription = expense.description;
 
     // Delete associated receipt file if exists
@@ -249,7 +322,7 @@ export const deleteExpense = async (expenseId, userId, tripId) => {
     await Expense.findByIdAndDelete(expenseId);
 
     // Get all trip members for notifications
-    const tripDoc = await Trip.findById(tripId).populate('members', '_id');
+    const tripDoc = await Trip.findById(expenseTripId).populate('members', '_id');
 
     if (tripDoc) {
       // Create notifications for all trip members except the deleter
@@ -260,7 +333,7 @@ export const deleteExpense = async (expenseId, userId, tripId) => {
           type: 'expense_added',
           title: 'Expense Deleted',
           message: `The expense "${expenseDescription}" has been deleted`,
-          relatedTrip: tripId,
+          relatedTrip: expenseTripId,
         }));
 
       if (notifications.length > 0) {
@@ -308,19 +381,7 @@ export const getExpensesByTrip = async (tripId, userId) => {
       .populate('creator', 'name email')
       .sort({ createdAt: -1 });
 
-    return expenses.map((expense) => ({
-      id: expense._id,
-      trip: expense.trip,
-      amount: expense.amount,
-      currency: expense.currency,
-      category: expense.category,
-      description: expense.description,
-      payer: expense.payer,
-      receipt: expense.receipt,
-      creator: expense.creator,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
-    }));
+    return expenses.map(toExpenseResponse);
   } catch (e) {
     throw e;
   }

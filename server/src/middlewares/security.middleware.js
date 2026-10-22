@@ -18,7 +18,6 @@ export const securityHeaders = helmet({
       "img-src": ["'self'", "data:", "blob:", "https:"],
       "connect-src": [
         "'self'",
-        "https://api.open-meteo.com",
         "https://nominatim.openstreetmap.org",
         "https://commons.wikimedia.org",
         ...sentryConnectSrc,

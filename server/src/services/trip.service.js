@@ -1,6 +1,7 @@
 import Trip from "#models/trip.model.js";
 import Notification from "#models/notification.model.js";
 import { escapeRegex } from "#validations/search.validation.js";
+import { reconvertTripExpenses } from "#services/expense.service.js";
 
 /**
  * Create a new trip
@@ -22,6 +23,8 @@ export const createTrip = async ({
   endDate,
   destinationType,
   tripCategory,
+  baseCurrency,
+  budget,
   owner,
 }) => {
   try {
@@ -33,6 +36,8 @@ export const createTrip = async ({
       endDate,
       destinationType,
       tripCategory,
+      baseCurrency,
+      budget: budget ?? undefined,
       owner,
       members: [owner], // Owner is automatically added as a member
     });
@@ -50,6 +55,8 @@ export const createTrip = async ({
       endDate: trip.endDate,
       destinationType: trip.destinationType,
       tripCategory: trip.tripCategory,
+      baseCurrency: trip.baseCurrency || "BDT",
+      budget: trip.budget ?? null,
       owner: trip.owner,
       members: trip.members,
       createdAt: trip.createdAt,
@@ -93,15 +100,24 @@ export const updateTrip = async (tripId, userId, updateData) => {
       "startDate",
       "endDate",
       "destinationType",
+      "baseCurrency",
+      "budget",
     ];
+    const previousCurrency = trip.baseCurrency || "BDT";
 
     allowedUpdates.forEach((field) => {
       if (updateData[field] !== undefined) {
-        trip[field] = updateData[field];
+        // A null budget removes it
+        trip[field] = updateData[field] === null ? undefined : updateData[field];
       }
     });
 
     await trip.save();
+
+    // Keep totals meaningful: recorded expenses move to the new currency
+    if (trip.baseCurrency !== previousCurrency) {
+      await reconvertTripExpenses(trip._id, trip.baseCurrency);
+    }
     await trip.populate("owner", "name email");
 
     return {
@@ -111,6 +127,9 @@ export const updateTrip = async (tripId, userId, updateData) => {
       startDate: trip.startDate,
       endDate: trip.endDate,
       destinationType: trip.destinationType,
+      tripCategory: trip.tripCategory,
+      baseCurrency: trip.baseCurrency || "BDT",
+      budget: trip.budget ?? null,
       owner: trip.owner,
       members: trip.members,
       shareToken: trip.shareToken ?? null,
@@ -218,6 +237,8 @@ export const getTripById = async (tripId, userId) => {
       endDate: trip.endDate,
       destinationType: trip.destinationType,
       tripCategory: trip.tripCategory,
+      baseCurrency: trip.baseCurrency || "BDT",
+      budget: trip.budget ?? null,
       owner: trip.owner,
       members: trip.members,
       shareToken: trip.shareToken ?? null,

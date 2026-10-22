@@ -1,11 +1,11 @@
-import { Trash2, Receipt, User, Calendar } from "lucide-react";
+import { Trash2, Receipt, User, Users, Calendar } from "lucide-react";
 import Button from "../../ui/Button";
-import Badge from "../../ui/Badge";
+import { formatMoney } from "../../../utils/currency";
 
 /**
  * ExpenseCard component - displays individual expense information
  */
-const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
+const ExpenseCard = ({ expense, members = [], onDelete, onViewReceipt }) => {
   const categoryColors = {
     food: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200",
     transport: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200",
@@ -33,6 +33,19 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
     });
   };
 
+  const isForeign =
+    expense.baseCurrency &&
+    expense.currency &&
+    expense.currency !== expense.baseCurrency;
+
+  // Names of the members sharing it, when it is not everyone
+  const sharerNames = (expense.splitBetween || [])
+    .map((id) => {
+      const member = members.find((m) => (m._id || m.id) === (id?._id || id));
+      return member?.name;
+    })
+    .filter(Boolean);
+
   return (
     <div className='bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-700'>
       <div className='flex items-start justify-between gap-2'>
@@ -45,10 +58,14 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
             >
               {categoryLabels[expense.category]}
             </span>
-            <span className='text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-1 dark:text-gray-100'>
-              <span className='text-lg'>৳</span>
-              {expense.amount.toFixed(2)}
+            <span className='text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100'>
+              {formatMoney(expense.amount, expense.currency)}
             </span>
+            {isForeign && (
+              <span className='text-sm text-gray-600 dark:text-gray-400'>
+                ≈ {formatMoney(expense.convertedAmount, expense.baseCurrency)}
+              </span>
+            )}
           </div>
 
           <p className='text-gray-900 font-medium mb-3 dark:text-gray-100'>
@@ -60,6 +77,12 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
               <User size={16} />
               <span>Paid by: {expense.payer?.name || "Unknown"}</span>
             </div>
+            {sharerNames.length > 0 && (
+              <div className='flex items-center gap-1'>
+                <Users size={16} />
+                <span>Split with: {sharerNames.join(", ")}</span>
+              </div>
+            )}
             <div className='flex items-center gap-1'>
               <Calendar size={16} />
               <span>{formatDate(expense.createdAt)}</span>
@@ -81,6 +104,7 @@ const ExpenseCard = ({ expense, onDelete, onViewReceipt }) => {
             onClick={onDelete}
             variant='ghost'
             size='sm'
+            aria-label={`Delete expense ${expense.description}`}
             className='text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400'
           >
             <Trash2 size={18} />
