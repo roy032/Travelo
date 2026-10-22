@@ -13,6 +13,7 @@ const ChecklistView = ({
   tripId,
   canEdit = true,
   showPackingSuggestions = true,
+  refreshKey = 0,
 }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ const ChecklistView = ({
 
   useEffect(() => {
     fetchChecklist();
-  }, [tripId]);
+  }, [tripId, refreshKey]);
 
   const fetchChecklist = async () => {
     try {

@@ -92,3 +92,18 @@ export async function logOut(page) {
   await page.getByRole("button", { name: "Logout", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
 }
+
+// Add a user straight to a trip's members (skips the invitation flow)
+export async function addMember(tripTitle, email) {
+  const client = new MongoClient(MONGODB_URI);
+  try {
+    await client.connect();
+    const db = client.db();
+    const user = await db.collection("users").findOne({ email });
+    await db
+      .collection("trips")
+      .updateOne({ title: tripTitle }, { $addToSet: { members: user._id } });
+  } finally {
+    await client.close();
+  }
+}

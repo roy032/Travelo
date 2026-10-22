@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { getSocketId } from "../utils/socket";
 
 // VITE_API_URL is the server origin without the /api suffix
 export const API_BASE_URL = `${
@@ -21,10 +22,12 @@ export class ApiError extends Error {
  * Fetch wrapper with error handling and token management
  */
 async function fetchWithAuth(endpoint, options = {}) {
+  const socketId = getSocketId();
   const config = {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(socketId && { "X-Socket-Id": socketId }),
       ...options.headers,
     },
     credentials: "include", // Include cookies for JWT token
@@ -695,6 +698,41 @@ export const activityApi = {
     try {
       const response = await fetchWithAuth(`/trips/${tripId}/map`);
       return response;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// AI Itinerary Planner Endpoints
+// ============================================================================
+
+export const plannerApi = {
+  // { enabled, maxDays }; the planner is hidden when the server has no API key
+  getStatus: async () => {
+    try {
+      return await fetchWithAuth("/ai-planner/status");
+    } catch {
+      return { enabled: false };
+    }
+  },
+
+  // Errors are shown inside the planner, so they are not toasted here
+  suggestPlan: async (tripId, request) => {
+    const response = await fetchWithAuth(`/trips/${tripId}/ai-plan`, {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+    return response.plan;
+  },
+
+  applyPlan: async (tripId, activities) => {
+    try {
+      return await fetchWithAuth(`/trips/${tripId}/ai-plan/apply`, {
+        method: "POST",
+        body: JSON.stringify({ activities }),
+      });
     } catch (error) {
       return handleApiError(error);
     }
@@ -1396,6 +1434,7 @@ export default {
   admin: adminApi,
   trip: tripApi,
   activity: activityApi,
+  planner: plannerApi,
   checklist: checklistApi,
   notes: notesApi,
   expense: expenseApi,

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 import {
   tripApi,
   activityApi,
   notesApi,
   expenseApi,
   photoApi,
+  plannerApi,
 } from "../services/api.service";
 import TripHeader from "../components/features/trips/TripHeader";
 import MemberList from "../components/features/members/MemberList";
@@ -25,17 +27,33 @@ import PlaceImageGallery from "../components/features/trips/PlaceImageGallery";
 import PackageHelper from "../components/features/packing/PackageHelper";
 import JoinRequestsPanel from "../components/trip/JoinRequestsPanel";
 import TripChat from "../components/chat/TripChat";
+import AiPlannerModal from "../components/features/trips/AiPlannerModal";
+import LiveViewers from "../components/features/trips/LiveViewers";
+import Button from "../components/ui/Button";
+import useTripLive from "../hooks/useTripLive";
 import Modal from "../components/ui/Modal";
 import Loader from "../components/ui/Loader";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import { usePageTitle } from "../hooks/usePageTitle";
 
+// How a live change from another member is described in the toast
+const LIVE_SECTIONS = {
+  trip: "the trip details",
+  activities: "the itinerary",
+  checklist: "the checklist",
+  notes: "the notes",
+  expenses: "the expenses",
+  photos: "the photos",
+  members: "the members",
+};
+
 /**
  * TripDetailPage component - displays trip details with tab navigation
  */
 const TripDetailPage = () => {
   const { tripId } = useParams();
+  const navigate = useNavigate();
 
   const { user } = useAuth();
   const [trip, setTrip] = useState(null);
@@ -75,10 +93,75 @@ const TripDetailPage = () => {
   const [placeImages, setPlaceImages] = useState([]);
   const [placeImagesLoading, setPlaceImagesLoading] = useState(false);
 
+  // Checklist refresh (live updates from other members)
+  const [checklistRefreshKey, setChecklistRefreshKey] = useState(0);
+
+  // AI planner
+  const [plannerEnabled, setPlannerEnabled] = useState(false);
+  const [isPlannerOpen, setIsPlannerOpen] = useState(false);
+
   useEffect(() => {
     fetchTrip();
     fetchMembers();
   }, [tripId]);
+
+  useEffect(() => {
+    let active = true;
+    plannerApi.getStatus().then((status) => {
+      if (active) setPlannerEnabled(Boolean(status?.enabled));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Another member changed the trip: reload just that section
+  const handleLiveChange = ({ resource, action, actorId }) => {
+    if (resource === "trip" && action === "deleted") {
+      toast.error("This trip was deleted by its owner");
+      navigate("/trips");
+      return;
+    }
+
+    switch (resource) {
+      case "trip":
+        fetchTrip({ silent: true });
+        break;
+      case "activities":
+        setActivityRefreshKey((prev) => prev + 1);
+        if (activeTab === "place-images") fetchPlaceImages();
+        break;
+      case "checklist":
+        setChecklistRefreshKey((prev) => prev + 1);
+        break;
+      case "notes":
+        setNoteRefreshKey((prev) => prev + 1);
+        break;
+      case "expenses":
+        setExpenseRefreshKey((prev) => prev + 1);
+        break;
+      case "photos":
+        if (activeTab === "photos") fetchPhotos({ silent: true });
+        break;
+      case "members":
+        fetchMembers({ silent: true });
+        fetchTrip({ silent: true });
+        break;
+      default:
+        return;
+    }
+
+    const actor = members?.find(
+      (member) => String(member.id || member._id) === actorId
+    );
+    // One toast per section, so a burst of changes doesn't stack up
+    toast(`${actor?.name || "Another member"} updated ${LIVE_SECTIONS[resource]}`, {
+      id: `live-${resource}`,
+      icon: "🔄",
+    });
+  };
+
+  const { viewerIds, isLive } = useTripLive(tripId, handleLiveChange);
 
   useEffect(() => {
     if (activeTab === "photos") {
@@ -89,9 +172,9 @@ const TripDetailPage = () => {
     }
   }, [activeTab, tripId]);
 
-  const fetchTrip = async () => {
+  const fetchTrip = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const data = await tripApi.getTripById(tripId);
       setTrip(data);
     } catch (error) {
@@ -101,9 +184,9 @@ const TripDetailPage = () => {
     }
   };
 
-  const fetchMembers = async () => {
+  const fetchMembers = async ({ silent = false } = {}) => {
     try {
-      setLoadingMembers(true);
+      if (!silent) setLoadingMembers(true);
       const data = await tripApi.getTripMembers(tripId);
 
       setMembers(data.members);
@@ -251,9 +334,9 @@ const TripDetailPage = () => {
   };
 
   // Photo handlers
-  const fetchPhotos = async () => {
+  const fetchPhotos = async ({ silent = false } = {}) => {
     try {
-      setPhotosLoading(true);
+      if (!silent) setPhotosLoading(true);
       const data = await photoApi.getPhotos(tripId);
       setPhotos(data.photos || []);
     } catch (error) {
@@ -433,6 +516,15 @@ const TripDetailPage = () => {
         id='trip-tabpanel'
         aria-labelledby={`trip-tab-${activeTab}`}
       >
+        <div className='mb-4'>
+          <LiveViewers
+            viewerIds={viewerIds}
+            members={members || []}
+            currentUserId={userId}
+            isLive={isLive}
+          />
+        </div>
+
         {activeTab === "overview" && (
           <div className='space-y-6'>
             {/* Join Requests Panel - Only visible to owner */}
@@ -466,6 +558,18 @@ const TripDetailPage = () => {
 
         {activeTab === "itinerary" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+            {plannerEnabled && (
+              <div className='mb-6 flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900 dark:bg-blue-950'>
+                <p className='text-sm text-blue-900 dark:text-blue-100'>
+                  Not sure where to start? Get a day-by-day plan based on
+                  your budget and interests.
+                </p>
+                <Button size='sm' onClick={() => setIsPlannerOpen(true)}>
+                  <Sparkles className='mr-2 h-4 w-4' aria-hidden='true' />
+                  Plan with AI
+                </Button>
+              </div>
+            )}
             <ItineraryView
               tripId={tripId}
               tripStartDate={trip.startDate}
@@ -479,7 +583,11 @@ const TripDetailPage = () => {
 
         {activeTab === "map" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
-            <MapView tripId={tripId} tripStartDate={trip.startDate} />
+            <MapView
+              key={activityRefreshKey}
+              tripId={tripId}
+              tripStartDate={trip.startDate}
+            />
           </div>
         )}
 
@@ -526,7 +634,11 @@ const TripDetailPage = () => {
 
         {activeTab === "checklist" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
-            <ChecklistView tripId={tripId} canEdit={true} />
+            <ChecklistView
+              tripId={tripId}
+              canEdit={true}
+              refreshKey={checklistRefreshKey}
+            />
           </div>
         )}
 
@@ -638,6 +750,17 @@ const TripDetailPage = () => {
           loading={activityLoading}
         />
       </Modal>
+
+      {/* AI Planner Modal */}
+      {isPlannerOpen && (
+        <AiPlannerModal
+          isOpen={isPlannerOpen}
+          onClose={() => setIsPlannerOpen(false)}
+          tripId={tripId}
+          trip={trip}
+          onApplied={() => setActivityRefreshKey((prev) => prev + 1)}
+        />
+      )}
 
       {/* Note Modal */}
       <Modal
