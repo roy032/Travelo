@@ -8,6 +8,7 @@ import Button from "../components/ui/Button";
 import Modal from "../components/ui/Modal";
 import Loader from "../components/ui/Loader";
 import VerificationQueue from "../components/features/admin/VerificationQueue";
+import AdminAnalytics from "../components/features/admin/AdminAnalytics";
 import {
   Users,
   CheckCircle,
@@ -336,6 +337,8 @@ const AdminDashboardPage = () => {
             </div>
           </Card>
         </div>
+
+        <AdminAnalytics />
 
         {/* Verification Queue */}
         <div className='mb-8'>

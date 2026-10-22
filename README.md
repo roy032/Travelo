@@ -1,5 +1,7 @@
 # Travelo
 
+[![CI](https://github.com/roy032/Travelo/actions/workflows/ci.yml/badge.svg)](https://github.com/roy032/Travelo/actions/workflows/ci.yml)
+
 A collaborative trip planning application built with React, Node.js/Express, MongoDB and Socket.IO. Trip members can plan itineraries, share checklists and notes, track and split expenses, share photos and chat in real time.
 
 ## Features
@@ -16,7 +18,7 @@ A collaborative trip planning application built with React, Node.js/Express, Mon
 - Expense logging with receipts and equal split calculation
 - Photo gallery and private/shared notes
 - Destination explorer
-- Admin dashboard: users, verification queue, trip reports
+- Admin dashboard: users, verification queue, trip reports, and daily charts of sign-ups, active trips and server errors (5xx errors are kept for 90 days)
 
 ## Tech stack
 
@@ -129,7 +131,7 @@ npx playwright install chromium
 npm test
 ```
 
-CI runs all three suites with a MongoDB service container.
+CI (`.github/workflows/ci.yml`) runs on every pull request and every push to `main`: a gitleaks secret scan, server lint and tests, client lint, tests and build, then the Playwright suite. The server and e2e jobs use a MongoDB service container.
 
 ## Deployment
 

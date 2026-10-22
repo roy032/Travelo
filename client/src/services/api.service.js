@@ -329,6 +329,15 @@ export const adminApi = {
     }
   },
 
+  getAnalytics: async (days = 30) => {
+    try {
+      const response = await fetchWithAuth(`/admin/analytics?days=${days}`);
+      return response.analytics;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   getPendingVerifications: async () => {
     try {
       const response = await fetchWithAuth("/admin/verifications/pending");

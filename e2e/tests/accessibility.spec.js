@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { createTrip, markVerified, newUser, signUp } from "./support.js";
+import { ADMIN, createTrip, logIn, markVerified, newUser, signUp } from "./support.js";
 
 // WCAG 2.1 A/AA, including colour contrast, in both colour themes
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -67,6 +67,14 @@ for (const colorScheme of ["light", "dark"]) {
         await expect(tab).toHaveAttribute("aria-selected", "true");
         await expectAccessible(page, `trip tab ${name}`);
       }
+    });
+
+    test("admin dashboard with analytics", async ({ page }) => {
+      await logIn(page, ADMIN);
+      await page.goto("/admin");
+      await expect(page.getByRole("heading", { name: "Sign-ups" })).toBeVisible();
+      await page.getByText("Daily numbers as a table").click();
+      await expectAccessible(page, "/admin");
     });
   });
 }
