@@ -814,6 +814,16 @@ export const notesApi = {
 // Expense Endpoints
 // ============================================================================
 
+// Multipart body for an expense with a receipt; lists are sent as JSON text
+const expenseFormData = (expenseData) => {
+  const formData = new FormData();
+  Object.entries(expenseData).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
+  });
+  return formData;
+};
+
 export const expenseApi = {
   getExpenses: async (tripId) => {
     try {
@@ -829,12 +839,7 @@ export const expenseApi = {
       let body;
       if (receiptFile) {
         // Use FormData for file upload
-        const formData = new FormData();
-        formData.append("amount", expenseData.amount);
-        formData.append("currency", "BDT");
-        formData.append("category", expenseData.category);
-        formData.append("description", expenseData.description);
-        formData.append("payer", expenseData.payer);
+        const formData = expenseFormData(expenseData);
         formData.append("receipt", receiptFile);
         body = formData;
       } else {
@@ -856,12 +861,7 @@ export const expenseApi = {
       let body;
       if (receiptFile) {
         // Use FormData for file upload
-        const formData = new FormData();
-        formData.append("amount", expenseData.amount);
-        formData.append("currency", "BDT");
-        formData.append("category", expenseData.category);
-        formData.append("description", expenseData.description);
-        formData.append("payer", expenseData.payer);
+        const formData = expenseFormData(expenseData);
         formData.append("receipt", receiptFile);
         body = formData;
       } else {
@@ -915,6 +915,60 @@ export const expenseApi = {
       return handleApiError(error);
     }
   },
+
+  // Record that one member paid another back (amount in the trip currency)
+  createSettlement: async (tripId, { from, to, amount, note }) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/settlements`, {
+        method: "POST",
+        body: JSON.stringify({ from, to, amount, note }),
+      });
+      return response.settlement;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteSettlement: async (tripId, settlementId) => {
+    try {
+      return await fetchWithAuth(
+        `/trips/${tripId}/settlements/${settlementId}`,
+        { method: "DELETE" }
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Currency Endpoints
+// ============================================================================
+
+export const currencyApi = {
+  getRates: async () => {
+    try {
+      return await fetchWithAuth("/currency/rates");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // No toast on failure: the converter and expense form show errors inline
+  convert: async (amount, from, to) => {
+    const params = new URLSearchParams({ amount: String(amount), from, to });
+    return fetchWithAuth(`/currency/convert?${params}`);
+  },
+};
+
+// ============================================================================
+// Weather Endpoints
+// ============================================================================
+
+export const weatherApi = {
+  // { days, locations, hasLocation, packing, ... }
+  // No toast on failure: the weather tab shows the error inline
+  getTripWeather: async (tripId) => fetchWithAuth(`/trips/${tripId}/weather`),
 };
 
 // ============================================================================
@@ -1406,6 +1460,8 @@ export default {
   review: reviewApi,
   favorite: favoriteApi,
   packing: packingApi,
+  currency: currencyApi,
+  weather: weatherApi,
   report: reportApi,
   message: messageApi,
 };

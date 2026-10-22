@@ -123,7 +123,8 @@ test.describe("Trips, uploads and browsing", () => {
     const adminPage = await browser.newPage();
     await logIn(adminPage, ADMIN);
     await adminPage.goto("/admin");
-    await expect(adminPage.getByText(guest.email)).toBeVisible();
+    // The guest can show up both in the review queue and the user table
+    await expect(adminPage.getByText(guest.email).first()).toBeVisible();
     // The uploaded document is viewable by the admin
     const doc = adminPage.locator('img[src^="/api/documents/file/"]');
     await expect(doc).toBeVisible();

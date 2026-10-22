@@ -19,7 +19,6 @@ export const getTripWeatherController = async (req, res, next) => {
 
     const weather = await getTripWeather(trip, activities);
 
-    res.set("Cache-Control", "private, max-age=900");
     res.status(200).json({
       tripId,
       ...weather,

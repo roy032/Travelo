@@ -22,7 +22,9 @@ import ReceiptViewer from "../components/features/expenses/ReceiptViewer";
 import PhotoGrid from "../components/features/photos/PhotoGrid";
 import PhotoUploadButton from "../components/features/photos/PhotoUploadButton";
 import PlaceImageGallery from "../components/features/trips/PlaceImageGallery";
-import PackageHelper from "../components/features/packing/PackageHelper";
+import BudgetSettings from "../components/features/expenses/BudgetSettings";
+import CurrencyConverter from "../components/features/expenses/CurrencyConverter";
+import TripWeather from "../components/features/weather/TripWeather";
 import JoinRequestsPanel from "../components/trip/JoinRequestsPanel";
 import TripChat from "../components/chat/TripChat";
 import Modal from "../components/ui/Modal";
@@ -123,7 +125,7 @@ const TripDetailPage = () => {
   };
 
   const handleTripUpdate = (updatedTrip) => {
-    setTrip(updatedTrip);
+    setTrip((prev) => ({ ...prev, ...updatedTrip }));
   };
 
   const handleTripDelete = () => {
@@ -342,6 +344,7 @@ const TripDetailPage = () => {
   const ownerId = trip.owner?._id || trip.owner?.id || trip.owner;
   const userId = user?.id || user?._id;
   const isOwner = ownerId === userId;
+  const baseCurrency = trip.baseCurrency || "BDT";
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -353,7 +356,7 @@ const TripDetailPage = () => {
     { id: "expenses", label: "Expenses" },
     { id: "checklist", label: "Checklist" },
     { id: "notes", label: "Notes" },
-    { id: "package-helper", label: "Package Helper" },
+    { id: "weather", label: "Weather & Packing" },
     { id: "photos", label: "Photos" },
   ];
 
@@ -509,17 +512,43 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "expenses" && (
-          <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
-              <ExpenseList
-                tripId={tripId}
-                onAddExpense={handleAddExpense}
-                onViewReceipt={handleViewReceipt}
-                refreshKey={expenseRefreshKey}
-              />
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
+            <div className='space-y-6 lg:col-span-2 min-w-0'>
+              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+                <ExpenseList
+                  tripId={tripId}
+                  baseCurrency={baseCurrency}
+                  members={members || []}
+                  onAddExpense={handleAddExpense}
+                  onViewReceipt={handleViewReceipt}
+                  onChange={() => setExpenseRefreshKey((prev) => prev + 1)}
+                  refreshKey={expenseRefreshKey}
+                />
+              </div>
+              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+                <SplitSummary
+                  tripId={tripId}
+                  refreshKey={expenseRefreshKey}
+                  currentUserId={userId}
+                  isOwner={isOwner}
+                />
+              </div>
             </div>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
-              <SplitSummary tripId={tripId} refreshKey={expenseRefreshKey} />
+            <div className='space-y-6 min-w-0'>
+              {isOwner && (
+                <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+                  <BudgetSettings
+                    trip={trip}
+                    onSaved={(updated) => {
+                      setTrip((prev) => ({ ...prev, ...updated }));
+                      setExpenseRefreshKey((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              )}
+              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+                <CurrencyConverter baseCurrency={baseCurrency} />
+              </div>
             </div>
           </div>
         )}
@@ -543,9 +572,9 @@ const TripDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "package-helper" && (
+        {activeTab === "weather" && (
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
-            <PackageHelper tripId={tripId} startDate={trip.startDate} />
+            <TripWeather tripId={tripId} />
           </div>
         )}
 
@@ -663,6 +692,7 @@ const TripDetailPage = () => {
       >
         <ExpenseForm
           members={members || []}
+          baseCurrency={trip?.baseCurrency || "BDT"}
           onSubmit={handleExpenseSubmit}
           onCancel={handleCloseExpenseModal}
           loading={expenseLoading}
