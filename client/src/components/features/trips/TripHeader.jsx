@@ -1,10 +1,19 @@
 import { useState } from "react";
-import { Calendar, MapPin, Edit2, Trash2, ArrowLeft } from "lucide-react";
+import {
+  Calendar,
+  CalendarPlus,
+  MapPin,
+  Edit2,
+  Trash2,
+  ArrowLeft,
+  Share2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../ui/Button";
 import Badge from "../../ui/Badge";
 import Modal from "../../ui/Modal";
 import TripEditForm from "./TripEditForm";
+import ShareTripPanel from "./ShareTripPanel";
 import ReportButton from "../../report/ReportButton";
 import { tripApi } from "../../../services/api.service";
 import toast from "react-hot-toast";
@@ -17,6 +26,23 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportCalendar = async () => {
+    setExporting(true);
+    try {
+      await tripApi.downloadCalendar(trip.id || trip._id);
+    } catch {
+      // handleApiError already showed the reason
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleShareTokenChange = (shareToken) => {
+    onTripUpdate({ ...trip, shareToken });
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -126,40 +152,75 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
             </div>
 
             {/* Action Buttons */}
-            {isOwner ? (
-              <div className='flex gap-2'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={handleEdit}
-                  className='flex items-center'
-                >
-                  <Edit2 size={16} className='mr-2' />
-                  Edit
-                </Button>
-                <Button
-                  variant='danger'
-                  size='sm'
-                  onClick={handleDeleteClick}
-                  className='flex items-center'
-                >
-                  <Trash2 size={16} className='mr-2' />
-                  Delete
-                </Button>
-              </div>
-            ) : (
-              <div className='flex gap-2'>
-                <ReportButton
-                  tripId={trip.id || trip._id}
-                  tripTitle={trip.title}
-                  variant='outline'
-                  size='sm'
-                />
-              </div>
-            )}
+            <div className='flex flex-wrap gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleExportCalendar}
+                disabled={exporting}
+                className='flex items-center'
+              >
+                <CalendarPlus size={16} className='mr-2' aria-hidden='true' />
+                {exporting ? "Exporting..." : "Add to calendar"}
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setIsShareModalOpen(true)}
+                className='flex items-center'
+              >
+                <Share2 size={16} className='mr-2' aria-hidden='true' />
+                {trip.shareToken ? "Shared" : "Share"}
+              </Button>
+              {isOwner ? (
+                <div className='flex gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handleEdit}
+                    className='flex items-center'
+                  >
+                    <Edit2 size={16} className='mr-2' />
+                    Edit
+                  </Button>
+                  <Button
+                    variant='danger'
+                    size='sm'
+                    onClick={handleDeleteClick}
+                    className='flex items-center'
+                  >
+                    <Trash2 size={16} className='mr-2' />
+                    Delete
+                  </Button>
+                </div>
+              ) : (
+                <div className='flex gap-2'>
+                  <ReportButton
+                    tripId={trip.id || trip._id}
+                    tripTitle={trip.title}
+                    variant='outline'
+                    size='sm'
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title='Share trip'
+        size='md'
+      >
+        <ShareTripPanel
+          trip={trip}
+          isOwner={isOwner}
+          onShareTokenChange={handleShareTokenChange}
+        />
+      </Modal>
 
       {/* Edit Modal */}
       <Modal

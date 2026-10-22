@@ -71,18 +71,26 @@ const normalizePath = (pathname) =>
  * @param {string} template - contents of the built index.html
  * @param {string} pathname - request path
  * @param {string} siteUrl - public origin from getSiteUrl
+ * @param {{title: string, description: string, noindex?: boolean}} [pageOverride]
+ *   metadata for a page looked up per request, such as a shared trip
  */
-export const renderIndexHtml = (template, pathname, siteUrl) => {
+export const renderIndexHtml = (template, pathname, siteUrl, pageOverride) => {
   const path = normalizePath(pathname);
-  const page = PUBLIC_PAGES[path];
+  const page = pageOverride ?? PUBLIC_PAGES[path];
   const title = escapeHtml(page?.title ?? DEFAULT_TITLE);
   const description = escapeHtml(page?.description ?? DEFAULT_DESCRIPTION);
   const url = escapeHtml(`${siteUrl}${page ? path : "/"}`);
 
-  const extraTags = page
-    ? `<link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
-    : // Private pages and unknown paths stay out of search results
-      `<meta name="robots" content="noindex" />`;
+  let extraTags;
+  if (!page) {
+    // Private pages and unknown paths stay out of search results
+    extraTags = `<meta name="robots" content="noindex" />`;
+  } else if (page.noindex) {
+    // Unlisted pages (shared trips) still get link previews
+    extraTags = `<meta property="og:url" content="${url}" />\n    <meta name="robots" content="noindex" />`;
+  } else {
+    extraTags = `<link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`;
+  }
 
   return template
     .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
@@ -124,3 +132,71 @@ export const buildRobotsTxt = (siteUrl) =>
     `Sitemap: ${siteUrl}/sitemap.xml`,
     "",
   ].join("\n");
+
+const MAX_DESCRIPTION = 200;
+
+const truncate = (text, max) =>
+  text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+
+/**
+ * "10–15 Jan 2030", "28 Jan – 3 Feb 2030" or "30 Dec 2030 – 2 Jan 2031".
+ * Trip dates are stored as UTC midnight of the chosen day.
+ */
+export const formatDateRange = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const fmt = (date, options) =>
+    date.toLocaleDateString("en-GB", { timeZone: "UTC", ...options });
+  const full = { day: "numeric", month: "short", year: "numeric" };
+
+  if (start.getUTCFullYear() !== end.getUTCFullYear()) {
+    return `${fmt(start, full)} – ${fmt(end, full)}`;
+  }
+  if (start.getUTCMonth() !== end.getUTCMonth()) {
+    return `${fmt(start, { day: "numeric", month: "short" })} – ${fmt(end, full)}`;
+  }
+  if (start.getUTCDate() !== end.getUTCDate()) {
+    return `${start.getUTCDate()}–${fmt(end, full)}`;
+  }
+  return fmt(start, full);
+};
+
+/**
+ * Link-preview metadata for a shared trip page. Missing or turned-off links
+ * get a generic title so the preview doesn't leak the old trip name.
+ *
+ * @param {{trip: Object, activities: Array}|null} shared - from getSharedTrip
+ */
+export const sharedTripPage = (shared) => {
+  if (!shared) {
+    return {
+      title: `Shared trip | ${SITE_NAME}`,
+      description: "This shared trip link is no longer available.",
+      noindex: true,
+    };
+  }
+
+  const { trip, activities } = shared;
+  const places = [
+    ...new Set(activities.map((activity) => activity.location?.name).filter(Boolean)),
+  ];
+  const stops = activities.length;
+  const summary = [
+    formatDateRange(trip.startDate, trip.endDate),
+    stops > 0 &&
+      `${stops} ${stops === 1 ? "stop" : "stops"}${
+        places.length ? `: ${places.slice(0, 4).join(", ")}${places.length > 4 ? " and more" : ""}` : ""
+      }`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const description = [summary, trip.description?.trim()]
+    .filter(Boolean)
+    .join(". ");
+
+  return {
+    title: `${trip.title} | ${SITE_NAME}`,
+    description: truncate(description, MAX_DESCRIPTION),
+    noindex: true,
+  };
+};

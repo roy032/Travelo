@@ -15,6 +15,11 @@ import {
   rejectJoinRequestController,
 } from "#controllers/trip.controller.js";
 import {
+  enableSharingController,
+  disableSharingController,
+  tripCalendarController,
+} from "#controllers/share.controller.js";
+import {
   authenticateToken,
   isTripMember,
   isTripOwner,
@@ -37,6 +42,13 @@ router.get("/", getUserTripsController);
 
 // Get a specific trip by ID (member only)
 router.get("/:tripId", isTripMember, getTripController);
+
+// Download the trip and its itinerary as a calendar file (member only)
+router.get("/:tripId/calendar.ics", isTripMember, tripCalendarController);
+
+// Turn the public read-only link on or off (owner only)
+router.post("/:tripId/share", isTripOwner, enableSharingController);
+router.delete("/:tripId/share", isTripOwner, disableSharingController);
 
 // Request to join a trip (authenticated users only)
 router.post("/:id/join-request", requestJoinTripController);

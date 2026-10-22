@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 
 // VITE_API_URL is the server origin without the /api suffix
-const API_BASE_URL = `${
+export const API_BASE_URL = `${
   import.meta.env.VITE_API_URL ?? "http://localhost:3000"
 }/api`;
 
@@ -110,6 +110,20 @@ function toQueryString(params) {
     ([, value]) => value !== undefined && value !== null && value !== ""
   );
   return new URLSearchParams(entries).toString();
+}
+
+/**
+ * Hand a downloaded file to the browser to save
+ */
+function saveFile(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
@@ -410,6 +424,53 @@ export const adminApi = {
 // ============================================================================
 
 export const tripApi = {
+  // Turn on the public read-only link; returns { shareToken, sharedAt, url }
+  enableSharing: async (tripId) => {
+    try {
+      return await fetchWithAuth(`/trips/${tripId}/share`, { method: "POST" });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  disableSharing: async (tripId) => {
+    try {
+      return await fetchWithAuth(`/trips/${tripId}/share`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Download the trip and its itinerary as an .ics file
+  downloadCalendar: async (tripId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/trips/${tripId}/calendar.ics`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new ApiError(
+          data.message || "Failed to export calendar",
+          response.status,
+          data
+        );
+      }
+      const fileName =
+        response.headers
+          .get("content-disposition")
+          ?.match(/filename="([^"]+)"/)?.[1] || "trip.ics";
+      saveFile(await response.blob(), fileName);
+    } catch (error) {
+      return handleApiError(
+        error instanceof ApiError
+          ? error
+          : new ApiError("Network error. Please check your connection.", 0, null)
+      );
+    }
+  },
+
   // Public endpoint - no authentication required.
   // params: search, destinationType, tripCategory, from, to, minDays, maxDays, sort
   getPublicTrips: async (params = {}) => {
@@ -1347,4 +1408,32 @@ export default {
   packing: packingApi,
   report: reportApi,
   message: messageApi,
+};
+
+// Public shared-trip links - no authentication required
+export const shareApi = {
+  // Returns { trip, activities }; throws ApiError 404 when the link is off
+  getSharedTrip: async (token) => {
+    const response = await fetch(
+      `${API_BASE_URL}/shared/${encodeURIComponent(token)}`
+    ).catch(() => {
+      throw new ApiError("Network error. Please check your connection.", 0, null);
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || "Failed to load trip",
+        response.status,
+        data
+      );
+    }
+    return data;
+  },
+
+  // Public .ics address; calendar apps can subscribe to it
+  calendarUrl: (token) =>
+    new URL(
+      `${API_BASE_URL}/shared/${encodeURIComponent(token)}/calendar.ics`,
+      window.location.origin
+    ).toString(),
 };

@@ -28,9 +28,15 @@ import {
   permissionsPolicy,
 } from "#middlewares/security.middleware.js";
 import { apiRateLimiter } from "#middlewares/rateLimit.middleware.js";
-import seoRoutes from "#routes/seo.route.js";
-import { getSiteUrl, renderIndexHtml } from "#utils/seo.js";
 import favoriteRoutes from "#routes/favorite.route.js";
+import shareRoutes from "#routes/share.route.js";
+import seoRoutes from "#routes/seo.route.js";
+import {
+  getSiteUrl,
+  renderIndexHtml,
+  sharedTripPage,
+} from "#utils/seo.js";
+import { getSharedTrip } from "#services/share.service.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -120,6 +126,7 @@ app.use("/api/auth", authRoutes);
 // apply authenticateToken to every request passing through them
 app.use("/api/destinations", destinationRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/shared", shareRoutes); // Public shared-trip links
 app.use("/api/documents", documentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/trips", tripRoutes); // Must be first to catch /explore before authenticated routes
@@ -141,12 +148,24 @@ if (serveClient) {
     path.join(clientDist, "index.html"),
     "utf8",
   );
-  app.get(/^\/(?!api\/|api$|socket\.io\/|uploads\/|assets\/).*/, (req, res) => {
-    res
-      .type("html")
-      .set("Cache-Control", "no-cache")
-      .send(renderIndexHtml(indexTemplate, req.path, getSiteUrl(req)));
-  });
+  app.get(
+    /^\/(?!api\/|api$|socket\.io\/|uploads\/|assets\/).*/,
+    async (req, res, next) => {
+      try {
+        // Shared trips get their own title and description in link previews
+        const shareMatch = req.path.match(/^\/share\/([^/]+)\/?$/);
+        const page = shareMatch
+          ? sharedTripPage(await getSharedTrip(shareMatch[1]))
+          : undefined;
+        res
+          .type("html")
+          .set("Cache-Control", "no-cache")
+          .send(renderIndexHtml(indexTemplate, req.path, getSiteUrl(req), page));
+      } catch (e) {
+        next(e);
+      }
+    },
+  );
 }
 
 // 404 handler - must be before error handler

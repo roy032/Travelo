@@ -132,3 +132,49 @@ describe("API client", () => {
     expect(options.headers["Content-Type"]).toBeUndefined();
   });
 });
+
+describe("calendar export", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+    URL.createObjectURL = vi.fn(() => "blob:calendar");
+    URL.revokeObjectURL = vi.fn();
+  });
+
+  it("saves the .ics file under the server's file name", async () => {
+    fetch.mockResolvedValue(
+      new Response("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n", {
+        status: 200,
+        headers: {
+          "Content-Type": "text/calendar; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="sylhet.ics"',
+        },
+      })
+    );
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function () {
+        expect(this.download).toBe("sylhet.ics");
+        expect(this.href).toBe("blob:calendar");
+      });
+
+    await tripApi.downloadCalendar("trip1");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:3000/api/trips/trip1/calendar.ics",
+      { credentials: "include" }
+    );
+    expect(click).toHaveBeenCalledOnce();
+  });
+
+  it("shows the server's reason when the export fails", async () => {
+    fetch.mockResolvedValue(
+      jsonResponse(403, { message: "You are not a member of this trip" })
+    );
+    await expect(tripApi.downloadCalendar("trip1")).rejects.toThrow(
+      "You are not a member of this trip"
+    );
+    expect(toast.error).toHaveBeenCalledWith(
+      "You are not a member of this trip"
+    );
+  });
+});
