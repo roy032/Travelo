@@ -73,14 +73,14 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
 
   if (days.length === 0) {
     return (
-      <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
+      <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 dark:bg-gray-950 dark:border-gray-600'>
         <MapPin
           size={48}
           className='mx-auto text-gray-400 mb-4'
           aria-hidden='true'
         />
-        <p className='text-gray-600 mb-2'>No activities on the map yet</p>
-        <p className='text-sm text-gray-500'>
+        <p className='text-gray-600 mb-2 dark:text-gray-400'>No activities on the map yet</p>
+        <p className='text-sm text-gray-500 dark:text-gray-400'>
           Activities added to the itinerary appear here in the order you visit
           them
         </p>
@@ -103,7 +103,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               selectedDay === "all"
                 ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             }`}
           >
             All days
@@ -117,7 +117,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedDay === day.key
                   ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               }`}
             >
               <span
@@ -131,7 +131,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
         </div>
       )}
 
-      <div className='rounded-lg overflow-hidden border border-gray-300 shadow-sm'>
+      <div className='rounded-lg overflow-hidden border border-gray-300 shadow-sm dark:border-gray-600'>
         <MapContainer
           ref={setMap}
           center={visiblePoints[0] ?? WORLD_VIEW.center}
@@ -174,18 +174,18 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
                   >
                     <Popup>
                       <div className='space-y-1'>
-                        <p className='font-semibold text-gray-900'>
+                        <p className='font-semibold text-gray-900 dark:text-gray-100'>
                           {stop.stopNumber}. {stop.title}
                         </p>
-                        <p className='text-sm text-gray-600'>
+                        <p className='text-sm text-gray-600 dark:text-gray-400'>
                           Day {day.dayNumber} · {formatDay(day.key)}
                           {stop.time ? ` at ${stop.time}` : ""}
                         </p>
-                        <p className='text-sm text-gray-700'>
+                        <p className='text-sm text-gray-700 dark:text-gray-300'>
                           {stop.location.name}
                         </p>
                         {stop.location.address && (
-                          <p className='text-xs text-gray-500'>
+                          <p className='text-xs text-gray-500 dark:text-gray-400'>
                             {stop.location.address}
                           </p>
                         )}
@@ -200,7 +200,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
       </div>
 
       {unmapped > 0 && (
-        <p className='mt-2 text-sm text-gray-500'>
+        <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
           {unmapped} {unmapped === 1 ? "activity has" : "activities have"} no
           map location and {unmapped === 1 ? "is" : "are"} only listed below.
         </p>
@@ -209,7 +209,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
       <ol className='mt-6 space-y-6'>
         {visibleDays.map((day) => (
           <li key={day.key}>
-            <h3 className='flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2'>
+            <h3 className='flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2 dark:text-gray-100'>
               <span
                 className='w-3 h-3 rounded-full'
                 style={{ background: day.color }}
@@ -221,7 +221,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
               {day.stops.map((stop) => (
                 <li
                   key={stop.id}
-                  className='flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200'
+                  className='flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700'
                 >
                   <span
                     className='flex items-center justify-center w-7 h-7 shrink-0 rounded-full text-white text-xs font-semibold'
@@ -231,8 +231,8 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
                     {stop.stopNumber}
                   </span>
                   <div className='flex-1 min-w-0'>
-                    <p className='font-medium text-gray-900'>{stop.title}</p>
-                    <p className='text-sm text-gray-600 flex flex-wrap items-center gap-x-3'>
+                    <p className='font-medium text-gray-900 dark:text-gray-100'>{stop.title}</p>
+                    <p className='text-sm text-gray-600 flex flex-wrap items-center gap-x-3 dark:text-gray-400'>
                       {stop.time && (
                         <span className='inline-flex items-center gap-1'>
                           <Clock size={14} aria-hidden='true' />
@@ -247,7 +247,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
                       )}
                     </p>
                     {stop.description && (
-                      <p className='text-sm text-gray-500 mt-1'>
+                      <p className='text-sm text-gray-500 mt-1 dark:text-gray-400'>
                         {stop.description}
                       </p>
                     )}
@@ -257,7 +257,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
                       <button
                         type='button'
                         onClick={() => showStop(stop)}
-                        className='text-blue-600 hover:text-blue-700 font-medium'
+                        className='text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300'
                         aria-label={`Show ${stop.title} on the map`}
                       >
                         Show
@@ -266,7 +266,7 @@ const ItineraryMap = ({ activities, tripStartDate }) => {
                         href={openStreetMapUrl(stop.location.coordinates)}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='inline-flex items-center gap-1 text-gray-600 hover:text-gray-900'
+                        className='inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
                         aria-label={`Open ${stop.title} in OpenStreetMap`}
                       >
                         <ExternalLink size={14} aria-hidden='true' />

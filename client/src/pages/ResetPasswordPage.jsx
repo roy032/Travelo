@@ -59,22 +59,22 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
       <div className='max-w-md w-full space-y-8'>
-        <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
+        <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100'>
           Choose a new password
         </h1>
 
         <Card>
           {!token ? (
             <div className='space-y-4 text-center' role='alert'>
-              <p className='text-gray-700'>
+              <p className='text-gray-700 dark:text-gray-300'>
                 This reset link is incomplete. Please open the link from your
                 email again, or request a new one.
               </p>
               <Link
                 to='/forgot-password'
-                className='inline-block font-medium text-blue-600 hover:text-blue-500'
+                className='inline-block font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
               >
                 Request a new link
               </Link>
@@ -115,11 +115,11 @@ const ResetPasswordPage = () => {
                 Reset password
               </Button>
 
-              <p className='text-center text-sm text-gray-600'>
+              <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
                 Link expired?{" "}
                 <Link
                   to='/forgot-password'
-                  className='font-medium text-blue-600 hover:text-blue-500'
+                  className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
                 >
                   Request a new one
                 </Link>

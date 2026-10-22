@@ -37,26 +37,26 @@ const VerifyEmailPage = () => {
   }, [token, updateUser]);
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
       <div className='max-w-md w-full'>
         <Card>
           {status === "verifying" && (
             <div className='text-center space-y-4' role='status'>
               <Loader />
-              <p className='text-gray-700'>Confirming your email address...</p>
+              <p className='text-gray-700 dark:text-gray-300'>Confirming your email address...</p>
             </div>
           )}
 
           {status === "success" && (
             <div className='text-center space-y-4' role='status'>
-              <CheckCircle className='w-12 h-12 text-green-600 mx-auto' aria-hidden='true' />
-              <h1 className='text-2xl font-bold text-gray-900'>Email confirmed</h1>
-              <p className='text-gray-700'>
+              <CheckCircle className='w-12 h-12 text-green-600 mx-auto dark:text-green-400' aria-hidden='true' />
+              <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>Email confirmed</h1>
+              <p className='text-gray-700 dark:text-gray-300'>
                 Thanks! You'll now get emails about your trips and join requests.
               </p>
               <Link
                 to={isAuthenticated ? "/trips" : "/login"}
-                className='inline-block font-medium text-blue-600 hover:text-blue-500'
+                className='inline-block font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
               >
                 {isAuthenticated ? "Go to my trips" : "Sign in"}
               </Link>
@@ -65,12 +65,12 @@ const VerifyEmailPage = () => {
 
           {status === "error" && (
             <div className='text-center space-y-4' role='alert'>
-              <XCircle className='w-12 h-12 text-red-600 mx-auto' aria-hidden='true' />
-              <h1 className='text-2xl font-bold text-gray-900'>
+              <XCircle className='w-12 h-12 text-red-600 mx-auto dark:text-red-400' aria-hidden='true' />
+              <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                 We couldn't confirm your email
               </h1>
-              <p className='text-gray-700'>{message}</p>
-              <p className='text-sm text-gray-500'>
+              <p className='text-gray-700 dark:text-gray-300'>{message}</p>
+              <p className='text-sm text-gray-500 dark:text-gray-400'>
                 {isAuthenticated
                   ? "Use the banner at the top of the page to send a new link."
                   : "Sign in to send yourself a new link."}
@@ -78,7 +78,7 @@ const VerifyEmailPage = () => {
               {!isAuthenticated && (
                 <Link
                   to='/login'
-                  className='inline-block font-medium text-blue-600 hover:text-blue-500'
+                  className='inline-block font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
                 >
                   Sign in
                 </Link>

@@ -52,10 +52,10 @@ const SharedTripPage = () => {
             className='w-12 h-12 text-gray-400 mx-auto mb-4'
             aria-hidden='true'
           />
-          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
             {gone ? "This link isn't available" : "Something went wrong"}
           </h1>
-          <p className='text-gray-600 mb-6'>
+          <p className='text-gray-600 mb-6 dark:text-gray-400'>
             {gone
               ? "The trip organizer may have turned off sharing or deleted the trip."
               : "We couldn't load this trip. Please try again in a moment."}
@@ -77,17 +77,17 @@ const SharedTripPage = () => {
   const subscribeUrl = calendarUrl.replace(/^https?:/, "webcal:");
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <div className='bg-white shadow-sm border-b border-gray-200'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950'>
+      <div className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
         <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-          <p className='text-sm font-medium text-blue-600 mb-2'>Shared trip plan</p>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>{trip.title}</h1>
+          <p className='text-sm font-medium text-blue-600 mb-2 dark:text-blue-400'>Shared trip plan</p>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2 dark:text-gray-100'>{trip.title}</h1>
           {trip.description && (
-            <p className='text-gray-600 mb-4 whitespace-pre-line'>
+            <p className='text-gray-600 mb-4 whitespace-pre-line dark:text-gray-400'>
               {trip.description}
             </p>
           )}
-          <div className='flex flex-wrap gap-4 text-sm text-gray-600 mb-4'>
+          <div className='flex flex-wrap gap-4 text-sm text-gray-600 mb-4 dark:text-gray-400'>
             <span className='flex items-center'>
               <Calendar size={16} className='mr-2' aria-hidden='true' />
               {formatDate(trip.startDate)} – {formatDate(trip.endDate)}
@@ -107,14 +107,14 @@ const SharedTripPage = () => {
           <div className='flex flex-wrap gap-2'>
             <a
               href={calendarUrl}
-              className='inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50'
+              className='inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800'
             >
               <CalendarPlus size={16} className='mr-2' aria-hidden='true' />
               Add to calendar
             </a>
             <a
               href={subscribeUrl}
-              className='inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50'
+              className='inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800'
               title='Your calendar app keeps the plan up to date'
             >
               Subscribe in calendar app
@@ -124,8 +124,8 @@ const SharedTripPage = () => {
       </div>
 
       <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6'>
-        <section className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
-          <h2 className='text-xl font-semibold text-gray-900 mb-4'>Itinerary</h2>
+        <section className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+          <h2 className='text-xl font-semibold text-gray-900 mb-4 dark:text-gray-100'>Itinerary</h2>
           <ItineraryMap activities={activities} tripStartDate={trip.startDate} />
         </section>
 
@@ -140,7 +140,7 @@ const SharedTripPage = () => {
             </p>
             <Link
               to='/register'
-              className='inline-flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50'
+              className='inline-flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 dark:bg-gray-900 dark:text-blue-300'
             >
               Create a free account
             </Link>

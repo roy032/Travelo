@@ -33,8 +33,8 @@ const EmailVerificationBanner = () => {
   };
 
   return (
-    <div className='bg-amber-50 border-b border-amber-200' role='region' aria-label='Email confirmation'>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-amber-900'>
+    <div className='bg-amber-50 border-b border-amber-200 dark:bg-amber-950/40 dark:border-amber-800' role='region' aria-label='Email confirmation'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-amber-900 dark:text-amber-200'>
         <MailWarning className='w-4 h-4 shrink-0' aria-hidden='true' />
         <span>
           Please confirm your email address ({user.email}) to get trip updates

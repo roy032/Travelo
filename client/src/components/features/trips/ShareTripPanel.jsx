@@ -66,7 +66,7 @@ const ShareTripPanel = ({ trip, isOwner, onShareTokenChange }) => {
   if (!token) {
     return (
       <div className='space-y-4'>
-        <p className='text-gray-700'>
+        <p className='text-gray-700 dark:text-gray-300'>
           Anyone with a public link can see this trip&apos;s dates, itinerary
           and map, without signing in. They won&apos;t see members, chat,
           expenses, notes, photos or documents.
@@ -81,7 +81,7 @@ const ShareTripPanel = ({ trip, isOwner, onShareTokenChange }) => {
             {busy ? "Creating link..." : "Create public link"}
           </Button>
         ) : (
-          <p className='text-sm text-gray-500'>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             Only the trip organizer can create a public link.
           </p>
         )}
@@ -91,7 +91,7 @@ const ShareTripPanel = ({ trip, isOwner, onShareTokenChange }) => {
 
   return (
     <div className='space-y-4'>
-      <p className='text-gray-700'>
+      <p className='text-gray-700 dark:text-gray-300'>
         Anyone with this link can see the trip plan and add it to their
         calendar. Members, chat, expenses, notes, photos and documents stay
         private.
@@ -107,7 +107,7 @@ const ShareTripPanel = ({ trip, isOwner, onShareTokenChange }) => {
           readOnly
           value={shareUrl}
           onFocus={(e) => e.target.select()}
-          className='flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-800'
+          className='flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-200'
         />
         <Button
           variant='outline'
@@ -134,17 +134,17 @@ const ShareTripPanel = ({ trip, isOwner, onShareTokenChange }) => {
       </div>
 
       {isOwner && (
-        <div className='pt-4 border-t border-gray-200'>
+        <div className='pt-4 border-t border-gray-200 dark:border-gray-700'>
           <Button
             variant='outline'
             onClick={turnOff}
             disabled={busy}
-            className='flex items-center text-red-600'
+            className='flex items-center text-red-600 dark:text-red-400'
           >
             <Link2Off size={16} className='mr-2' aria-hidden='true' />
             {busy ? "Turning off..." : "Turn off public link"}
           </Button>
-          <p className='mt-2 text-xs text-gray-500'>
+          <p className='mt-2 text-xs text-gray-500 dark:text-gray-400'>
             The link stops working at once. If you share again later, you get a
             new link.
           </p>
