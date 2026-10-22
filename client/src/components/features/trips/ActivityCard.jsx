@@ -23,15 +23,15 @@ const ActivityCard = ({ activity, onEdit, onDelete, canEdit = true }) => {
     <Card padding='md' className='hover:shadow-md transition-shadow'>
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <h4 className='text-lg font-semibold text-gray-900 mb-2'>
+          <h4 className='text-lg font-semibold text-gray-900 mb-2 dark:text-gray-100'>
             {activity.title}
           </h4>
 
           {activity.description && (
-            <p className='text-gray-600 mb-3 text-sm'>{activity.description}</p>
+            <p className='text-gray-600 mb-3 text-sm dark:text-gray-400'>{activity.description}</p>
           )}
 
-          <div className='flex flex-col space-y-1 text-sm text-gray-500'>
+          <div className='flex flex-col space-y-1 text-sm text-gray-500 dark:text-gray-400'>
             <div className='flex items-center'>
               <Clock size={16} className='mr-2' />
               <span>{formatTime(activity.time)}</span>
@@ -50,14 +50,14 @@ const ActivityCard = ({ activity, onEdit, onDelete, canEdit = true }) => {
           <div className='flex space-x-2 ml-4'>
             <button
               onClick={() => onEdit(activity)}
-              className='text-blue-600 hover:text-blue-800 transition-colors p-1'
+              className='text-blue-600 hover:text-blue-800 transition-colors p-1 dark:text-blue-400 dark:hover:text-blue-200'
               aria-label='Edit activity'
             >
               <Edit2 size={18} />
             </button>
             <button
               onClick={() => onDelete(activity.id)}
-              className='text-red-600 hover:text-red-800 transition-colors p-1'
+              className='text-red-600 hover:text-red-800 transition-colors p-1 dark:text-red-400 dark:hover:text-red-200'
               aria-label='Delete activity'
             >
               <Trash2 size={18} />

@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "../ui/Button";
+import { reportError } from "../../utils/monitoring";
 
 /**
  * Error Boundary component to catch React component errors
@@ -29,8 +30,7 @@ class ErrorBoundary extends React.Component {
       errorInfo,
     });
 
-    // You can also log the error to an error reporting service here
-    // Example: logErrorToService(error, errorInfo);
+    reportError(error, errorInfo);
   }
 
   handleReset = () => {
@@ -45,11 +45,11 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Fallback UI
       return (
-        <div className='min-h-screen flex items-center justify-center bg-gray-50 px-4'>
-          <div className='max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center'>
+        <div className='min-h-screen flex items-center justify-center bg-gray-50 px-4 dark:bg-gray-950'>
+          <div className='max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center dark:bg-gray-900'>
             <div className='mb-4'>
               <svg
-                className='mx-auto h-16 w-16 text-red-500'
+                className='mx-auto h-16 w-16 text-red-600 dark:text-red-400'
                 fill='none'
                 viewBox='0 0 24 24'
                 stroke='currentColor'
@@ -63,26 +63,26 @@ class ErrorBoundary extends React.Component {
               </svg>
             </div>
 
-            <h1 className='text-2xl font-bold text-gray-900 mb-2'>
+            <h1 className='text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
               Oops! Something went wrong
             </h1>
 
-            <p className='text-gray-600 mb-6'>
+            <p className='text-gray-600 mb-6 dark:text-gray-400'>
               We encountered an unexpected error. Please try refreshing the page
               or contact support if the problem persists.
             </p>
 
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className='mb-6 text-left'>
-                <summary className='cursor-pointer text-sm font-medium text-gray-700 mb-2'>
+                <summary className='cursor-pointer text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
                   Error Details (Development Only)
                 </summary>
-                <div className='bg-gray-100 rounded p-4 text-xs overflow-auto max-h-48'>
-                  <p className='font-semibold text-red-600 mb-2'>
+                <div className='bg-gray-100 rounded p-4 text-xs overflow-auto max-h-48 dark:bg-gray-800'>
+                  <p className='font-semibold text-red-600 mb-2 dark:text-red-400'>
                     {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
-                    <pre className='text-gray-700 whitespace-pre-wrap'>
+                    <pre className='text-gray-700 whitespace-pre-wrap dark:text-gray-300'>
                       {this.state.errorInfo.componentStack}
                     </pre>
                   )}

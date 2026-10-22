@@ -19,19 +19,19 @@ const JourneySection = () => {
   ];
 
   return (
-    <div className='bg-linear-to-b from-white to-gray-50 py-20'>
+    <div className='bg-linear-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950'>
       <div className='max-w-7xl mx-auto px-6'>
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
           {/* Left Content */}
           <div>
             <div className='mb-6'>
-              <span className='text-blue-600 font-semibold text-sm uppercase tracking-wider'>
+              <span className='text-blue-600 font-semibold text-sm uppercase tracking-wider dark:text-blue-400'>
                 Travel with us
               </span>
-              <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mt-3 mb-6'>
+              <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mt-3 mb-6 dark:text-gray-100'>
                 The journey is more important than the goal.
               </h2>
-              <p className='text-lg text-gray-600 leading-relaxed'>
+              <p className='text-lg text-gray-600 leading-relaxed dark:text-gray-400'>
                 Experience unforgettable adventures and create lasting memories.
                 Our carefully curated destinations offer something special for
                 every traveler.
@@ -43,15 +43,15 @@ const JourneySection = () => {
               {features.map((feature, index) => (
                 <div key={index} className='flex gap-4 group'>
                   <div className='shrink-0'>
-                    <div className='w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-500 transition-colors'>
-                      <Check className='w-4 h-4 text-blue-600 group-hover:text-white transition-colors' />
+                    <div className='w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-500 transition-colors dark:bg-blue-900/40'>
+                      <Check className='w-4 h-4 text-blue-600 group-hover:text-white transition-colors dark:text-blue-400' />
                     </div>
                   </div>
                   <div>
-                    <h3 className='font-semibold text-gray-900 mb-1'>
+                    <h3 className='font-semibold text-gray-900 mb-1 dark:text-gray-100'>
                       {feature.title}
                     </h3>
-                    <p className='text-sm text-gray-600'>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>
                       {feature.description}
                     </p>
                   </div>
@@ -72,8 +72,8 @@ const JourneySection = () => {
             </div>
 
             {/* Decorative Elements */}
-            <div className='absolute -bottom-6 -right-6 w-48 h-48 bg-blue-200 rounded-full blur-3xl opacity-30 -z-10'></div>
-            <div className='absolute -top-6 -left-6 w-48 h-48 bg-cyan-200 rounded-full blur-3xl opacity-30 -z-10'></div>
+            <div className='absolute -bottom-6 -right-6 w-48 h-48 bg-blue-200 rounded-full blur-3xl opacity-30 -z-10 dark:bg-blue-800/50'></div>
+            <div className='absolute -top-6 -left-6 w-48 h-48 bg-cyan-200 rounded-full blur-3xl opacity-30 -z-10 dark:bg-cyan-800/50'></div>
           </div>
         </div>
       </div>

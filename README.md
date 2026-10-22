@@ -4,11 +4,14 @@ A collaborative trip planning application built with React, Node.js/Express, Mon
 
 ## Features
 
-- Authentication with HTTP-only JWT cookies
+- Authentication with HTTP-only JWT cookies, email confirmation and password reset by email
+- Email notifications for join requests and invitations (Resend, any SMTP server, or the server log in development)
 - NID/passport upload and admin verification (required to create or join domestic/international trips)
 - Trips: create, edit, invite members, join requests
 - Real-time group chat per trip (Socket.IO) and in-app notifications
-- Day-by-day itinerary with map view
+- Day-by-day itinerary with a map of numbered stops and daily routes (OpenStreetMap, no API key)
+- Calendar export (.ics) of a trip and its activities
+- Opt-in public share links: a read-only trip plan with link previews and a subscribable calendar
 - Shared checklist and packing suggestions
 - Expense logging with receipts and equal split calculation
 - Photo gallery and private/shared notes
@@ -53,12 +56,18 @@ Server (`server/.env`):
 | --- | --- | --- |
 | `MONGODB_URI` | yes | MongoDB connection string |
 | `JWT_SECRET` | yes | Long random string used to sign auth tokens |
-| `UPLOADTHING_TOKEN` | for uploads | UploadThing API token |
+| `UPLOADTHING_TOKEN` | for uploads in production | UploadThing API token. Without it, development stores uploads in `server/src/uploads` |
+| `FILE_STORAGE` | no | Set to `local` to store uploads on disk even with a token (never use on hosts with ephemeral disks) |
 | `JWT_EXPIRES_IN` | no | Token and cookie lifetime, e.g. `1d`, `12h` (default `1d`) |
 | `PORT` | no | HTTP port (default `3000`) |
 | `NODE_ENV` | no | `development` or `production` (secure cookies in production) |
 | `CLIENT_URL` | no | Allowed client origin(s) for CORS and Socket.IO, comma-separated (default `http://localhost:5173`) |
 | `TRUST_PROXY` | no | Set to `true` when running behind a reverse proxy |
+| `EMAIL_PROVIDER` | no | `console` (default, writes emails to the server log), `resend` or `smtp` |
+| `EMAIL_FROM` | no | Sender address for emails |
+| `RESEND_API_KEY` | no | Needed with `EMAIL_PROVIDER=resend` |
+| `SMTP_URL` | no | Needed with `EMAIL_PROVIDER=smtp` (or `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`) |
+| `APP_URL` | no | Base URL for links in emails (default `SITE_URL`, then the first `CLIENT_URL`) |
 
 Client (`client/.env`):
 
@@ -90,7 +99,7 @@ npm run dev
 - Client: http://localhost:5173
 - API: http://localhost:3000/api
 
-The first account registered becomes the admin.
+To make yourself an admin, register an account, then either list its email in `ADMIN_EMAILS` in `server/.env` and sign in again, or run `npm run make-admin -- you@example.com` in `server/`.
 
 ## Scripts
 
@@ -98,7 +107,8 @@ Server (`server/`):
 
 - `npm run dev` - start with nodemon
 - `npm start` - start with node
-- `npm test` - run tests (Vitest)
+- `npm run make-admin -- <email>` - promote an existing account to admin
+- `npm test` - run tests (Vitest); set `MONGODB_TEST_URI` (e.g. `mongodb://localhost:27017`) to include the API tests, which use a throwaway database
 - `npm run seed:destinations` - seed destination data
 - `npm run lint` / `npm run format` - ESLint / Prettier
 
@@ -107,7 +117,33 @@ Client (`client/`):
 - `npm run dev` - start the Vite dev server
 - `npm run build` - production build
 - `npm run preview` - preview the production build
+- `npm test` - component and API client tests (Vitest + Testing Library)
 - `npm run lint` - ESLint
+
+End-to-end tests (`e2e/`, Playwright) build the client, start the server on port 3100 against a local MongoDB (`E2E_MONGODB_URI`, default `mongodb://127.0.0.1:27017/travelo_e2e`, wiped on every run) and drive Chromium through sign-up, login, trip creation, photo upload, Explore, NID verification and joining a trip:
+
+```bash
+cd e2e
+npm ci
+npx playwright install chromium
+npm test
+```
+
+CI runs all three suites with a MongoDB service container.
+
+## Deployment
+
+The root `Dockerfile` builds the client and serves it from the API server, so the app and API share one origin (the auth cookie is `SameSite=strict`). It runs on any Docker host, such as Render, Railway or Fly.io.
+
+```bash
+docker build -t travelo .
+docker run -p 3000:3000 \
+  -e MONGODB_URI=... -e JWT_SECRET=... -e UPLOADTHING_TOKEN=... \
+  -e CLIENT_URL=https://your-domain -e TRUST_PROXY=true \
+  travelo
+```
+
+Set `CLIENT_URL` to the public URL. `CLIENT_DIST` is set by the image; outside Docker, point it at `client/dist` to serve the built client from the server. See [DEPLOY.md](DEPLOY.md) for step-by-step Render setup and credential rotation.
 
 ## Project structure
 

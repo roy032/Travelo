@@ -1,5 +1,5 @@
 import { Calendar, Users, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Card from "../../ui/Card";
 import Badge from "../../ui/Badge";
 
@@ -7,8 +7,6 @@ import Badge from "../../ui/Badge";
  * TripCard component - displays trip summary information
  */
 const TripCard = ({ trip }) => {
-  const navigate = useNavigate();
-
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -33,69 +31,69 @@ const TripCard = ({ trip }) => {
 
   const status = getTripStatus();
 
-  const handleClick = () => {
-    navigate(`/trips/${trip.id}`);
-  };
-
   return (
-    <Card hover onClick={handleClick} className='h-full'>
-      {/* <div>{JSON.stringify(trip)}</div> */}
-      <div className='flex flex-col h-full'>
-        {/* Header */}
-        <div className='flex items-start justify-between mb-3'>
-          <h3 className='text-lg font-semibold text-gray-900 line-clamp-2 flex-1'>
-            {trip.title}
-          </h3>
-          <Badge variant={status.variant} className='ml-2 shrink-0'>
-            {status.label}
-          </Badge>
-        </div>
-
-        {/* Description */}
-        {trip.description && (
-          <p className='text-sm text-gray-600 mb-4 line-clamp-2'>
-            {trip.description}
-          </p>
-        )}
-
-        {/* Trip Details */}
-        <div className='space-y-2 mt-auto'>
-          {/* Dates */}
-          <div className='flex items-center text-sm text-gray-600'>
-            <Calendar size={16} className='mr-2 shrink-0' />
-            <span>
-              {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
-            </span>
-          </div>
-
-          {/* Destination Type */}
-          {trip.destinationType && (
-            <div className='flex items-center text-sm text-gray-600'>
-              <MapPin size={16} className='mr-2 shrink-0' />
-              <span className='capitalize'>{trip.destinationType}</span>
-            </div>
-          )}
-
-          {/* Members */}
-          <div className='flex items-center text-sm text-gray-600'>
-            <Users size={16} className='mr-2 shrink-0' />
-            <span>
-              {trip.members?.length || 0}{" "}
-              {trip.members?.length === 1 ? "member" : "members"}
-            </span>
-          </div>
-        </div>
-
-        {/* Owner Badge */}
-        {trip.isOwner && (
-          <div className='mt-3 pt-3 border-t border-gray-200'>
-            <Badge variant='primary' size='sm'>
-              Owner
+    <Link
+      to={`/trips/${trip.id}`}
+      className='block h-full rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950'
+    >
+      <Card hover className='h-full'>
+        <div className='flex flex-col h-full'>
+          {/* Header */}
+          <div className='flex items-start justify-between mb-3'>
+            <h2 className='text-lg font-semibold text-gray-900 line-clamp-2 flex-1 dark:text-gray-100'>
+              {trip.title}
+            </h2>
+            <Badge variant={status.variant} className='ml-2 shrink-0'>
+              {status.label}
             </Badge>
           </div>
-        )}
-      </div>
-    </Card>
+
+          {/* Description */}
+          {trip.description && (
+            <p className='text-sm text-gray-600 mb-4 line-clamp-2 dark:text-gray-400'>
+              {trip.description}
+            </p>
+          )}
+
+          {/* Trip Details */}
+          <div className='space-y-2 mt-auto'>
+            {/* Dates */}
+            <div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+              <Calendar size={16} className='mr-2 shrink-0' aria-hidden='true' />
+              <span>
+                {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+              </span>
+            </div>
+
+            {/* Destination Type */}
+            {trip.destinationType && (
+              <div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+                <MapPin size={16} className='mr-2 shrink-0' aria-hidden='true' />
+                <span className='capitalize'>{trip.destinationType}</span>
+              </div>
+            )}
+
+            {/* Members */}
+            <div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+              <Users size={16} className='mr-2 shrink-0' aria-hidden='true' />
+              <span>
+                {trip.members?.length || 0}{" "}
+                {trip.members?.length === 1 ? "member" : "members"}
+              </span>
+            </div>
+          </div>
+
+          {/* Owner Badge */}
+          {trip.isOwner && (
+            <div className='mt-3 pt-3 border-t border-gray-200 dark:border-gray-700'>
+              <Badge variant='primary' size='sm'>
+                Owner
+              </Badge>
+            </div>
+          )}
+        </div>
+      </Card>
+    </Link>
   );
 };
 

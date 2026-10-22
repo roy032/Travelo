@@ -127,19 +127,25 @@ const PhotoGrid = ({ photos, onDeletePhoto, currentUserId, loading }) => {
               key={photo.id}
               className={`${getBentoClass(
                 index
-              )} relative group overflow-hidden rounded-lg cursor-pointer bg-gray-100`}
-              onClick={() => handlePhotoClick(index)}
+              )} relative group overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800`}
             >
-              {/* Image */}
-              <img
-                src={photo.url}
-                alt={photo.caption || "Trip photo"}
-                className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-110'
-                loading='lazy'
-              />
+              {/* Image: opens the lightbox */}
+              <button
+                type='button'
+                onClick={() => handlePhotoClick(index)}
+                className='block w-full h-full cursor-pointer rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500'
+                aria-label={`Open photo${photo.caption ? `: ${photo.caption}` : ""}`}
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.caption || "Trip photo"}
+                  className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-110'
+                  loading='lazy'
+                />
+              </button>
 
-              {/* Hover Overlay */}
-              <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+              {/* Overlay: shown on hover and while a control inside the tile has keyboard focus */}
+              <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300'>
                 {/* Content at bottom */}
                 <div className='absolute bottom-0 left-0 right-0 p-4 text-white'>
                   {/* Uploader */}
@@ -166,14 +172,14 @@ const PhotoGrid = ({ photos, onDeletePhoto, currentUserId, loading }) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className='absolute top-3 right-3 flex space-x-2'>
+                <div className='pointer-events-auto absolute top-3 right-3 flex space-x-2'>
                   {/* Download Button */}
                   <button
                     onClick={(e) => handleDownload(e, photo)}
-                    className='bg-blue-500/90 hover:bg-blue-600 text-white p-2 rounded-full transition-colors shadow-lg'
+                    className='bg-blue-600/90 hover:bg-blue-700 text-white p-2 rounded-full transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
                     aria-label='Download photo'
                   >
-                    <Download className='h-4 w-4' />
+                    <Download className='h-4 w-4' aria-hidden='true' />
                   </button>
 
                   {/* Delete Button */}
@@ -181,10 +187,10 @@ const PhotoGrid = ({ photos, onDeletePhoto, currentUserId, loading }) => {
                     <button
                       onClick={(e) => handleDelete(e, photo.id)}
                       disabled={deletingId === photo.id}
-                      className='bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-full transition-colors shadow-lg'
+                      className='bg-red-600/90 hover:bg-red-700 text-white p-2 rounded-full transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
                       aria-label='Delete photo'
                     >
-                      <Trash2 className='h-4 w-4' />
+                      <Trash2 className='h-4 w-4' aria-hidden='true' />
                     </button>
                   )}
                 </div>

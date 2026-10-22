@@ -10,11 +10,13 @@ import { EmptyTrips, EmptySearchResults } from "../components/ui/EmptyState";
 import Modal from "../components/ui/Modal";
 import TripCreateForm from "../components/features/trips/TripCreateForm";
 import { useAuth } from "../hooks/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * TripListPage component - displays user's trips with filtering and search
  */
 const TripListPage = () => {
+  usePageTitle("My trips");
   const { user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
@@ -111,15 +113,15 @@ const TripListPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gray-50'>
-        <div className='bg-white shadow-sm border-b border-gray-200'>
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-950'>
+        <div className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
             <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
               <div>
-                <div className='h-9 w-32 bg-gray-200 rounded animate-pulse'></div>
-                <div className='h-5 w-64 bg-gray-200 rounded animate-pulse mt-2'></div>
+                <div className='h-9 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
+                <div className='h-5 w-64 bg-gray-200 rounded animate-pulse mt-2 dark:bg-gray-700'></div>
               </div>
-              <div className='h-10 w-32 bg-gray-200 rounded animate-pulse'></div>
+              <div className='h-10 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
             </div>
           </div>
         </div>
@@ -131,14 +133,14 @@ const TripListPage = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950'>
       {/* Header */}
-      <div className='bg-white shadow-sm border-b border-gray-200'>
+      <div className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>My Trips</h1>
-              <p className='mt-1 text-sm text-gray-600'>
+              <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>My Trips</h1>
+              <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
                 Plan and manage your travel adventures
               </p>
             </div>
@@ -161,7 +163,7 @@ const TripListPage = () => {
       {/* Verification Warning Banner */}
       {user?.domesticVerification?.status !== "verified" &&
         user?.internationalVerification?.status !== "verified" && (
-          <div className='bg-yellow-50 border-l-4 border-yellow-400'>
+          <div className='bg-yellow-50 border-l-4 border-yellow-400 dark:bg-yellow-950/40'>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
               <div className='flex items-start'>
                 <div className='flex-shrink-0'>
@@ -171,10 +173,10 @@ const TripListPage = () => {
                   />
                 </div>
                 <div className='ml-3 flex-1'>
-                  <h3 className='text-sm font-medium text-yellow-800'>
+                  <h2 className='text-sm font-medium text-yellow-800 dark:text-yellow-200'>
                     Document Verification Required
-                  </h3>
-                  <div className='mt-2 text-sm text-yellow-700'>
+                  </h2>
+                  <div className='mt-2 text-sm text-yellow-700 dark:text-yellow-300'>
                     <p>
                       To create trips, you need to verify at least one document:
                     </p>
@@ -183,7 +185,7 @@ const TripListPage = () => {
                         <strong>For Domestic trips:</strong> Upload and verify
                         your NID
                         {user?.domesticVerification?.status === "pending" && (
-                          <span className='ml-1 text-yellow-600'>
+                          <span className='ml-1 text-yellow-700 dark:text-yellow-300'>
                             (Verification pending - please wait for admin
                             approval)
                           </span>
@@ -194,7 +196,7 @@ const TripListPage = () => {
                         verify your Passport
                         {user?.internationalVerification?.status ===
                           "pending" && (
-                          <span className='ml-1 text-yellow-600'>
+                          <span className='ml-1 text-yellow-700 dark:text-yellow-300'>
                             (Verification pending - please wait for admin
                             approval)
                           </span>
@@ -260,7 +262,7 @@ const TripListPage = () => {
                 placeholder='Search trips...'
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className='block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                className='block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
               />
             </div>
           </div>

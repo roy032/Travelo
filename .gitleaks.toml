@@ -1,0 +1,22 @@
+# Secret scanning config for gitleaks (runs in CI on every push and PR).
+# Extends the built-in rules with database connection strings, which the
+# defaults miss.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "database-uri-with-credentials"
+description = "Database connection string with an embedded password"
+regex = '''(?i)\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqps?)://[^\s:/@"'`]+:([^\s:/@"'`<>]{6,})@[^\s"'`]+'''
+secretGroup = 1
+keywords = ["mongodb", "postgres", "mysql", "redis", "amqp"]
+
+[[rules.allowlists]]
+regexTarget = "secret"
+regexes = ['''(?i)^(password|passwd|pass|secret|changeme|example|your[-_]?password.*|\$\{?[A-Z_]+\}?)$''']
+
+# Documentation placeholders such as YOUR_JWT_TOKEN or your-uploadthing-token
+[[allowlists]]
+description = "Placeholder values in docs and examples"
+regexTarget = "secret"
+regexes = ['''(?i)^(your|replace)[-_]''']

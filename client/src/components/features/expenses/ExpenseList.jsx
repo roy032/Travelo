@@ -59,16 +59,15 @@ const ExpenseList = ({
       .toFixed(2);
   };
 
-  console.log(expenses);
   if (loading) {
     return (
       <div className='space-y-4'>
         <div className='flex justify-between items-center mb-6'>
           <div>
-            <div className='h-7 w-24 bg-gray-200 rounded animate-pulse'></div>
-            <div className='h-4 w-40 bg-gray-200 rounded animate-pulse mt-2'></div>
+            <div className='h-7 w-24 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
+            <div className='h-4 w-40 bg-gray-200 rounded animate-pulse mt-2 dark:bg-gray-700'></div>
           </div>
-          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse'></div>
+          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
         </div>
         <SkeletonList count={3} />
       </div>
@@ -79,8 +78,8 @@ const ExpenseList = ({
     <div>
       <div className='flex justify-between items-center mb-6'>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>Expenses</h2>
-          <p className='text-sm text-gray-600 mt-1'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Expenses</h2>
+          <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
             {expenses.length} {expenses.length === 1 ? "expense" : "expenses"} •
             Total: ৳{calculateTotal()}
           </p>

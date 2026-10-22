@@ -30,7 +30,7 @@ const MessageBubble = ({ message, isOptimistic = false }) => {
       >
         {/* Avatar */}
         {!isOwnMessage && (
-          <div className='shrink-0 w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium mr-2'>
+          <div className='shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium mr-2'>
             {message.sender?.name?.charAt(0).toUpperCase() || "?"}
           </div>
         )}
@@ -39,7 +39,7 @@ const MessageBubble = ({ message, isOptimistic = false }) => {
         <div>
           {/* Sender name (only for others' messages) */}
           {!isOwnMessage && (
-            <div className='text-xs text-gray-600 mb-1 px-1'>
+            <div className='text-xs text-gray-600 mb-1 px-1 dark:text-gray-400'>
               {message.sender?.name || "Unknown"}
             </div>
           )}
@@ -48,8 +48,8 @@ const MessageBubble = ({ message, isOptimistic = false }) => {
           <div
             className={`px-4 py-2 rounded-2xl ${
               isOwnMessage
-                ? "bg-blue-500 text-white rounded-tr-sm"
-                : "bg-gray-200 text-gray-900 rounded-tl-sm"
+                ? "bg-blue-600 text-white rounded-tr-sm"
+                : "bg-gray-200 text-gray-900 rounded-tl-sm dark:bg-gray-700 dark:text-gray-100"
             } ${isOptimistic ? "opacity-60" : ""}`}
           >
             <p className='text-sm whitespace-pre-wrap word-break-words'>
@@ -59,7 +59,7 @@ const MessageBubble = ({ message, isOptimistic = false }) => {
 
           {/* Timestamp */}
           <div
-            className={`text-xs text-gray-500 mt-1 px-1 ${
+            className={`text-xs text-gray-500 mt-1 px-1 dark:text-gray-400 ${
               isOwnMessage ? "text-right" : "text-left"
             }`}
           >

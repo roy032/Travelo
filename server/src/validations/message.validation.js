@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const sendMessageSchema = z.object({
   text: z
-    .string({ required_error: "Message text is required" })
+    .string({ error: "Message text is required" })
     .trim()
     .min(1, "Message cannot be empty")
     .max(2000, "Message must not exceed 2000 characters"),

@@ -80,7 +80,7 @@ const PackingSuggestionPanel = ({ tripId, onItemsAdded, onDismiss }) => {
 
   if (loading) {
     return (
-      <div className='bg-blue-50 border border-blue-200 rounded-lg p-6'>
+      <div className='bg-blue-50 border border-blue-200 rounded-lg p-6 dark:bg-blue-950/40 dark:border-blue-800'>
         <div className='flex justify-center'>
           <Loader />
         </div>
@@ -93,22 +93,22 @@ const PackingSuggestionPanel = ({ tripId, onItemsAdded, onDismiss }) => {
   }
 
   return (
-    <div className='bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6'>
+    <div className='bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 dark:bg-blue-950/40 dark:border-blue-800'>
       <div className='flex items-start justify-between mb-4'>
         <div className='flex items-center space-x-2'>
-          <Package className='text-blue-600' size={24} />
+          <Package className='text-blue-600 dark:text-blue-400' size={24} />
           <div>
-            <h3 className='text-lg font-semibold text-gray-900'>
+            <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
               Smart Packing Suggestions
             </h3>
-            <p className='text-sm text-gray-600'>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
               Based on your trip destination and duration
             </p>
           </div>
         </div>
         <button
           onClick={onDismiss}
-          className='text-gray-400 hover:text-gray-600 transition-colors'
+          className='text-gray-400 hover:text-gray-600 transition-colors dark:hover:text-gray-300'
           aria-label='Dismiss suggestions'
         >
           <X size={20} />
@@ -120,10 +120,10 @@ const PackingSuggestionPanel = ({ tripId, onItemsAdded, onDismiss }) => {
         {suggestions.categories &&
           Object.entries(suggestions.categories).map(([category, items]) => (
             <div key={category}>
-              <h4 className='text-sm font-medium text-gray-700 mb-2 capitalize'>
+              <h4 className='text-sm font-medium text-gray-700 mb-2 capitalize dark:text-gray-300'>
                 {category}
               </h4>
-              <div className='space-y-1 bg-white rounded-lg p-2 border border-blue-100'>
+              <div className='space-y-1 bg-white rounded-lg p-2 border border-blue-100 dark:bg-gray-900 dark:border-blue-900'>
                 {items.map((item, index) => (
                   <SuggestionItem
                     key={`${category}-${index}`}
@@ -138,25 +138,25 @@ const PackingSuggestionPanel = ({ tripId, onItemsAdded, onDismiss }) => {
       </div>
 
       {/* Action buttons */}
-      <div className='flex items-center justify-between pt-4 border-t border-blue-200'>
+      <div className='flex items-center justify-between pt-4 border-t border-blue-200 dark:border-blue-800'>
         <div className='flex space-x-2'>
           <button
             onClick={handleSelectAll}
-            className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+            className='text-sm text-blue-600 hover:text-blue-800 font-medium dark:text-blue-400 dark:hover:text-blue-200'
           >
             Select All
           </button>
           <span className='text-gray-300'>|</span>
           <button
             onClick={handleDeselectAll}
-            className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+            className='text-sm text-blue-600 hover:text-blue-800 font-medium dark:text-blue-400 dark:hover:text-blue-200'
           >
             Deselect All
           </button>
         </div>
 
         <div className='flex items-center space-x-2'>
-          <span className='text-sm text-gray-600'>
+          <span className='text-sm text-gray-600 dark:text-gray-400'>
             {selectedItems.length} selected
           </span>
           <Button

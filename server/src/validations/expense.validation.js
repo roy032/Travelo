@@ -14,7 +14,7 @@ export const createExpenseSchema = z.object({
   category: z.enum(
     ["food", "transport", "accommodation", "activities", "shopping", "other"],
     {
-      errorMap: () => ({ message: "Invalid category" }),
+      error: "Invalid category",
     }
   ),
   description: z
@@ -41,7 +41,7 @@ export const updateExpenseSchema = z.object({
     .enum(
       ["food", "transport", "accommodation", "activities", "shopping", "other"],
       {
-        errorMap: () => ({ message: "Invalid category" }),
+        error: "Invalid category",
       }
     )
     .optional(),

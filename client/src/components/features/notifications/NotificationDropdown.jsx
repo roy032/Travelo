@@ -96,17 +96,17 @@ const NotificationDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className='absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] flex flex-col'
+      className='absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] flex flex-col dark:bg-gray-900 dark:border-gray-700'
     >
       {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b border-gray-200'>
-        <h3 className='text-lg font-semibold text-gray-900'>Notifications</h3>
+      <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>Notifications</h3>
         <div className='flex items-center gap-2'>
           {hasUnread && (
             <button
               onClick={handleMarkAllAsRead}
               disabled={markingAllAsRead}
-              className='text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50'
+              className='text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300'
               title='Mark all as read'
             >
               <CheckCheck size={20} />
@@ -114,7 +114,7 @@ const NotificationDropdown = ({
           )}
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-600 transition-colors'
+            className='text-gray-400 hover:text-gray-600 transition-colors dark:hover:text-gray-300'
             aria-label='Close'
           >
             <X size={20} />
@@ -129,11 +129,11 @@ const NotificationDropdown = ({
             <Loader />
           </div>
         ) : notifications.length === 0 ? (
-          <div className='p-8 text-center text-gray-500'>
+          <div className='p-8 text-center text-gray-500 dark:text-gray-400'>
             <p>No notifications yet</p>
           </div>
         ) : (
-          <div className='divide-y divide-gray-100'>
+          <div className='divide-y divide-gray-100 dark:divide-gray-800'>
             {notifications.map((notification) => (
               <NotificationItem
                 key={notification._id}
@@ -148,10 +148,10 @@ const NotificationDropdown = ({
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className='p-3 border-t border-gray-200 text-center'>
+        <div className='p-3 border-t border-gray-200 text-center dark:border-gray-700'>
           <a
             href='/notifications'
-            className='text-sm text-blue-600 hover:text-blue-700 font-medium'
+            className='text-sm text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300'
             onClick={onClose}
           >
             View all notifications

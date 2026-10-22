@@ -79,15 +79,16 @@ export const uploadPhoto = async (photoData) => {
  * Delete a photo with file removal from UploadThing
  * @param {string} photoId - Photo ID
  * @param {string} userId - User ID attempting to delete
+ * @param {string} [tripId] - Trip the photo must belong to
  * @returns {Promise<Object>} Deletion confirmation
  * @throws {Error} If photo not found or user is not the uploader
  */
-export const deletePhoto = async (photoId, userId) => {
+export const deletePhoto = async (photoId, userId, tripId) => {
   try {
     // Find the photo
     const photo = await Photo.findById(photoId);
 
-    if (!photo) {
+    if (!photo || (tripId && photo.trip.toString() !== tripId.toString())) {
       throw new Error("Photo not found");
     }
 
