@@ -2,13 +2,15 @@ import { Link } from "react-router-dom";
 import ReportList from "../components/admin/ReportList";
 import Button from "../components/ui/Button";
 import { Users, Flag } from "lucide-react";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * Admin Reports Page - View and manage trip reports
  */
 const AdminReportsPage = () => {
+  usePageTitle("Reports");
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
+    <div className='min-h-screen bg-gray-50 p-6 dark:bg-gray-950'>
       <div className='max-w-7xl mx-auto'>
         {/* Admin Navigation */}
         <div className='flex gap-2 mb-6'>

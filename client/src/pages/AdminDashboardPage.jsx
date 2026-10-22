@@ -21,12 +21,14 @@ import {
   Flag,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * AdminDashboard page component
  * Displays user statistics, user table with filtering and search
  */
 const AdminDashboardPage = () => {
+  usePageTitle("Admin");
   const [statistics, setStatistics] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,6 @@ const AdminDashboardPage = () => {
     password: "",
     role: "user",
   });
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isActionMenuOpen, setIsActionMenuOpen] = useState(null);
 
   useEffect(() => {
     fetchStatistics();
@@ -252,12 +252,12 @@ const AdminDashboardPage = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
+    <div className='min-h-screen bg-gray-50 p-6 dark:bg-gray-950'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>Admin Dashboard</h1>
-          <p className='text-gray-600 mt-2'>
+          <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>Admin Dashboard</h1>
+          <p className='text-gray-600 mt-2 dark:text-gray-400'>
             Manage users and verification requests
           </p>
 
@@ -282,12 +282,12 @@ const AdminDashboardPage = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
           <Card>
             <div className='flex items-center'>
-              <div className='p-3 bg-blue-100 rounded-lg'>
-                <Users className='text-blue-600' size={24} />
+              <div className='p-3 bg-blue-100 rounded-lg dark:bg-blue-900/40'>
+                <Users className='text-blue-600 dark:text-blue-400' size={24} />
               </div>
               <div className='ml-4'>
-                <p className='text-sm text-gray-600'>Total Users</p>
-                <p className='text-2xl font-bold text-gray-900'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Total Users</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                   {statistics.totalUsers}
                 </p>
               </div>
@@ -296,12 +296,12 @@ const AdminDashboardPage = () => {
 
           <Card>
             <div className='flex items-center'>
-              <div className='p-3 bg-green-100 rounded-lg'>
-                <CheckCircle className='text-green-600' size={24} />
+              <div className='p-3 bg-green-100 rounded-lg dark:bg-green-900/40'>
+                <CheckCircle className='text-green-700 dark:text-green-300' size={24} />
               </div>
               <div className='ml-4'>
-                <p className='text-sm text-gray-600'>Verified</p>
-                <p className='text-2xl font-bold text-gray-900'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Verified</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                   {statistics.verifiedUsers}
                 </p>
               </div>
@@ -310,12 +310,12 @@ const AdminDashboardPage = () => {
 
           <Card>
             <div className='flex items-center'>
-              <div className='p-3 bg-yellow-100 rounded-lg'>
-                <Clock className='text-yellow-600' size={24} />
+              <div className='p-3 bg-yellow-100 rounded-lg dark:bg-yellow-900/40'>
+                <Clock className='text-yellow-700 dark:text-yellow-300' size={24} />
               </div>
               <div className='ml-4'>
-                <p className='text-sm text-gray-600'>Pending</p>
-                <p className='text-2xl font-bold text-gray-900'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Pending</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                   {statistics.pendingUsers}
                 </p>
               </div>
@@ -324,12 +324,12 @@ const AdminDashboardPage = () => {
 
           <Card>
             <div className='flex items-center'>
-              <div className='p-3 bg-gray-100 rounded-lg'>
-                <XCircle className='text-gray-600' size={24} />
+              <div className='p-3 bg-gray-100 rounded-lg dark:bg-gray-800'>
+                <XCircle className='text-gray-600 dark:text-gray-400' size={24} />
               </div>
               <div className='ml-4'>
-                <p className='text-sm text-gray-600'>Unverified</p>
-                <p className='text-2xl font-bold text-gray-900'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Unverified</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                   {statistics.unverifiedUsers}
                 </p>
               </div>
@@ -339,14 +339,19 @@ const AdminDashboardPage = () => {
 
         {/* Verification Queue */}
         <div className='mb-8'>
-          <VerificationQueue />
+          <VerificationQueue
+            onChange={() => {
+              fetchUsers();
+              fetchStatistics();
+            }}
+          />
         </div>
 
         {/* User Table */}
         <Card>
           <div className='mb-6'>
             <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl font-semibold text-gray-900'>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                 User Management
               </h2>
               {/* <Button
@@ -370,13 +375,13 @@ const AdminDashboardPage = () => {
                 />
               </div>
 
-              <div className='flex gap-2'>
+              <div className='flex flex-wrap gap-2'>
                 <button
                   onClick={() => setFilterStatus("")}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === ""
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                   }`}
                 >
                   All
@@ -386,7 +391,7 @@ const AdminDashboardPage = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === "verified"
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                   }`}
                 >
                   Verified
@@ -396,7 +401,7 @@ const AdminDashboardPage = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === "pending"
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                   }`}
                 >
                   Pending
@@ -406,7 +411,7 @@ const AdminDashboardPage = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === "unverified"
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                   }`}
                 >
                   Unverified
@@ -424,10 +429,10 @@ const AdminDashboardPage = () => {
             <>
               <div className='overflow-x-auto'>
                 <table className='w-full'>
-                  <thead className='bg-gray-50 border-b border-gray-200'>
+                  <thead className='bg-gray-50 border-b border-gray-200 dark:bg-gray-950 dark:border-gray-700'>
                     <tr>
                       <th
-                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100'
+                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                         onClick={() => handleSort("name")}
                       >
                         <div className='flex items-center'>
@@ -440,7 +445,7 @@ const AdminDashboardPage = () => {
                         </div>
                       </th>
                       <th
-                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100'
+                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                         onClick={() => handleSort("email")}
                       >
                         <div className='flex items-center'>
@@ -452,11 +457,11 @@ const AdminDashboardPage = () => {
                           )}
                         </div>
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400'>
                         Role
                       </th>
                       <th
-                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100'
+                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                         onClick={() => handleSort("verificationStatus")}
                       >
                         <div className='flex items-center'>
@@ -469,7 +474,7 @@ const AdminDashboardPage = () => {
                         </div>
                       </th>
                       <th
-                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100'
+                        className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                         onClick={() => handleSort("createdAt")}
                       >
                         <div className='flex items-center'>
@@ -481,16 +486,16 @@ const AdminDashboardPage = () => {
                           )}
                         </div>
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400'>
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='bg-white divide-y divide-gray-200'>
+                  <tbody className='bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700'>
                     {sortedUsers.map((user) => (
-                      <tr key={user._id} className='hover:bg-gray-50'>
+                      <tr key={user._id} className='hover:bg-gray-50 dark:hover:bg-gray-800'>
                         <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm font-medium text-gray-900'>
+                          <div className='text-sm font-medium text-gray-900 dark:text-gray-100'>
                             {user.name}
                             {user.isBlocked && (
                               <Badge variant='danger' className='ml-2'>
@@ -500,7 +505,7 @@ const AdminDashboardPage = () => {
                           </div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm text-gray-600'>
+                          <div className='text-sm text-gray-600 dark:text-gray-400'>
                             {user.email}
                           </div>
                         </td>
@@ -522,7 +527,7 @@ const AdminDashboardPage = () => {
                             {user.verificationStatus}
                           </Badge>
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-600'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400'>
                           {formatDate(user.createdAt)}
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap text-sm'>
@@ -537,8 +542,8 @@ const AdminDashboardPage = () => {
                               }
                               className={`p-2 rounded-lg transition-colors ${
                                 user.role === "admin"
-                                  ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                  ? "bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-400 dark:hover:bg-purple-800/50"
+                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
                               }`}
                               title={
                                 user.role === "admin"
@@ -556,8 +561,8 @@ const AdminDashboardPage = () => {
                               }
                               className={`p-2 rounded-lg transition-colors ${
                                 user.isBlocked
-                                  ? "bg-green-100 text-green-600 hover:bg-green-200"
-                                  : "bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+                                  ? "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-800/50"
+                                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:hover:bg-yellow-800/50"
                               }`}
                               title={
                                 user.isBlocked ? "Unblock user" : "Block user"
@@ -571,7 +576,7 @@ const AdminDashboardPage = () => {
                               onClick={() =>
                                 handleDeleteUser(user._id, user.name)
                               }
-                              className='p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors'
+                              className='p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-800/50'
                               title='Delete user and all data'
                             >
                               <Trash2 className='h-4 w-4' />
@@ -586,8 +591,8 @@ const AdminDashboardPage = () => {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className='flex items-center justify-between mt-6 pt-6 border-t border-gray-200'>
-                  <div className='text-sm text-gray-600'>
+                <div className='flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700'>
+                  <div className='text-sm text-gray-600 dark:text-gray-400'>
                     Showing{" "}
                     {(pagination.currentPage - 1) * pagination.usersPerPage + 1}{" "}
                     to{" "}
@@ -606,7 +611,7 @@ const AdminDashboardPage = () => {
                         }))
                       }
                       disabled={pagination.currentPage === 1}
-                      className='px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                      className='px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     >
                       Previous
                     </button>
@@ -620,7 +625,7 @@ const AdminDashboardPage = () => {
                       disabled={
                         pagination.currentPage === pagination.totalPages
                       }
-                      className='px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                      className='px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     >
                       Next
                     </button>
@@ -680,7 +685,7 @@ const AdminDashboardPage = () => {
           />
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
               Role
             </label>
             <select
@@ -688,7 +693,7 @@ const AdminDashboardPage = () => {
               onChange={(e) =>
                 setNewUserData({ ...newUserData, role: e.target.value })
               }
-              className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600'
             >
               <option value='user'>User</option>
               <option value='admin'>Admin</option>

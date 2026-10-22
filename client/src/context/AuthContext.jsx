@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await profileApi.getProfile();
+      const response = await profileApi.getProfile({ silent: true });
       setUser(response.user);
       setIsAuthenticated(true);
     } catch {
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
     // Fetch complete user profile data after successful registration
     try {
-      const profileResponse = await profileApi.getProfile();
+      const profileResponse = await profileApi.getProfile({ silent: true });
       setUser(profileResponse.user);
       setIsAuthenticated(true);
       toast.success("Registration successful!");
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
     // Fetch complete user profile data after successful login
     try {
-      const profileResponse = await profileApi.getProfile();
+      const profileResponse = await profileApi.getProfile({ silent: true });
       setUser(profileResponse.user);
       setIsAuthenticated(true);
       toast.success("Login successful!");
@@ -79,9 +79,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (userData) => {
+  const updateUser = useCallback((userData) => {
     setUser((prev) => ({ ...prev, ...userData }));
-  };
+  }, []);
 
   const value = {
     user,

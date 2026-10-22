@@ -1,212 +1,322 @@
-import { useState, useEffect } from "react";
-import { Compass, Loader2, AlertCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Compass, Loader2, AlertCircle, Search, X } from "lucide-react";
 import TripCard from "../components/explore/TripCard";
 import { useAuth } from "../hooks/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { useAsyncData } from "../hooks/useAsyncData";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { tripApi } from "../services/api.service";
+
+const TRIP_TYPES = [
+  { value: "", label: "All Types" },
+  { value: "beach", label: "Beach" },
+  { value: "mountain", label: "Mountain" },
+  { value: "city", label: "City" },
+  { value: "countryside", label: "Countryside" },
+  { value: "other", label: "Other" },
+];
+
+const TRIP_CATEGORIES = [
+  { value: "", label: "Domestic & international" },
+  { value: "domestic", label: "Domestic" },
+  { value: "international", label: "International" },
+];
+
+// Each option sets minDays/maxDays
+const LENGTHS = [
+  { value: "", label: "Any length" },
+  { value: "1-3", label: "Weekend (1–3 days)", minDays: 1, maxDays: 3 },
+  { value: "4-7", label: "Up to a week (4–7 days)", minDays: 4, maxDays: 7 },
+  { value: "8-14", label: "1–2 weeks (8–14 days)", minDays: 8, maxDays: 14 },
+  { value: "15-", label: "Longer (15+ days)", minDays: 15 },
+];
+
+const SORTS = [
+  { value: "soonest", label: "Starting soonest" },
+  { value: "latest", label: "Starting latest" },
+  { value: "newest", label: "Recently posted" },
+  { value: "shortest", label: "Shortest first" },
+  { value: "longest", label: "Longest first" },
+];
+
+const FILTER_KEYS = ["search", "type", "category", "from", "to", "length"];
+
+const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * ExplorePage - Displays upcoming trips
  * NO AUTHENTICATION REQUIRED - accessible to all users
- * For logged-in users, shows only trips they are NOT a member of
+ * For logged-in users, shows only trips they are NOT a member of.
+ * Filtering happens on the server; filters live in the URL.
  */
 const ExplorePage = () => {
+  usePageTitle("Explore trips");
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchText, setSearchText] = useState(searchParams.get("search") || "");
+  const debouncedSearch = useDebouncedValue(searchText.trim(), 300);
+  const [retry, setRetry] = useState(0);
 
-  // Trips state
-  const [trips, setTrips] = useState([]);
-  const [filteredTrips, setFilteredTrips] = useState([]);
-  const [tripsLoading, setTripsLoading] = useState(true);
-  const [tripsError, setTripsError] = useState(null);
-  const [tripFilter, setTripFilter] = useState(""); // destination type filter
-  const [tripSearch, setTripSearch] = useState("");
+  const search = searchParams.get("search") || "";
+  const destinationType = searchParams.get("type") || "";
+  const tripCategory = searchParams.get("category") || "";
+  const from = searchParams.get("from") || "";
+  const to = searchParams.get("to") || "";
+  const length = searchParams.get("length") || "";
+  const sort = searchParams.get("sort") || "soonest";
 
+  const updateParam = (key, value) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value) next.set(key, value);
+        else next.delete(key);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  // Push the debounced search text into the URL
   useEffect(() => {
-    fetchPublicTrips();
-  }, []);
+    setSearchParams(
+      (prev) => {
+        if ((prev.get("search") || "") === debouncedSearch) return prev;
+        const next = new URLSearchParams(prev);
+        if (debouncedSearch) next.set("search", debouncedSearch);
+        else next.delete("search");
+        return next;
+      },
+      { replace: true }
+    );
+  }, [debouncedSearch, setSearchParams]);
 
-  useEffect(() => {
-    applyTripFilters();
-  }, [trips, tripFilter, tripSearch]);
+  const loadTrips = useCallback(
+    () => {
+      const lengthOption = LENGTHS.find((option) => option.value === length);
+      return tripApi.getPublicTrips({
+        search,
+        destinationType,
+        tripCategory,
+        from,
+        to,
+        minDays: lengthOption?.minDays,
+        maxDays: lengthOption?.maxDays,
+        sort,
+      });
+    },
+    // retry re-runs the same request
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [search, destinationType, tripCategory, from, to, length, sort, retry]
+  );
+  const { data, error, loading } = useAsyncData(loadTrips);
 
-  const fetchPublicTrips = async () => {
-    try {
-      setTripsLoading(true);
-      setTripsError(null);
+  // Hide trips the user already owns or belongs to
+  const trips = (data || []).filter(
+    (trip) =>
+      !user?.id ||
+      (trip.ownerId !== user.id && !trip.members?.includes(user.id))
+  );
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/trips/explore`
-      );
+  const hasFilters = FILTER_KEYS.some((key) => searchParams.get(key));
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch trips");
-      }
-
-      const data = await response.json();
-      let tripsData = data.trips || [];
-
-      // If user is logged in, filter out trips where user is a member or owner
-      if (user && user.id) {
-        tripsData = tripsData.filter((trip) => {
-          // Check if user is the owner
-          const isOwner = trip.ownerId === user.id;
-
-          // Check if user is in members array
-          const isMember = trip.members?.some(
-            (memberId) => memberId === user.id
-          );
-
-          // Show only trips where user is NOT owner and NOT member
-          return !isOwner && !isMember;
-        });
-      }
-
-      setTrips(tripsData);
-      setFilteredTrips(tripsData);
-    } catch (err) {
-      console.error("Error fetching public trips:", err);
-      setTripsError(err.message || "Failed to load trips");
-    } finally {
-      setTripsLoading(false);
-    }
+  const clearFilters = () => {
+    setSearchText("");
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        FILTER_KEYS.forEach((key) => next.delete(key));
+        return next;
+      },
+      { replace: true }
+    );
   };
 
-  const applyTripFilters = () => {
-    let filtered = [...trips];
-
-    // Apply destination type filter
-    if (tripFilter) {
-      filtered = filtered.filter((trip) => trip.destinationType === tripFilter);
-    }
-
-    // Apply search filter
-    if (tripSearch) {
-      const query = tripSearch.toLowerCase();
-      filtered = filtered.filter(
-        (trip) =>
-          trip.title.toLowerCase().includes(query) ||
-          trip.description?.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredTrips(filtered);
-  };
-
-  const handleTripFilterChange = (filter) => {
-    setTripFilter(filter);
-  };
-
-  const handleTripSearchChange = (search) => {
-    setTripSearch(search);
-  };
-
-  const clearTripFilters = () => {
-    setTripFilter("");
-    setTripSearch("");
-  };
-
-  const tripCategories = [
-    { value: "", label: "All Types" },
-    { value: "beach", label: "Beach" },
-    { value: "mountain", label: "Mountain" },
-    { value: "city", label: "City" },
-    { value: "countryside", label: "Countryside" },
-    { value: "other", label: "Other" },
-  ];
+  const fieldClass =
+    "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600 dark:bg-gray-900";
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300";
 
   return (
-    <div className='min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 py-8'>
+    <div className='min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 py-8 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Page Header */}
         <div className='mb-8 text-center'>
           <div className='flex items-center justify-center mb-4'>
-            <Compass className='w-12 h-12 text-blue-600' />
+            <Compass className='w-12 h-12 text-blue-600 dark:text-blue-400' aria-hidden='true' />
           </div>
-          <h1 className='text-4xl font-bold text-gray-900 mb-2'>
+          <h1 className='text-4xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
             Explore Trips
           </h1>
-          <p className='text-lg text-gray-600'>
+          <p className='text-lg text-gray-600 dark:text-gray-400'>
             Discover upcoming trips and join amazing adventures
           </p>
         </div>
 
-        <>
-          {/* Trips Filter */}
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6'>
-            {/* Search Input */}
-            <div className='mb-4'>
-              <input
-                type='text'
-                placeholder='Search trips by title...'
-                value={tripSearch}
-                onChange={(e) => handleTripSearchChange(e.target.value)}
-                className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              />
-            </div>
-
-            {/* Category Filters */}
-            <div className='space-y-3'>
-              <label className='block text-sm font-medium text-gray-700'>
-                Filter by Destination Type
-              </label>
-              <div className='flex flex-wrap gap-2'>
-                {tripCategories.map((category) => (
-                  <button
-                    key={category.value}
-                    onClick={() => handleTripFilterChange(category.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      tripFilter === category.value
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {category.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Clear Filters Button */}
-            {(tripFilter || tripSearch) && (
-              <div className='mt-4 pt-4 border-t border-gray-200'>
-                <button
-                  onClick={clearTripFilters}
-                  className='px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
-                >
-                  Clear All Filters
-                </button>
-              </div>
-            )}
+        {/* Filters */}
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-4 dark:bg-gray-900 dark:border-gray-700'>
+          <div className='relative'>
+            <Search
+              className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400'
+              aria-hidden='true'
+            />
+            <label htmlFor='trip-search' className='sr-only'>
+              Search trips
+            </label>
+            <input
+              id='trip-search'
+              type='search'
+              placeholder='Search trips by title or description...'
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600'
+            />
           </div>
 
-          {/* Results Count */}
-          {!tripsLoading && (
-            <div className='mb-6'>
-              <p className='text-sm text-gray-600'>
-                Showing {filteredTrips.length} of {trips.length}{" "}
-                {trips.length === 1 ? "trip" : "trips"}
-              </p>
+          <div>
+            <span className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
+              Destination type
+            </span>
+            <div className='flex flex-wrap gap-2' role='group' aria-label='Destination type'>
+              {TRIP_TYPES.map((option) => (
+                <button
+                  key={option.value}
+                  type='button'
+                  onClick={() => updateParam("type", option.value)}
+                  aria-pressed={destinationType === option.value}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    destinationType === option.value
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3'>
+            <div>
+              <label htmlFor='trip-category' className={labelClass}>
+                Trip
+              </label>
+              <select
+                id='trip-category'
+                value={tripCategory}
+                onChange={(e) => updateParam("category", e.target.value)}
+                className={fieldClass}
+              >
+                {TRIP_CATEGORIES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor='trip-from' className={labelClass}>
+                Starts after
+              </label>
+              <input
+                id='trip-from'
+                type='date'
+                value={from}
+                min={today()}
+                max={to || undefined}
+                onChange={(e) => updateParam("from", e.target.value)}
+                className={fieldClass}
+              />
+            </div>
+            <div>
+              <label htmlFor='trip-to' className={labelClass}>
+                Starts before
+              </label>
+              <input
+                id='trip-to'
+                type='date'
+                value={to}
+                min={from || today()}
+                onChange={(e) => updateParam("to", e.target.value)}
+                className={fieldClass}
+              />
+            </div>
+            <div>
+              <label htmlFor='trip-length' className={labelClass}>
+                Length
+              </label>
+              <select
+                id='trip-length'
+                value={length}
+                onChange={(e) => updateParam("length", e.target.value)}
+                className={fieldClass}
+              >
+                {LENGTHS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor='trip-sort' className={labelClass}>
+                Sort by
+              </label>
+              <select
+                id='trip-sort'
+                value={sort}
+                onChange={(e) =>
+                  updateParam("sort", e.target.value === "soonest" ? "" : e.target.value)
+                }
+                className={fieldClass}
+              >
+                {SORTS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {hasFilters && (
+            <div className='pt-3 border-t border-gray-200 dark:border-gray-700'>
+              <button
+                type='button'
+                onClick={clearFilters}
+                className='inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800'
+              >
+                <X size={16} aria-hidden='true' />
+                Clear all filters
+              </button>
             </div>
           )}
+        </div>
 
+        <div aria-live='polite'>
           {/* Loading State */}
-          {tripsLoading && (
+          {loading && (
             <div className='flex flex-col items-center justify-center py-20'>
-              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4' />
-              <p className='text-gray-600'>Loading trips...</p>
+              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4 dark:text-blue-400' />
+              <p className='text-gray-600 dark:text-gray-400'>Loading trips...</p>
             </div>
           )}
 
           {/* Error State */}
-          {tripsError && !tripsLoading && (
-            <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-8'>
+          {error && !loading && (
+            <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-8 dark:bg-red-950/40 dark:border-red-800'>
               <div className='flex items-center space-x-3'>
-                <AlertCircle className='w-6 h-6 text-red-600' />
+                <AlertCircle className='w-6 h-6 text-red-600 dark:text-red-400' aria-hidden='true' />
                 <div>
-                  <h3 className='text-red-900 font-semibold'>Error</h3>
-                  <p className='text-red-700 text-sm'>{tripsError}</p>
+                  <h2 className='text-red-900 font-semibold dark:text-red-200'>Error</h2>
+                  <p className='text-red-700 text-sm dark:text-red-300'>
+                    {error.message || "Failed to load trips"}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={fetchPublicTrips}
+                type='button'
+                onClick={() => setRetry((n) => n + 1)}
                 className='mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium'
               >
                 Try Again
@@ -214,22 +324,31 @@ const ExplorePage = () => {
             </div>
           )}
 
+          {/* Results Count */}
+          {!loading && !error && trips.length > 0 && (
+            <p className='mb-6 text-sm text-gray-600 dark:text-gray-400'>
+              {trips.length} {trips.length === 1 ? "trip" : "trips"}
+              {hasFilters ? " match your filters" : ""}
+            </p>
+          )}
+
           {/* Empty State */}
-          {!tripsLoading && !tripsError && filteredTrips.length === 0 && (
+          {!loading && !error && trips.length === 0 && (
             <div className='text-center py-20'>
-              <Compass className='w-16 h-16 text-gray-400 mx-auto mb-4' />
-              <h3 className='text-xl font-semibold text-gray-900 mb-2'>
+              <Compass className='w-16 h-16 text-gray-400 mx-auto mb-4' aria-hidden='true' />
+              <h2 className='text-xl font-semibold text-gray-900 mb-2 dark:text-gray-100'>
                 No Trips Found
-              </h3>
-              <p className='text-gray-600 mb-4'>
-                {trips.length === 0
-                  ? "Check back later to discover new travel plans!"
-                  : "Try adjusting your filters to see more results"}
+              </h2>
+              <p className='text-gray-600 mb-4 dark:text-gray-400'>
+                {hasFilters
+                  ? "Try adjusting your filters to see more results"
+                  : "Check back later to discover new travel plans!"}
               </p>
-              {(tripFilter || tripSearch) && (
+              {hasFilters && (
                 <button
-                  onClick={clearTripFilters}
-                  className='text-blue-600 hover:text-blue-700 font-medium'
+                  type='button'
+                  onClick={clearFilters}
+                  className='text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300'
                 >
                   Clear filters
                 </button>
@@ -238,14 +357,14 @@ const ExplorePage = () => {
           )}
 
           {/* Trips Grid */}
-          {!tripsLoading && !tripsError && filteredTrips.length > 0 && (
+          {!loading && !error && trips.length > 0 && (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {filteredTrips.map((trip) => (
+              {trips.map((trip) => (
                 <TripCard key={trip.id} trip={trip} />
               ))}
             </div>
           )}
-        </>
+        </div>
       </div>
     </div>
   );

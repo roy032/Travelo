@@ -1,5 +1,5 @@
 import User from "#models/user.model.js";
-import bcrypt from "bcrypt";
+import { sendVerificationEmail } from "#services/account.service.js";
 
 export const getAllUsers = async () => {
   try {
@@ -28,6 +28,8 @@ export const getUserProfile = async (id) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
+      emailNotifications: user.emailNotifications,
       verificationStatus: user.verificationStatus,
       domesticVerification: user.domesticVerification,
       internationalVerification: user.internationalVerification,
@@ -41,13 +43,8 @@ export const getUserProfile = async (id) => {
 };
 
 export const getUserById = async (id) => {
-  try {
-    // TODO: get user by id
-
-    return user;
-  } catch (e) {
-    throw e;
-  }
+  // TODO: get user by id
+  return null;
 };
 
 /**
@@ -69,6 +66,8 @@ export const updateProfile = async (id, updates) => {
       throw new Error("User not found");
     }
 
+    let emailChanged = false;
+
     // Handle email update with uniqueness check
     if (updates.email && updates.email !== user.email) {
       const existingUser = await User.findOne({
@@ -78,6 +77,13 @@ export const updateProfile = async (id, updates) => {
         throw new Error("Email already exists");
       }
       user.email = updates.email;
+      // The new address has to be confirmed again
+      user.emailVerified = false;
+      emailChanged = true;
+    }
+
+    if (typeof updates.emailNotifications === "boolean") {
+      user.emailNotifications = updates.emailNotifications;
     }
 
     // Handle name update
@@ -106,12 +112,18 @@ export const updateProfile = async (id, updates) => {
 
     await user.save();
 
+    if (emailChanged) {
+      await sendVerificationEmail(user);
+    }
+
     // Return updated user without password
     return {
       id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
+      emailNotifications: user.emailNotifications,
       verificationStatus: user.verificationStatus,
       domesticVerification: user.domesticVerification,
       internationalVerification: user.internationalVerification,

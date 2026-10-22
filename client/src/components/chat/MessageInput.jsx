@@ -52,7 +52,7 @@ const MessageInput = ({ onSend, disabled = false }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex items-end gap-2 p-4 border-t bg-white'
+      className='flex items-end gap-2 p-4 border-t bg-white dark:bg-gray-900'
     >
       <textarea
         ref={textareaRef}
@@ -60,10 +60,11 @@ const MessageInput = ({ onSend, disabled = false }) => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={disabled ? "Not connected..." : "Type a message..."}
+        aria-label='Message'
         disabled={disabled || sending}
         rows={1}
         maxLength={2000}
-        className='flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed max-h-32 overflow-y-auto'
+        className='flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed max-h-32 overflow-y-auto dark:border-gray-600 dark:disabled:bg-gray-800'
         style={{ minHeight: "42px" }}
       />
 
@@ -72,11 +73,12 @@ const MessageInput = ({ onSend, disabled = false }) => {
         disabled={!text.trim() || disabled || sending}
         size='md'
         className='shrink-0'
+        aria-label={sending ? "Sending message" : "Send message"}
       >
         {sending ? (
-          <Loader2 className='w-5 h-5 animate-spin' />
+          <Loader2 className='w-5 h-5 animate-spin' aria-hidden='true' />
         ) : (
-          <Send className='w-5 h-5' />
+          <Send className='w-5 h-5' aria-hidden='true' />
         )}
       </Button>
     </form>

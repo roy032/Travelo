@@ -5,7 +5,7 @@ const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className='bg-white py-20'>
+    <div className='bg-white py-20 dark:bg-gray-900'>
       <div className='max-w-7xl mx-auto px-6'>
         <div className='relative rounded-3xl overflow-hidden shadow-2xl min-h-[400px] md:min-h-[500px]'>
           {/* Background Image */}
@@ -41,14 +41,14 @@ const CTASection = () => {
               {/* CTA Buttons */}
               <div className='flex flex-col sm:flex-row gap-4'>
                 <button
-                  className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                  className='bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1'
                   onClick={() => navigate("/explore")}
                 >
                   Explore Now
                   <ArrowRight size={20} />
                 </button>
                 <button
-                  className='bg-white hover:bg-gray-100 text-blue-600 px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                  className='bg-white hover:bg-gray-100 text-blue-600 px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-blue-400'
                   onClick={() => navigate("/explore")}
                 >
                   Learn More
@@ -58,7 +58,7 @@ const CTASection = () => {
           </div>
 
           {/* Decorative wave pattern */}
-          <div className='absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white to-transparent'></div>
+          <div className='absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white to-transparent dark:from-gray-900'></div>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import {
   createTripSchema,
   updateTripSchema,
 } from "#validations/trip.validation.js";
+import { exploreQuerySchema } from "#validations/search.validation.js";
 import { formatValidationError } from "#utils/format.js";
 import {
   createTrip,
@@ -15,6 +16,12 @@ import {
   getPublicUpcomingTrips,
 } from "#services/trip.service.js";
 import User from "#models/user.model.js";
+import { emailUser } from "#services/email/notify.js";
+import {
+  joinRequestAcceptedTemplate,
+  joinRequestReceivedTemplate,
+  joinRequestRejectedTemplate,
+} from "#services/email/templates.js";
 
 /**
  * Create a new trip
@@ -37,6 +44,8 @@ export const createTripController = async (req, res, next) => {
       endDate,
       destinationType,
       tripCategory,
+      baseCurrency,
+      budget,
     } = validationResult.data;
 
     // Fetch user to check trip-specific verification
@@ -80,6 +89,8 @@ export const createTripController = async (req, res, next) => {
       endDate: new Date(endDate),
       destinationType,
       tripCategory,
+      baseCurrency,
+      budget,
       owner: req.user.id, // From authentication middleware
     };
 
@@ -388,11 +399,20 @@ export const getTripMembersController = async (req, res, next) => {
 
 /**
  * Get all upcoming trips for public exploration (NO AUTH REQUIRED)
- * Returns sanitized trip data with activities and checklist only
+ * Returns sanitized trip summaries, filtered by the query string
  */
 export const getPublicTripsController = async (req, res, next) => {
   try {
-    const trips = await getPublicUpcomingTrips();
+    const validationResult = exploreQuerySchema.safeParse(req.query);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: formatValidationError(validationResult.error),
+      });
+    }
+
+    const trips = await getPublicUpcomingTrips(validationResult.data);
 
     res.status(200).json({
       trips,
@@ -491,13 +511,14 @@ export const requestJoinTripController = async (req, res, next) => {
       }
     }
 
-    // Avoid duplicate pending requests from the same user
+    // Avoid duplicate pending requests from the same user. Handled requests
+    // are deleted, so any remaining one is still pending (even if the owner
+    // has already read the notification).
     const existingRequest = await Notification.findOne({
       user: trip.owner._id,
       type: "join_request",
       relatedTrip: trip._id,
       relatedResource: userId,
-      isRead: false,
     });
 
     if (existingRequest) {
@@ -511,10 +532,19 @@ export const requestJoinTripController = async (req, res, next) => {
       user: trip.owner._id,
       type: "join_request",
       title: "New Join Request",
-      message: `${requestingUser.name}  wants to join "${trip.title}"`,
+      message: `${requestingUser.name} wants to join "${trip.title}"`,
       relatedTrip: trip._id,
       relatedResource: userId,
     });
+
+    // Not awaited: email is best effort and shouldn't slow the response
+    emailUser(trip.owner._id, (owner) =>
+      joinRequestReceivedTemplate({
+        name: owner.name,
+        requesterName: requestingUser.name,
+        tripTitle: trip.title,
+      })
+    );
 
     res.status(200).json({
       message: "Join request sent successfully",
@@ -536,7 +566,6 @@ export const getJoinRequestsController = async (req, res, next) => {
     const Trip = (await import("#models/trip.model.js")).default;
     const Notification = (await import("#models/notification.model.js"))
       .default;
-    const User = (await import("#models/user.model.js")).default;
 
     // Check if user is the owner
     const trip = await Trip.findById(tripId);
@@ -661,8 +690,8 @@ export const acceptJoinRequestController = async (req, res, next) => {
     );
 
     if (isMember) {
-      // Mark notification as read and return
-      await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+      // Already handled; drop the stale request
+      await Notification.findByIdAndDelete(notificationId);
       return res.status(400).json({
         error: "Already a member",
         message: "User is already a member of this trip",
@@ -673,8 +702,8 @@ export const acceptJoinRequestController = async (req, res, next) => {
     trip.members.push(requesterId);
     await trip.save();
 
-    // Mark notification as read
-    await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+    // The request is handled; remove it so it no longer shows as pending
+    await Notification.findByIdAndDelete(notificationId);
 
     // Create notification for the requester
     await Notification.create({
@@ -684,6 +713,14 @@ export const acceptJoinRequestController = async (req, res, next) => {
       message: `Your request to join "${trip.title}" has been accepted!`,
       relatedTrip: trip._id,
     });
+
+    emailUser(requesterId, (requester) =>
+      joinRequestAcceptedTemplate({
+        name: requester.name,
+        tripTitle: trip.title,
+        tripId: trip._id.toString(),
+      })
+    );
 
     res.status(200).json({
       message: "Join request accepted successfully",
@@ -748,8 +785,8 @@ export const rejectJoinRequestController = async (req, res, next) => {
 
     const requesterId = notification.relatedResource;
 
-    // Mark notification as read
-    await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+    // The request is handled; remove it so it no longer shows as pending
+    await Notification.findByIdAndDelete(notificationId);
 
     // Create notification for the requester
     await Notification.create({
@@ -759,6 +796,13 @@ export const rejectJoinRequestController = async (req, res, next) => {
       message: `Your request to join "${trip.title}" has been declined`,
       relatedTrip: trip._id,
     });
+
+    emailUser(requesterId, (requester) =>
+      joinRequestRejectedTemplate({
+        name: requester.name,
+        tripTitle: trip.title,
+      })
+    );
 
     res.status(200).json({
       message: "Join request rejected",

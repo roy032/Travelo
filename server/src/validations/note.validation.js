@@ -13,7 +13,7 @@ export const createNoteSchema = z.object({
     .trim(),
   visibility: z
     .enum(['private', 'shared'], {
-      errorMap: () => ({ message: 'Visibility must be either private or shared' }),
+      error: 'Visibility must be either private or shared',
     })
     .default('shared'),
 });
@@ -32,7 +32,7 @@ export const updateNoteSchema = z.object({
     .optional(),
   visibility: z
     .enum(['private', 'shared'], {
-      errorMap: () => ({ message: 'Visibility must be either private or shared' }),
+      error: 'Visibility must be either private or shared',
     })
     .optional(),
 });

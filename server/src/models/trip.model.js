@@ -49,6 +49,25 @@ const tripSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    // Expenses are converted into this currency for totals and splits
+    baseCurrency: {
+      type: String,
+      default: "BDT",
+      uppercase: true,
+      trim: true,
+    },
+    // Optional spending target, in baseCurrency
+    budget: {
+      type: Number,
+      min: [0, "Budget cannot be negative"],
+    },
+    // Public read-only link, set only when the owner turns sharing on
+    shareToken: {
+      type: String,
+    },
+    sharedAt: {
+      type: Date,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -71,6 +90,7 @@ const tripSchema = new mongoose.Schema(
 tripSchema.index({ owner: 1 });
 tripSchema.index({ members: 1 });
 tripSchema.index({ isDeleted: 1, createdAt: -1 });
+tripSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
 
 // Query helper to exclude deleted trips
 tripSchema.query.notDeleted = function () {

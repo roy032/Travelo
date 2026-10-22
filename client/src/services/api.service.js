@@ -1,14 +1,14 @@
 import toast from "react-hot-toast";
 
 // VITE_API_URL is the server origin without the /api suffix
-const API_BASE_URL = `${
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
+export const API_BASE_URL = `${
+  import.meta.env.VITE_API_URL ?? "http://localhost:3000"
 }/api`;
 
 /**
  * Custom error class for API errors
  */
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
     this.name = "ApiError";
@@ -50,7 +50,11 @@ async function fetchWithAuth(endpoint, options = {}) {
 
     // Handle error responses
     if (!response.ok) {
-      const errorMessage = data?.message || data?.error || "An error occurred";
+      // Validation failures put the readable reason in `details`
+      const details =
+        typeof data?.details === "string" ? data.details : undefined;
+      const errorMessage =
+        data?.message || details || data?.error || "An error occurred";
       throw new ApiError(errorMessage, response.status, data);
     }
 
@@ -67,42 +71,66 @@ async function fetchWithAuth(endpoint, options = {}) {
 }
 
 /**
+ * Pick the message to show the user for a failed request. Prefer what the
+ * server said (e.g. "You must upload and verify your NID...") and fall back
+ * to a generic message per status.
+ */
+export function getErrorMessage(error) {
+  if (!(error instanceof ApiError)) {
+    return "Network error. Please check your connection.";
+  }
+
+  switch (error.status) {
+    case 0:
+      return error.message;
+    case 401:
+      // Wrong email or password on sign-in, otherwise an expired session
+      return error.data?.error === "Invalid credentials"
+        ? "Invalid email or password"
+        : "Please log in to continue";
+    case 413:
+      return "File is too large";
+    case 415:
+      return error.data?.message || "Unsupported file type";
+    case 429:
+      return error.message || "Too many attempts. Please try again later";
+    default:
+      if (error.status >= 500) return "Server error. Please try again later";
+      return error.message && error.message !== "An error occurred"
+        ? error.message
+        : "Something went wrong. Please try again";
+  }
+}
+
+/**
+ * Build a query string from an object, skipping empty values
+ */
+function toQueryString(params) {
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null && value !== ""
+  );
+  return new URLSearchParams(entries).toString();
+}
+
+/**
+ * Hand a downloaded file to the browser to save
+ */
+function saveFile(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
  * Handle API errors with toast notifications
  */
 function handleApiError(error) {
-  if (error instanceof ApiError) {
-    // Show user-friendly error messages
-    switch (error.status) {
-      case 400:
-        toast.error(error.message || "Invalid request");
-        break;
-      case 401:
-        toast.error("Please log in to continue");
-        break;
-      case 403:
-        toast.error("You do not have permission to perform this action");
-        break;
-      case 404:
-        toast.error(error.message || "Resource not found");
-        break;
-      case 409:
-        toast.error(error.message || "Conflict occurred");
-        break;
-      case 413:
-        toast.error("File is too large");
-        break;
-      case 415:
-        toast.error("Unsupported file type");
-        break;
-      case 500:
-        toast.error("Server error. Please try again later");
-        break;
-      default:
-        toast.error(error.message || "An unexpected error occurred");
-    }
-  } else {
-    toast.error("Network error. Please check your connection.");
-  }
+  toast.error(getErrorMessage(error));
   throw error;
 }
 
@@ -113,7 +141,6 @@ function handleApiError(error) {
 export const authApi = {
   register: async (userData) => {
     try {
-      console.log("register api hit");
       return await fetchWithAuth("/auth/sign-up", {
         method: "POST",
         body: JSON.stringify(userData),
@@ -136,7 +163,46 @@ export const authApi = {
 
   logout: async () => {
     try {
-      return await fetchWithAuth("/auth/signout", {
+      return await fetchWithAuth("/auth/sign-out", {
+        method: "POST",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      return await fetchWithAuth("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  resetPassword: async ({ token, password }) => {
+    try {
+      return await fetchWithAuth("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token, password }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // No toast: the verify page shows the outcome itself
+  verifyEmail: (token) =>
+    fetchWithAuth("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  resendVerification: async () => {
+    try {
+      return await fetchWithAuth("/auth/resend-verification", {
         method: "POST",
       });
     } catch (error) {
@@ -150,11 +216,14 @@ export const authApi = {
 // ============================================================================
 
 export const profileApi = {
-  getProfile: async () => {
+  // silent: skip the error toast (used for the session check on page load,
+  // where a 401 just means the visitor is signed out)
+  getProfile: async ({ silent = false } = {}) => {
     try {
       const response = await fetchWithAuth("/profile");
       return response;
     } catch (error) {
+      if (silent) throw error;
       return handleApiError(error);
     }
   },
@@ -355,21 +424,71 @@ export const adminApi = {
 // ============================================================================
 
 export const tripApi = {
-  // Public endpoint - no authentication required
-  getPublicTrips: async () => {
+  // Turn on the public read-only link; returns { shareToken, sharedAt, url }
+  enableSharing: async (tripId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/trips/explore`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch public trips");
-      }
-
-      const data = await response.json();
-      return data.trips || [];
+      return await fetchWithAuth(`/trips/${tripId}/share`, { method: "POST" });
     } catch (error) {
-      console.error("Error fetching public trips:", error);
-      return [];
+      return handleApiError(error);
     }
+  },
+
+  disableSharing: async (tripId) => {
+    try {
+      return await fetchWithAuth(`/trips/${tripId}/share`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Download the trip and its itinerary as an .ics file
+  downloadCalendar: async (tripId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/trips/${tripId}/calendar.ics`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new ApiError(
+          data.message || "Failed to export calendar",
+          response.status,
+          data
+        );
+      }
+      const fileName =
+        response.headers
+          .get("content-disposition")
+          ?.match(/filename="([^"]+)"/)?.[1] || "trip.ics";
+      saveFile(await response.blob(), fileName);
+    } catch (error) {
+      return handleApiError(
+        error instanceof ApiError
+          ? error
+          : new ApiError("Network error. Please check your connection.", 0, null)
+      );
+    }
+  },
+
+  // Public endpoint - no authentication required.
+  // params: search, destinationType, tripCategory, from, to, minDays, maxDays, sort
+  getPublicTrips: async (params = {}) => {
+    const queryString = toQueryString(params);
+    const response = await fetch(
+      `${API_BASE_URL}/trips/explore${queryString ? `?${queryString}` : ""}`
+    );
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new ApiError(
+        data.details || data.message || "Failed to load trips",
+        response.status,
+        data
+      );
+    }
+
+    return data.trips || [];
   },
 
   getUserTrips: async (params = {}) => {
@@ -695,6 +814,16 @@ export const notesApi = {
 // Expense Endpoints
 // ============================================================================
 
+// Multipart body for an expense with a receipt; lists are sent as JSON text
+const expenseFormData = (expenseData) => {
+  const formData = new FormData();
+  Object.entries(expenseData).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
+  });
+  return formData;
+};
+
 export const expenseApi = {
   getExpenses: async (tripId) => {
     try {
@@ -707,18 +836,11 @@ export const expenseApi = {
 
   createExpense: async (tripId, expenseData, receiptFile = null) => {
     try {
-      console.log("Creating expense with receipt file:", receiptFile);
       let body;
       if (receiptFile) {
         // Use FormData for file upload
-        const formData = new FormData();
-        formData.append("amount", expenseData.amount);
-        formData.append("currency", "BDT");
-        formData.append("category", expenseData.category);
-        formData.append("description", expenseData.description);
-        formData.append("payer", expenseData.payer);
+        const formData = expenseFormData(expenseData);
         formData.append("receipt", receiptFile);
-        console.log("FormData created with receipt");
         body = formData;
       } else {
         body = JSON.stringify(expenseData);
@@ -728,7 +850,6 @@ export const expenseApi = {
         method: "POST",
         body,
       });
-      console.log("Expense created response:", response);
       return response.expense;
     } catch (error) {
       return handleApiError(error);
@@ -740,12 +861,7 @@ export const expenseApi = {
       let body;
       if (receiptFile) {
         // Use FormData for file upload
-        const formData = new FormData();
-        formData.append("amount", expenseData.amount);
-        formData.append("currency", "BDT");
-        formData.append("category", expenseData.category);
-        formData.append("description", expenseData.description);
-        formData.append("payer", expenseData.payer);
+        const formData = expenseFormData(expenseData);
         formData.append("receipt", receiptFile);
         body = formData;
       } else {
@@ -799,6 +915,60 @@ export const expenseApi = {
       return handleApiError(error);
     }
   },
+
+  // Record that one member paid another back (amount in the trip currency)
+  createSettlement: async (tripId, { from, to, amount, note }) => {
+    try {
+      const response = await fetchWithAuth(`/trips/${tripId}/settlements`, {
+        method: "POST",
+        body: JSON.stringify({ from, to, amount, note }),
+      });
+      return response.settlement;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteSettlement: async (tripId, settlementId) => {
+    try {
+      return await fetchWithAuth(
+        `/trips/${tripId}/settlements/${settlementId}`,
+        { method: "DELETE" }
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Currency Endpoints
+// ============================================================================
+
+export const currencyApi = {
+  getRates: async () => {
+    try {
+      return await fetchWithAuth("/currency/rates");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // No toast on failure: the converter and expense form show errors inline
+  convert: async (amount, from, to) => {
+    const params = new URLSearchParams({ amount: String(amount), from, to });
+    return fetchWithAuth(`/currency/convert?${params}`);
+  },
+};
+
+// ============================================================================
+// Weather Endpoints
+// ============================================================================
+
+export const weatherApi = {
+  // { days, locations, hasLocation, packing, ... }
+  // No toast on failure: the weather tab shows the error inline
+  getTripWeather: async (tripId) => fetchWithAuth(`/trips/${tripId}/weather`),
 };
 
 // ============================================================================
@@ -857,7 +1027,6 @@ export const notificationApi = {
       const response = await fetchWithAuth(
         `/notifications${queryString ? `?${queryString}` : ""}`
       );
-      console.log(response);
       return response;
     } catch (error) {
       return handleApiError(error);
@@ -1013,9 +1182,10 @@ export const invitationApi = {
 // ============================================================================
 
 export const destinationApi = {
+  // params: search, category, country, minRating, sort
   getDestinations: async (params = {}) => {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = toQueryString(params);
       const response = await fetchWithAuth(
         `/destinations${queryString ? `?${queryString}` : ""}`
       );
@@ -1025,10 +1195,117 @@ export const destinationApi = {
     }
   },
 
+  getCountries: async () => {
+    try {
+      const response = await fetchWithAuth("/destinations/countries");
+      return response.countries || [];
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   getDestinationById: async (destinationId) => {
     try {
       const response = await fetchWithAuth(`/destinations/${destinationId}`);
       return response.destination;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Review Endpoints
+// ============================================================================
+
+export const reviewApi = {
+  // Returns { reviews, summary, pagination }
+  getReviews: async (destinationId, params = {}) => {
+    try {
+      const queryString = toQueryString(params);
+      return await fetchWithAuth(
+        `/destinations/${destinationId}/reviews${queryString ? `?${queryString}` : ""}`
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // The signed-in user's review, or null
+  getMyReview: async (destinationId) => {
+    try {
+      const response = await fetchWithAuth(
+        `/destinations/${destinationId}/reviews/me`
+      );
+      return response.review;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Creates the review, or updates it if the user already wrote one
+  saveReview: async (destinationId, { rating, comment }) => {
+    try {
+      return await fetchWithAuth(`/destinations/${destinationId}/reviews`, {
+        method: "PUT",
+        body: JSON.stringify({ rating, comment }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  deleteReview: async (destinationId, reviewId) => {
+    try {
+      return await fetchWithAuth(
+        `/destinations/${destinationId}/reviews/${reviewId}`,
+        { method: "DELETE" }
+      );
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+};
+
+// ============================================================================
+// Favorite Endpoints
+// ============================================================================
+
+export const favoriteApi = {
+  // Returns { destinations, trips } with details
+  getFavorites: async () => {
+    try {
+      return await fetchWithAuth("/favorites");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // Returns { destination: [ids], trip: [ids] }
+  getFavoriteIds: async () => {
+    try {
+      return await fetchWithAuth("/favorites/ids");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  addFavorite: async (itemType, itemId) => {
+    try {
+      return await fetchWithAuth("/favorites", {
+        method: "POST",
+        body: JSON.stringify({ itemType, itemId }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  removeFavorite: async (itemType, itemId) => {
+    try {
+      return await fetchWithAuth(`/favorites/${itemType}/${itemId}`, {
+        method: "DELETE",
+      });
     } catch (error) {
       return handleApiError(error);
     }
@@ -1180,7 +1457,39 @@ export default {
   notification: notificationApi,
   invitation: invitationApi,
   destination: destinationApi,
+  review: reviewApi,
+  favorite: favoriteApi,
   packing: packingApi,
+  currency: currencyApi,
+  weather: weatherApi,
   report: reportApi,
   message: messageApi,
+};
+
+// Public shared-trip links - no authentication required
+export const shareApi = {
+  // Returns { trip, activities }; throws ApiError 404 when the link is off
+  getSharedTrip: async (token) => {
+    const response = await fetch(
+      `${API_BASE_URL}/shared/${encodeURIComponent(token)}`
+    ).catch(() => {
+      throw new ApiError("Network error. Please check your connection.", 0, null);
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || "Failed to load trip",
+        response.status,
+        data
+      );
+    }
+    return data;
+  },
+
+  // Public .ics address; calendar apps can subscribe to it
+  calendarUrl: (token) =>
+    new URL(
+      `${API_BASE_URL}/shared/${encodeURIComponent(token)}/calendar.ics`,
+      window.location.origin
+    ).toString(),
 };

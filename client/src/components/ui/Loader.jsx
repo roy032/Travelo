@@ -35,7 +35,7 @@ const Loader = ({
         className={`${sizes[size]} animate-spin rounded-full border-b-2 ${colors[color]}`}
         aria-hidden="true"
       ></div>
-      {text && <p className="text-sm text-gray-600">{text}</p>}
+      {text && <p className="text-sm text-gray-600 dark:text-gray-400">{text}</p>}
       {!text && <span className="sr-only">{loadingText}</span>}
     </div>
   );
@@ -43,7 +43,7 @@ const Loader = ({
   if (fullScreen) {
     return (
       <div
-        className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50"
+        className="fixed inset-0 flex items-center justify-center bg-white/75 z-50 dark:bg-gray-950/75"
         role="dialog"
         aria-modal="true"
         aria-label="Loading content"

@@ -8,7 +8,7 @@ const Card = ({
   hover = false,
   onClick,
 }) => {
-  const baseStyles = 'bg-white rounded-lg shadow-sm border border-gray-200';
+  const baseStyles = 'bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-700';
   const hoverStyles = hover ? 'hover:shadow-md transition-shadow cursor-pointer' : '';
 
   const paddings = {

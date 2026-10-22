@@ -8,15 +8,15 @@ const VisibilityToggle = ({ visibility, onChange, disabled = false }) => {
 
   return (
     <div className="flex items-center space-x-2">
-      <label className="text-sm font-medium text-gray-700">Visibility:</label>
-      <div className="flex items-center bg-gray-100 rounded-lg p-1">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Visibility:</label>
+      <div className="flex items-center bg-gray-100 rounded-lg p-1 dark:bg-gray-800">
         <button
           type="button"
           onClick={() => onChange('private')}
           disabled={disabled}
           className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${isPrivate
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100'
+              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           <Lock size={14} />
@@ -27,8 +27,8 @@ const VisibilityToggle = ({ visibility, onChange, disabled = false }) => {
           onClick={() => onChange('shared')}
           disabled={disabled}
           className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!isPrivate
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100'
+              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           <Users size={14} />
