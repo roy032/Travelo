@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { initMonitoring } from './utils/monitoring'
+import { registerServiceWorker } from './utils/offline'
 
 initMonitoring()
 
@@ -14,9 +15,5 @@ createRoot(document.getElementById('root')).render(
 
 // Offline support and "install app"; skipped in dev so Vite's HMR is not cached
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((error) => {
-      console.error('Service worker registration failed:', error)
-    })
-  })
+  window.addEventListener('load', () => registerServiceWorker())
 }

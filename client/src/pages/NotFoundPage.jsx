@@ -2,13 +2,15 @@ import { Link } from "react-router-dom";
 import { Home, ArrowLeft } from "lucide-react";
 import Button from "../components/ui/Button";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { useTranslation } from "../hooks/useTranslation";
 
 /**
  * NotFoundPage component
  * Displays a 404 error page when route is not found
  */
 const NotFoundPage = () => {
-  usePageTitle("Page not found");
+  const { t } = useTranslation();
+  usePageTitle(t("notFound.pageTitle"));
   return (
     <div className='min-h-screen bg-gray-50 flex items-center justify-center px-4 dark:bg-gray-950'>
       <div className='max-w-md w-full text-center'>
@@ -35,11 +37,10 @@ const NotFoundPage = () => {
 
         {/* Error Message */}
         <h2 className='text-3xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
-          Page Not Found
+          {t("notFound.heading")}
         </h2>
         <p className='text-lg text-gray-600 mb-8 dark:text-gray-400'>
-          Sorry, we couldn't find the page you're looking for. The page might
-          have been moved or doesn't exist.
+          {t("notFound.message")}
         </p>
 
         {/* Action Buttons */}
@@ -47,7 +48,7 @@ const NotFoundPage = () => {
           <Link to='/'>
             <Button variant='primary' className='w-full sm:w-auto'>
               <Home size={18} className='mr-2' />
-              Go Home
+              {t("notFound.goHome")}
             </Button>
           </Link>
           <Button
@@ -56,19 +57,19 @@ const NotFoundPage = () => {
             className='w-full sm:w-auto'
           >
             <ArrowLeft size={18} className='mr-2' />
-            Go Back
+            {t("notFound.goBack")}
           </Button>
         </div>
 
         {/* Help Text */}
         <div className='mt-12 text-sm text-gray-500 dark:text-gray-400'>
           <p>
-            If you believe this is an error, please{" "}
+            {t("notFound.help")}{" "}
             <a
               href='mailto:support@travelo.com'
               className='text-blue-700 underline hover:no-underline dark:text-blue-300'
             >
-              contact support
+              {t("notFound.contact")}
             </a>
           </p>
         </div>

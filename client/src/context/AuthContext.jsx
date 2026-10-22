@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
+import { clearOfflineData } from "../utils/offline";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await authApi.register(userData);
+    await clearOfflineData();
 
     // Fetch complete user profile data after successful registration
     try {
@@ -47,6 +49,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const response = await authApi.login(credentials);
+    // Another account may have used this device; drop its saved trips
+    await clearOfflineData();
 
     // Fetch complete user profile data after successful login
     try {
@@ -67,6 +71,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Saved trips belong to this account; don't leave them on a shared device
+    await clearOfflineData();
     try {
       await authApi.logout();
       setUser(null);

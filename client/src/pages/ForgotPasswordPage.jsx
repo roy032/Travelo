@@ -4,8 +4,12 @@ import { authApi } from "../services/api.service";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { useTranslation } from "../hooks/useTranslation";
 
 const ForgotPasswordPage = () => {
+  const { t } = useTranslation();
+  usePageTitle(t("auth.forgot.pageTitle"));
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,11 +19,11 @@ const ForgotPasswordPage = () => {
     e.preventDefault();
 
     if (!email) {
-      setError("Email is required");
+      setError(t("auth.emailRequired"));
       return;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Email is invalid");
+      setError(t("auth.emailInvalid"));
       return;
     }
 
@@ -27,8 +31,7 @@ const ForgotPasswordPage = () => {
     try {
       const response = await authApi.forgotPassword(email);
       setSentMessage(
-        response?.message ||
-          "If an account exists for that email, we've sent a link to reset the password."
+        response?.message || t("auth.forgot.sent")
       );
     } catch (err) {
       // Error is already shown by the API service with a toast
@@ -43,10 +46,10 @@ const ForgotPasswordPage = () => {
       <div className='max-w-md w-full space-y-8'>
         <div>
           <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100'>
-            Forgot your password?
+            {t("auth.forgot.heading")}
           </h1>
           <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
-            Enter your email and we'll send you a link to choose a new one.
+            {t("auth.forgot.intro")}
           </p>
         </div>
 
@@ -55,20 +58,19 @@ const ForgotPasswordPage = () => {
             <div className='space-y-4 text-center' role='status'>
               <p className='text-gray-700 dark:text-gray-300'>{sentMessage}</p>
               <p className='text-sm text-gray-500 dark:text-gray-400'>
-                The link expires in 60 minutes. Check your spam folder if you
-                don't see it.
+                {t("auth.forgot.expires")}
               </p>
               <Link
                 to='/login'
                 className='inline-block font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
               >
-                Back to sign in
+                {t("auth.backToSignIn")}
               </Link>
             </div>
           ) : (
             <form className='space-y-6' onSubmit={handleSubmit} noValidate>
               <Input
-                label='Email address'
+                label={t("auth.email")}
                 type='email'
                 name='email'
                 value={email}
@@ -76,7 +78,7 @@ const ForgotPasswordPage = () => {
                   setEmail(e.target.value);
                   setError("");
                 }}
-                placeholder='you@example.com'
+                placeholder={t("auth.emailPlaceholder")}
                 error={error}
                 required
                 autoComplete='email'
@@ -89,7 +91,7 @@ const ForgotPasswordPage = () => {
                 loading={loading}
                 disabled={loading}
               >
-                Send reset link
+                {t("auth.forgot.submit")}
               </Button>
 
               <p className='text-center text-sm'>
@@ -97,7 +99,7 @@ const ForgotPasswordPage = () => {
                   to='/login'
                   className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
                 >
-                  Back to sign in
+                  {t("auth.backToSignIn")}
                 </Link>
               </p>
             </form>

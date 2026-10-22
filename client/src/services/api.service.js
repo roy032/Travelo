@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { detectLanguage, translate } from "../i18n";
 
 // VITE_API_URL is the server origin without the /api suffix
 export const API_BASE_URL = `${
@@ -16,6 +17,10 @@ export class ApiError extends Error {
     this.data = data;
   }
 }
+
+// Shown in the visitor's language; this module lives outside React
+const networkErrorMessage = () =>
+  translate(detectLanguage(), "common.networkError");
 
 /**
  * Fetch wrapper with error handling and token management
@@ -66,7 +71,7 @@ async function fetchWithAuth(endpoint, options = {}) {
     }
 
     // Network error
-    throw new ApiError("Network error. Please check your connection.", 0, null);
+    throw new ApiError(networkErrorMessage(), 0, null);
   }
 }
 
@@ -77,7 +82,7 @@ async function fetchWithAuth(endpoint, options = {}) {
  */
 export function getErrorMessage(error) {
   if (!(error instanceof ApiError)) {
-    return "Network error. Please check your connection.";
+    return networkErrorMessage();
   }
 
   switch (error.status) {
@@ -466,7 +471,7 @@ export const tripApi = {
       return handleApiError(
         error instanceof ApiError
           ? error
-          : new ApiError("Network error. Please check your connection.", 0, null)
+          : new ApiError(networkErrorMessage(), 0, null)
       );
     }
   },
@@ -1417,7 +1422,7 @@ export const shareApi = {
     const response = await fetch(
       `${API_BASE_URL}/shared/${encodeURIComponent(token)}`
     ).catch(() => {
-      throw new ApiError("Network error. Please check your connection.", 0, null);
+      throw new ApiError(networkErrorMessage(), 0, null);
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
