@@ -24,8 +24,10 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
+    // NODE_ENV below is for the API server; the client is built as in
+    // production so React's production build and the service worker run
     command:
-      "npm --prefix ../client run build && node ../server/src/index.js",
+      "NODE_ENV=production npm --prefix ../client run build && node ../server/src/index.js",
     url: `${BASE_URL}/api`,
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,

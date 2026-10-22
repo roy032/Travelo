@@ -1,4 +1,5 @@
 import Button from './Button';
+import { useTranslation } from '../../hooks/useTranslation';
 
 /**
  * Empty state component with accessibility features
@@ -52,15 +53,18 @@ const EmptyState = ({
 /**
  * Predefined empty states for common scenarios
  */
-export const EmptyTrips = ({ onCreateTrip }) => (
-  <EmptyState
-    icon="🗺️"
-    title="No trips yet"
-    message="Start planning your next adventure by creating your first trip!"
-    actionLabel="Create Trip"
-    onAction={onCreateTrip}
-  />
-);
+export const EmptyTrips = ({ onCreateTrip }) => {
+  const { t } = useTranslation();
+  return (
+    <EmptyState
+      icon="🗺️"
+      title={t("trips.emptyTitle")}
+      message={t("trips.emptyMessage")}
+      actionLabel={t("trips.create")}
+      onAction={onCreateTrip}
+    />
+  );
+};
 
 export const EmptyActivities = ({ onAddActivity }) => (
   <EmptyState
@@ -120,12 +124,15 @@ export const EmptyNotifications = () => (
   />
 );
 
-export const EmptySearchResults = () => (
-  <EmptyState
-    icon="🔍"
-    title="No results found"
-    message="Try adjusting your search or filters to find what you're looking for."
-  />
-);
+export const EmptySearchResults = () => {
+  const { t } = useTranslation();
+  return (
+    <EmptyState
+      icon="🔍"
+      title={t("trips.noResultsTitle")}
+      message={t("trips.noResultsMessage")}
+    />
+  );
+};
 
 export default EmptyState;

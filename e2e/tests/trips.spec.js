@@ -123,7 +123,9 @@ test.describe("Trips, uploads and browsing", () => {
     const adminPage = await browser.newPage();
     await logIn(adminPage, ADMIN);
     await adminPage.goto("/admin");
-    await expect(adminPage.getByText(guest.email)).toBeVisible();
+    // Listed under pending verifications, and also among users while the
+    // database is small (a fresh CI run)
+    await expect(adminPage.getByText(guest.email).first()).toBeVisible();
     // The uploaded document is viewable by the admin
     const doc = adminPage.locator('img[src^="/api/documents/file/"]');
     await expect(doc).toBeVisible();

@@ -14,13 +14,15 @@ import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import NotificationBell from "../features/notifications/NotificationBell";
 import Avatar from "../ui/Avatar";
 import ThemeToggle from "../ui/ThemeToggle";
+import LanguageSelect from "../ui/LanguageSelect";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const MAIN_LINKS = [
-  { to: "/trips", label: "My Trips" },
-  { to: "/explore", label: "Explore" },
-  { to: "/destinations", label: "Destinations" },
-  { to: "/favorites", label: "Saved" },
-  { to: "/join-requests", label: "Join Requests" },
+  { to: "/trips", label: "nav.myTrips" },
+  { to: "/explore", label: "nav.explore" },
+  { to: "/destinations", label: "nav.destinations" },
+  { to: "/favorites", label: "nav.saved" },
+  { to: "/join-requests", label: "nav.joinRequests" },
 ];
 
 const desktopLinkClass = ({ isActive }) =>
@@ -60,6 +62,7 @@ const Navbar = () => {
   const userMenuButtonRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
   const installApp = useInstallPrompt();
+  const { t } = useTranslation();
 
   // Close the user menu on a tap or click outside it
   useEffect(() => {
@@ -120,7 +123,7 @@ const Navbar = () => {
               <Link
                 to='/'
                 className='flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
-                aria-label='Travelo home'
+                aria-label={t("common.home")}
               >
                 <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                   Travelo
@@ -136,20 +139,21 @@ const Navbar = () => {
                   `hidden sm:inline ${publicLinkClass(state)}`
                 }
               >
-                Destinations
+                {t("nav.destinations")}
               </NavLink>
               <NavLink to='/explore' className={publicLinkClass}>
-                Explore
+                {t("nav.explore")}
               </NavLink>
               <NavLink to='/login' className={publicLinkClass}>
-                Sign In
+                {t("nav.signIn")}
               </NavLink>
               <Link
                 to='/register'
                 className='px-3 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 whitespace-nowrap'
               >
-                Get Started
+                {t("nav.getStarted")}
               </Link>
+              <LanguageSelect className='hidden sm:flex' />
               <ThemeToggle />
             </div>
           </div>
@@ -170,7 +174,7 @@ const Navbar = () => {
             <Link
               to='/trips'
               className='flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
-              aria-label='Travelo home'
+              aria-label={t("common.home")}
             >
               <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                 Travelo
@@ -182,7 +186,7 @@ const Navbar = () => {
               {MAIN_LINKS.map(({ to, label }) => (
                 <li key={to}>
                   <NavLink to={to} className={desktopLinkClass}>
-                    {label}
+                    {t(label)}
                   </NavLink>
                 </li>
               ))}
@@ -190,7 +194,7 @@ const Navbar = () => {
                 <li>
                   <NavLink to='/admin' className={desktopLinkClass}>
                     <Shield size={16} aria-hidden='true' />
-                    Admin
+                    {t("nav.admin")}
                   </NavLink>
                 </li>
               )}
@@ -199,6 +203,7 @@ const Navbar = () => {
 
           {/* Right side - Theme, notifications and user menu */}
           <div className='flex items-center gap-1 sm:gap-3'>
+            <LanguageSelect className='hidden sm:flex' />
             <ThemeToggle />
 
             {/* Notification Bell */}
@@ -214,7 +219,7 @@ const Navbar = () => {
                 ref={userMenuButtonRef}
                 onClick={() => setIsUserMenuOpen((open) => !open)}
                 className='flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:bg-gray-800'
-                aria-label={`Account menu for ${user?.name || "you"}`}
+                aria-label={t("nav.accountMenu", { name: user?.name || t("nav.you") })}
                 aria-expanded={isUserMenuOpen}
                 aria-controls='user-menu'
               >
@@ -240,7 +245,7 @@ const Navbar = () => {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <User size={16} aria-hidden='true' />
-                      Profile
+                      {t("nav.profile")}
                     </Link>
                   </li>
                   <li className='md:hidden'>
@@ -250,7 +255,7 @@ const Navbar = () => {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <Settings size={16} aria-hidden='true' />
-                      Notifications
+                      {t("nav.notifications")}
                     </Link>
                   </li>
                   {installApp && (
@@ -264,7 +269,7 @@ const Navbar = () => {
                         className={menuItemClass}
                       >
                         <Download size={16} aria-hidden='true' />
-                        Install app
+                        {t("nav.installApp")}
                       </button>
                     </li>
                   )}
@@ -278,7 +283,7 @@ const Navbar = () => {
                       className='flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 dark:focus:bg-red-950/40'
                     >
                       <LogOut size={16} aria-hidden='true' />
-                      Logout
+                      {t("nav.logout")}
                     </button>
                   </li>
                 </ul>
@@ -290,7 +295,7 @@ const Navbar = () => {
               ref={mobileMenuButtonRef}
               onClick={() => setIsMobileMenuOpen((open) => !open)}
               className='md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800'
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMobileMenuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               aria-expanded={isMobileMenuOpen}
               aria-controls='mobile-menu'
             >
@@ -318,7 +323,7 @@ const Navbar = () => {
                   className={mobileLinkClass}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {label}
+                  {t(label)}
                 </NavLink>
               </li>
             ))}
@@ -329,7 +334,7 @@ const Navbar = () => {
                   className={mobileLinkClass}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Admin Dashboard
+                  {t("nav.adminDashboard")}
                 </NavLink>
               </li>
             )}
@@ -344,10 +349,13 @@ const Navbar = () => {
                   className='flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300 dark:hover:bg-blue-950/40'
                 >
                   <Download size={18} aria-hidden='true' />
-                  Install the Travelo app
+                  {t("nav.installTravelo")}
                 </button>
               </li>
             )}
+            <li className='px-3 py-2 sm:hidden'>
+              <LanguageSelect className='w-fit' />
+            </li>
           </ul>
         </div>
       )}
