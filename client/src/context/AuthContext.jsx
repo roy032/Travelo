@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
@@ -79,9 +79,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (userData) => {
+  const updateUser = useCallback((userData) => {
     setUser((prev) => ({ ...prev, ...userData }));
-  };
+  }, []);
 
   const value = {
     user,

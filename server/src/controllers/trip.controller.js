@@ -16,6 +16,12 @@ import {
   getPublicUpcomingTrips,
 } from "#services/trip.service.js";
 import User from "#models/user.model.js";
+import { emailUser } from "#services/email/notify.js";
+import {
+  joinRequestAcceptedTemplate,
+  joinRequestReceivedTemplate,
+  joinRequestRejectedTemplate,
+} from "#services/email/templates.js";
 
 /**
  * Create a new trip
@@ -522,10 +528,19 @@ export const requestJoinTripController = async (req, res, next) => {
       user: trip.owner._id,
       type: "join_request",
       title: "New Join Request",
-      message: `${requestingUser.name}  wants to join "${trip.title}"`,
+      message: `${requestingUser.name} wants to join "${trip.title}"`,
       relatedTrip: trip._id,
       relatedResource: userId,
     });
+
+    // Not awaited: email is best effort and shouldn't slow the response
+    emailUser(trip.owner._id, (owner) =>
+      joinRequestReceivedTemplate({
+        name: owner.name,
+        requesterName: requestingUser.name,
+        tripTitle: trip.title,
+      })
+    );
 
     res.status(200).json({
       message: "Join request sent successfully",
@@ -695,6 +710,14 @@ export const acceptJoinRequestController = async (req, res, next) => {
       relatedTrip: trip._id,
     });
 
+    emailUser(requesterId, (requester) =>
+      joinRequestAcceptedTemplate({
+        name: requester.name,
+        tripTitle: trip.title,
+        tripId: trip._id.toString(),
+      })
+    );
+
     res.status(200).json({
       message: "Join request accepted successfully",
       trip,
@@ -769,6 +792,13 @@ export const rejectJoinRequestController = async (req, res, next) => {
       message: `Your request to join "${trip.title}" has been declined`,
       relatedTrip: trip._id,
     });
+
+    emailUser(requesterId, (requester) =>
+      joinRequestRejectedTemplate({
+        name: requester.name,
+        tripTitle: trip.title,
+      })
+    );
 
     res.status(200).json({
       message: "Join request rejected",

@@ -50,7 +50,23 @@ The free plan sleeps after 15 minutes without traffic and takes about a minute t
 
 3. Check login, trip creation, chat (open a trip in two browsers) and a photo upload.
 
-## 4. Monitoring
+## 4. Email
+
+Travelo sends email confirmation links on sign-up, password reset links, and trip updates (join requests, accepted or declined requests, invitations). Until a provider is set, emails are only written to the server log, so password reset doesn't work for real users.
+
+**Resend (simplest).** Sign up at [resend.com](https://resend.com) (free for 3,000 emails a month), add and verify your domain under **Domains**, and create an API key. In the Render service, open **Environment** and add:
+
+- `EMAIL_PROVIDER`: `resend`
+- `RESEND_API_KEY`: the API key
+- `EMAIL_FROM`: a sender on the verified domain, e.g. `Travelo <no-reply@yourdomain.com>`
+
+**Any SMTP server** (Gmail app password, Mailgun, Amazon SES, Postmark, Brevo): set `EMAIL_PROVIDER=smtp`, `EMAIL_FROM`, and either `SMTP_URL` (e.g. `smtps://user:pass@smtp.example.com:465`) or `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER` and `SMTP_PASS`.
+
+Links in emails point at `APP_URL`, then `SITE_URL`, then the first `CLIENT_URL`. To test, use **Forgot your password?** on the sign-in page with your own email.
+
+Trip update emails only go to confirmed addresses, and users can turn them off on their profile page. Accounts created before this feature start unconfirmed and see a banner with a **Resend email** button.
+
+## 5. Monitoring
 
 **Error tracking (Sentry).** Create a free project at [sentry.io](https://sentry.io) (platform: Node.js, plus a second React project if you want browser errors). In the Render service, open **Environment** and add:
 
@@ -66,7 +82,8 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 
 ## Security notes
 
-- Sign-up and sign-in are limited to 10 attempts per IP and per account every 15 minutes, and the API to 300 requests per IP per minute. Override with `AUTH_RATE_LIMIT_MAX` and `API_RATE_LIMIT_MAX`. The limits are kept in memory, so they are per instance.
+- Password reset and email confirmation links are single-use, stored only as SHA-256 hashes, and expire after 60 minutes and 24 hours. Forgot-password answers the same way whether or not the email is registered.
+- Sign-up, sign-in and forgot-password are limited to 10 attempts per IP and per account every 15 minutes, and the API to 300 requests per IP per minute. Override with `AUTH_RATE_LIMIT_MAX` and `API_RATE_LIMIT_MAX`. The limits are kept in memory, so they are per instance.
 - CI runs gitleaks over the full git history on every push and pull request, and fails if a secret is committed. Previously leaked, rotated secrets are listed in `.gitleaksignore`.
 - Dependabot opens weekly pull requests for vulnerable dependencies.
 
@@ -82,6 +99,11 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 | `TRUST_PROXY` | behind a proxy | `true` on Render, Railway and Fly.io |
 | `JWT_EXPIRES_IN` | no | Session length, default `1d` |
 | `ADMIN_EMAILS` | to have an admin | Comma-separated emails made admin on sign-in |
+| `EMAIL_PROVIDER` | for real email | `resend` or `smtp`; default `console` only logs emails |
+| `EMAIL_FROM` | with a provider | Sender, e.g. `Travelo <no-reply@yourdomain.com>` |
+| `RESEND_API_KEY` | with `resend` | Resend API key |
+| `SMTP_URL` or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS` | with `smtp` | SMTP server |
+| `APP_URL` | no | Base URL for links in emails; defaults to `SITE_URL`, then the first `CLIENT_URL` |
 | `SENTRY_DSN` | no | Server error tracking |
 | `VITE_SENTRY_DSN` | no | Browser error tracking (build time) |
 | `SENTRY_TRACES_SAMPLE_RATE` | no | Performance tracing sample rate, default `0` |

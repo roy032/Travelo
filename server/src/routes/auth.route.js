@@ -1,4 +1,13 @@
-import { signup, signIn, signOut } from '#controllers/auth.controller.js';
+import {
+  signup,
+  signIn,
+  signOut,
+  forgotPassword,
+  resetPasswordController,
+  verifyEmailController,
+  resendVerification,
+} from '#controllers/auth.controller.js';
+import { authenticateToken } from '#middlewares/auth.middleware.js';
 import {
   authRateLimiter,
   accountRateLimiter,
@@ -12,5 +21,24 @@ router.post('/sign-up', authRateLimiter, signup);
 router.post('/sign-in', authRateLimiter, accountRateLimiter, signIn);
 
 router.post('/sign-out', signOut);
+
+// Always answers 200 so it can't be used to discover registered emails
+router.post(
+  '/forgot-password',
+  authRateLimiter,
+  accountRateLimiter,
+  forgotPassword
+);
+
+router.post('/reset-password', authRateLimiter, resetPasswordController);
+
+router.post('/verify-email', authRateLimiter, verifyEmailController);
+
+router.post(
+  '/resend-verification',
+  authenticateToken,
+  authRateLimiter,
+  resendVerification
+);
 
 export default router;

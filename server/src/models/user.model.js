@@ -36,6 +36,23 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Set once the user opens the link in the verification email
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // Trip updates (join requests, invitations) by email; in-app
+    // notifications are always created
+    emailNotifications: {
+      type: Boolean,
+      default: true,
+    },
+    // SHA-256 hashes of single-use tokens sent by email; the raw token only
+    // ever exists in the email link
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
     // Legacy verification fields (kept for backward compatibility)
     verificationStatus: {
       type: String,
@@ -102,6 +119,8 @@ const userSchema = new mongoose.Schema(
 
 // Create indexes
 userSchema.index({ verificationStatus: 1 });
+userSchema.index({ emailVerificationToken: 1 }, { sparse: true });
+userSchema.index({ passwordResetToken: 1 }, { sparse: true });
 
 // Pre-save hook for password hashing
 userSchema.pre("save", async function () {

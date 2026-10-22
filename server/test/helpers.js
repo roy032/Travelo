@@ -9,6 +9,8 @@ export const TEST_DB_URI = process.env.MONGODB_TEST_URI;
 process.env.JWT_SECRET ||= 'test-secret-for-api-tests-only';
 process.env.AUTH_RATE_LIMIT_MAX ||= '1000';
 process.env.FILE_STORAGE = 'local';
+// Keep sign-up confirmation emails out of the test output
+process.env.EMAIL_PROVIDER ||= 'memory';
 
 export const connectTestDb = async () => {
   // A database per test file so files can run in parallel

@@ -121,6 +121,15 @@ const LoginPage = () => {
               autoComplete='current-password'
             />
 
+            <div className='-mt-3 text-right text-sm'>
+              <Link
+                to='/forgot-password'
+                className='font-medium text-blue-600 hover:text-blue-500'
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
             <Button
               type='submit'
               variant='primary'
