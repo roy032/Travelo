@@ -26,6 +26,16 @@ vi.mock('#models/trip.model.js', () => ({
   },
 }));
 
+// Nothing on the checklist yet unless a test says otherwise
+const existingChecklist = vi.hoisted(() => ({ items: [] }));
+vi.mock('#models/checklist.model.js', () => ({
+  default: {
+    find: vi.fn(() => ({
+      select: () => ({ lean: async () => existingChecklist.items }),
+    })),
+  },
+}));
+
 import { generatePackingSuggestions as mockGeneratePackingSuggestions } from '#services/packing.service.js';
 import { getTripById as mockGetTripById } from '#services/trip.service.js';
 import { createChecklistItem as mockCreateChecklistItem } from '#services/checklist.service.js';
@@ -46,6 +56,7 @@ describe('Packing Controller', () => {
       json: vi.fn(),
     };
     vi.clearAllMocks();
+    existingChecklist.items = [];
   });
 
   describe('getPackingSuggestions', () => {
@@ -165,6 +176,29 @@ describe('Packing Controller', () => {
         success: true,
         data: expect.objectContaining({
           message: '3 items added to checklist',
+        }),
+      });
+    });
+
+    it('skips items already on the checklist or repeated in the request', async () => {
+      req.params.tripId = 'trip123';
+      req.body.items = ['Rain jacket', 'rain jacket ', 'Sun hat', 'Umbrella'];
+      existingChecklist.items = [{ text: 'Umbrella' }];
+
+      mockGetTripById.mockResolvedValue({ id: 'trip123', title: 'Trip' });
+      mockCreateChecklistItem.mockImplementation(async ({ text }) => ({ text }));
+      Trip.findById.mockReturnValue({
+        populate: vi.fn().mockResolvedValue({ members: [{ _id: 'user123' }] }),
+      });
+
+      await addSuggestionsToChecklist(req, res);
+
+      expect(mockCreateChecklistItem).toHaveBeenCalledTimes(2);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: expect.objectContaining({
+          message: '2 items added to checklist',
+          skipped: 2,
         }),
       });
     });

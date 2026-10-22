@@ -1,5 +1,6 @@
 import {
   createExpenseSchema,
+  createSettlementSchema,
   updateExpenseSchema,
 } from "#validations/expense.validation.js";
 import { formatValidationError } from "#utils/format.js";
@@ -9,7 +10,11 @@ import {
   deleteExpense,
   getExpensesByTrip,
 } from "#services/expense.service.js";
-import { calculateSplits } from "#services/split.service.js";
+import {
+  calculateSplits,
+  createSettlement,
+  deleteSettlement,
+} from "#services/split.service.js";
 import { storeFile } from "#config/uploadthing.config.js";
 import { compressUpload } from "#utils/image.js";
 
@@ -35,15 +40,17 @@ export const createExpenseController = async (req, res, next) => {
       });
     }
 
-    const { amount, category, description, payer } = validationResult.data;
+    const { amount, currency, category, description, payer, splitBetween } =
+      validationResult.data;
 
     const expenseData = {
       trip: tripId,
       amount,
-      currency: "BDT", // Fixed to BDT only
+      currency, // Defaults to the trip's base currency
       category,
       description,
       payer,
+      splitBetween,
       creator: req.user.id, // From authentication middleware
     };
 
@@ -80,10 +87,13 @@ export const createExpenseController = async (req, res, next) => {
       });
     }
 
-    if (e.message === "Payer must be a member of the trip") {
+    if (
+      e.message === "Payer must be a member of the trip" ||
+      e.message === "Split members must be members of the trip"
+    ) {
       return res.status(400).json({
         error: "Validation failed",
-        message: "Payer must be a member of the trip",
+        message: e.message,
       });
     }
 
@@ -167,10 +177,13 @@ export const updateExpenseController = async (req, res, next) => {
       });
     }
 
-    if (e.message === "Payer must be a member of the trip") {
+    if (
+      e.message === "Payer must be a member of the trip" ||
+      e.message === "Split members must be members of the trip"
+    ) {
       return res.status(400).json({
         error: "Validation failed",
-        message: "Payer must be a member of the trip",
+        message: e.message,
       });
     }
 
@@ -261,6 +274,71 @@ export const getSplitsController = async (req, res, next) => {
       return res.status(403).json({
         error: "Access denied",
         message: "You are not a member of this trip",
+      });
+    }
+
+    next(e);
+  }
+};
+
+/**
+ * Record a payment between two members
+ */
+export const createSettlementController = async (req, res, next) => {
+  try {
+    const validationResult = createSettlementSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: formatValidationError(validationResult.error),
+      });
+    }
+
+    const settlement = await createSettlement(
+      req.params.tripId,
+      req.user.id,
+      validationResult.data
+    );
+
+    res.status(201).json({
+      message: "Payment recorded",
+      settlement,
+    });
+  } catch (e) {
+    if (e.message === "Both members must belong to the trip") {
+      return res.status(400).json({
+        error: "Validation failed",
+        message: e.message,
+      });
+    }
+
+    next(e);
+  }
+};
+
+/**
+ * Remove a recorded payment
+ */
+export const deleteSettlementController = async (req, res, next) => {
+  try {
+    const { tripId, settlementId } = req.params;
+
+    await deleteSettlement(tripId, settlementId, req.user.id);
+
+    res.status(200).json({ message: "Payment removed", settlementId });
+  } catch (e) {
+    if (e.message === "Payment not found") {
+      return res.status(404).json({
+        error: "Resource not found",
+        message: e.message,
+      });
+    }
+
+    if (e.message === "Access denied: You cannot remove this payment") {
+      return res.status(403).json({
+        error: "Access denied",
+        message: "You cannot remove this payment",
       });
     }
 

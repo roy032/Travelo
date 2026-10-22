@@ -49,6 +49,18 @@ const tripSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    // Expenses are converted into this currency for totals and splits
+    baseCurrency: {
+      type: String,
+      default: "BDT",
+      uppercase: true,
+      trim: true,
+    },
+    // Optional spending target, in baseCurrency
+    budget: {
+      type: Number,
+      min: [0, "Budget cannot be negative"],
+    },
     // Public read-only link, set only when the owner turns sharing on
     shareToken: {
       type: String,

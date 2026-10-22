@@ -23,6 +23,8 @@ import profileRoutes from "#routes/profile.route.js";
 import notificationRoutes from "#routes/notification.route.js";
 import invitationRoutes from "#routes/invitation.route.js";
 import healthRoutes from "#routes/health.route.js";
+import currencyRoutes from "#routes/currency.route.js";
+import weatherRoutes from "#routes/weather.route.js";
 import {
   securityHeaders,
   permissionsPolicy,
@@ -129,6 +131,7 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/shared", shareRoutes); // Public shared-trip links
 app.use("/api/documents", documentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/currency", currencyRoutes);
 app.use("/api/trips", tripRoutes); // Must be first to catch /explore before authenticated routes
 app.use("/api/trips", reportRoutes); // Must be before other trip routes to match /trips/:tripId/report
 app.use("/api/trips", messageRoutes); // Chat endpoints
@@ -138,6 +141,7 @@ app.use("/api", noteRoutes);
 app.use("/api", expenseRoutes);
 app.use("/api", photoRoutes);
 app.use("/api", packingRoutes);
+app.use("/api", weatherRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api", invitationRoutes);

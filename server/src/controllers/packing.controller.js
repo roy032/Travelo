@@ -3,6 +3,9 @@ import { getTripById } from '#services/trip.service.js';
 import { createChecklistItem } from '#services/checklist.service.js';
 import Notification from '#models/notification.model.js';
 import Trip from '#models/trip.model.js';
+import Checklist from '#models/checklist.model.js';
+
+const MAX_ITEMS_PER_REQUEST = 100;
 
 /**
  * Get packing suggestions for a trip
@@ -68,7 +71,12 @@ export const addSuggestionsToChecklist = async (req, res) => {
     const { items } = req.body;
 
     // Validate items array
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (
+      !items ||
+      !Array.isArray(items) ||
+      items.length === 0 ||
+      items.length > MAX_ITEMS_PER_REQUEST
+    ) {
       return res.status(400).json({
         success: false,
         error: 'Validation failed',
@@ -83,8 +91,19 @@ export const addSuggestionsToChecklist = async (req, res) => {
     // Create checklist items for each selected suggestion
     const createdItems = [];
 
+    // Skip anything already on the checklist (or repeated in this request)
+    const existing = await Checklist.find({ trip: tripId }).select('text').lean();
+    const seen = new Set(existing.map((item) => item.text.trim().toLowerCase()));
+    let skipped = 0;
+
     for (const itemText of items) {
       if (typeof itemText === 'string' && itemText.trim().length > 0) {
+        const key = itemText.trim().toLowerCase();
+        if (seen.has(key)) {
+          skipped += 1;
+          continue;
+        }
+        seen.add(key);
         const checklistItem = await createChecklistItem({
           trip: tripId,
           text: itemText.trim(),
@@ -109,7 +128,7 @@ export const addSuggestionsToChecklist = async (req, res) => {
         relatedTrip: tripId,
       }));
 
-    if (notifications.length > 0) {
+    if (notifications.length > 0 && createdItems.length > 0) {
       await Notification.insertMany(notifications);
     }
 
@@ -118,6 +137,7 @@ export const addSuggestionsToChecklist = async (req, res) => {
       data: {
         message: `${createdItems.length} items added to checklist`,
         items: createdItems,
+        skipped,
       },
     });
   } catch (error) {

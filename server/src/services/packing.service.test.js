@@ -143,3 +143,74 @@ describe('Packing Service', () => {
     });
   });
 });
+
+describe('generateWeatherPackingItems', () => {
+  const day = (date, overrides) => ({
+    date,
+    source: 'forecast',
+    weatherCode: 1,
+    tempMax: 24,
+    tempMin: 16,
+    precipitationChance: 0,
+    precipitationSum: 0,
+    windMax: 10,
+    uvMax: 4,
+    ...overrides,
+  });
+
+  it('suggests rain gear and says which days need it', async () => {
+    const { generateWeatherPackingItems } = await import('./packing.service.js');
+    const items = generateWeatherPackingItems([
+      day('2026-11-01', { precipitationChance: 80 }),
+      day('2026-11-02', { weatherCode: 63 }),
+      day('2026-11-03'),
+    ]);
+    const names = items.map((i) => i.item);
+    expect(names).toEqual(
+      expect.arrayContaining(['Rain jacket', 'Compact umbrella', 'Waterproof shoes'])
+    );
+    const jacket = items.find((i) => i.item === 'Rain jacket');
+    expect(jacket.days).toEqual(['2026-11-01', '2026-11-02']);
+    expect(jacket.reason).toBe('Rain likely on 1 Nov, 2 Nov');
+  });
+
+  it('covers heat, cold, wind and big temperature swings', async () => {
+    const { generateWeatherPackingItems } = await import('./packing.service.js');
+    const names = generateWeatherPackingItems([
+      day('2026-07-01', { tempMax: 36, tempMin: 22, uvMax: 10 }),
+      day('2026-07-02', { tempMax: 8, tempMin: -2, windMax: 55 }),
+    ]).map((i) => i.item);
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'Light, breathable clothing',
+        'Sunscreen (SPF 50)',
+        'Thermal base layers',
+        'Warm winter coat',
+        'Windproof jacket',
+        'Layers you can add or remove',
+      ])
+    );
+    // Each item appears once even when several rules want it
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('ignores days without weather data', async () => {
+    const { generateWeatherPackingItems } = await import('./packing.service.js');
+    expect(
+      generateWeatherPackingItems([
+        { date: '2026-11-01', source: 'unavailable' },
+        { date: '2026-11-02', source: 'no-location' },
+      ])
+    ).toEqual([]);
+  });
+
+  it('shortens long lists of days', async () => {
+    const { generateWeatherPackingItems } = await import('./packing.service.js');
+    const days = ['01', '02', '03', '04', '05'].map((d) =>
+      day(`2026-11-${d}`, { precipitationSum: 10 })
+    );
+    const [first] = generateWeatherPackingItems(days);
+    expect(first.reason).toBe('Rain likely on 1 Nov, 2 Nov, 3 Nov and 2 more');
+  });
+});
