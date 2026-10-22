@@ -12,6 +12,7 @@ import Note from "#models/note.model.js";
 import Photo from "#models/photo.model.js";
 import Notification from "#models/notification.model.js";
 import Invitation from "#models/invitation.model.js";
+import { ANALYTICS_RANGES, getAnalytics } from "#services/analytics.service.js";
 
 /**
  * Get all users with pending verification status
@@ -211,6 +212,30 @@ export const getUserStatistics = async (req, res, next) => {
         pendingUsers,
         unverifiedUsers,
       },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+/**
+ * Daily sign-ups, active trips and server errors for the admin charts
+ * Admin only endpoint
+ */
+export const fetchAnalytics = async (req, res, next) => {
+  try {
+    const days = Number.parseInt(req.query.days, 10) || 30;
+    if (!ANALYTICS_RANGES.includes(days)) {
+      return res.status(400).json({
+        error: "Validation failed",
+        message: `days must be one of ${ANALYTICS_RANGES.join(", ")}`,
+      });
+    }
+
+    const analytics = await getAnalytics(days);
+    res.status(200).json({
+      message: "Analytics retrieved successfully",
+      analytics,
     });
   } catch (e) {
     next(e);

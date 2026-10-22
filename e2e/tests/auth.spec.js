@@ -72,5 +72,12 @@ test.describe("Sign up, log in and log out", () => {
     await logIn(page, ADMIN);
     await page.goto("/admin");
     await expect(page.getByRole("heading", { name: "Admin Dashboard" })).toBeVisible();
+
+    // Analytics count the accounts made during this run, and switch range
+    await expect(page.getByRole("heading", { name: "Sign-ups" })).toBeVisible();
+    await expect(page.getByRole("img", { name: /^Sign-ups, daily/ })).toBeVisible();
+    await page.getByRole("button", { name: "7 days" }).click();
+    await expect(page.getByRole("button", { name: "7 days" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("heading", { name: "Recent server errors" })).toBeVisible();
   });
 });
