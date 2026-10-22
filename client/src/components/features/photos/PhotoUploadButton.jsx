@@ -35,9 +35,9 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
 
   const handleFileSelect = (file) => {
     // Validate file type
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      alert("Please select a JPEG or PNG image");
+      alert("Please select a JPEG, PNG or WebP image");
       return;
     }
 
@@ -143,8 +143,8 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
                   transition-colors
                   ${
                     isDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
+                      : "border-gray-300 hover:border-gray-400 bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:bg-gray-950"
                   }
                 `}
                 onDragEnter={handleDragEnter}
@@ -154,20 +154,20 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
                 onClick={handleBrowseClick}
               >
                 <Upload className='mx-auto h-12 w-12 text-gray-400 mb-4' />
-                <p className='text-sm text-gray-600 mb-2'>
-                  <span className='font-semibold text-blue-600'>
+                <p className='text-sm text-gray-600 mb-2 dark:text-gray-400'>
+                  <span className='font-semibold text-blue-600 dark:text-blue-400'>
                     Click to upload
                   </span>{" "}
                   or drag and drop
                 </p>
-                <p className='text-xs text-gray-500'>JPEG or PNG (max 10MB)</p>
+                <p className='text-xs text-gray-500 dark:text-gray-400'>JPEG, PNG or WebP (max 10MB)</p>
               </div>
 
               {/* Hidden File Input */}
               <input
                 ref={fileInputRef}
                 type='file'
-                accept='image/jpeg,image/jpg,image/png'
+                accept='image/jpeg,image/jpg,image/png,image/webp'
                 onChange={handleFileInputChange}
                 className='hidden'
               />
@@ -186,15 +186,15 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
                   <button
                     type='button'
                     onClick={handleRemoveFile}
-                    className='absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors'
+                    className='absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors dark:bg-gray-900 dark:hover:bg-gray-800'
                     aria-label='Remove photo'
                   >
-                    <X className='h-5 w-5 text-gray-600' />
+                    <X className='h-5 w-5 text-gray-600 dark:text-gray-400' />
                   </button>
                 </div>
 
                 {/* File Info */}
-                <div className='flex items-center space-x-2 text-sm text-gray-600'>
+                <div className='flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400'>
                   <span className='truncate font-medium'>
                     {selectedFile.name}
                   </span>
@@ -207,7 +207,7 @@ const PhotoUploadButton = ({ onUpload, loading }) => {
                 <div>
                   <label
                     htmlFor='caption'
-                    className='block text-sm font-medium text-gray-700 mb-1'
+                    className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
                   >
                     Caption (optional)
                   </label>

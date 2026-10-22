@@ -143,7 +143,7 @@ const LandingFooter = () => {
                 <Mail size={20} />
               </div>
               <div>
-                <p className='text-sm text-gray-500'>Email Us</p>
+                <p className='text-sm text-gray-400'>Email Us</p>
                 <p className='text-white'>support@travelo.com</p>
               </div>
             </div>
@@ -152,7 +152,7 @@ const LandingFooter = () => {
                 <Phone size={20} />
               </div>
               <div>
-                <p className='text-sm text-gray-500'>Call Us</p>
+                <p className='text-sm text-gray-400'>Call Us</p>
                 <p className='text-white'>+1 (555) 123-4567</p>
               </div>
             </div>
@@ -161,7 +161,7 @@ const LandingFooter = () => {
                 <MapPin size={20} />
               </div>
               <div>
-                <p className='text-sm text-gray-500'>Visit Us</p>
+                <p className='text-sm text-gray-400'>Visit Us</p>
                 <p className='text-white'>123 Travel St, NY 10001</p>
               </div>
             </div>
@@ -171,7 +171,7 @@ const LandingFooter = () => {
         {/* Bottom Bar */}
         <div className='border-t border-gray-800 pt-8'>
           <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
-            <p className='text-gray-500 text-sm'>
+            <p className='text-gray-400 text-sm'>
               © {currentYear} Travelo. All rights reserved.
             </p>
             <div className='flex gap-6 text-sm'>

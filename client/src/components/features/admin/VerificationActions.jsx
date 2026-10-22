@@ -74,16 +74,16 @@ const VerificationActions = ({
         size='sm'
       >
         <div className='space-y-4'>
-          <div className='flex items-center justify-center p-4 bg-green-50 rounded-lg'>
-            <CheckCircle className='text-green-600' size={48} />
+          <div className='flex items-center justify-center p-4 bg-green-50 rounded-lg dark:bg-green-950/40'>
+            <CheckCircle className='text-green-700 dark:text-green-300' size={48} />
           </div>
           <div className='text-center'>
-            <p className='text-gray-700'>
+            <p className='text-gray-700 dark:text-gray-300'>
               Are you sure you want to approve the{" "}
               <span className='font-semibold'>{documentType}</span> verification
               for <span className='font-semibold'>{userName}</span>?
             </p>
-            <p className='text-sm text-gray-600 mt-2'>
+            <p className='text-sm text-gray-600 mt-2 dark:text-gray-400'>
               This will grant them verified status for{" "}
               {documentType === "NID" ? "domestic" : "international"} trips.
             </p>
@@ -111,16 +111,16 @@ const VerificationActions = ({
         size='sm'
       >
         <div className='space-y-4'>
-          <div className='flex items-center justify-center p-4 bg-red-50 rounded-lg'>
-            <XCircle className='text-red-600' size={48} />
+          <div className='flex items-center justify-center p-4 bg-red-50 rounded-lg dark:bg-red-950/40'>
+            <XCircle className='text-red-600 dark:text-red-400' size={48} />
           </div>
           <div className='text-center'>
-            <p className='text-gray-700'>
+            <p className='text-gray-700 dark:text-gray-300'>
               Are you sure you want to reject the{" "}
               <span className='font-semibold'>{documentType}</span> verification
               for <span className='font-semibold'>{userName}</span>?
             </p>
-            <p className='text-sm text-gray-600 mt-2'>
+            <p className='text-sm text-gray-600 mt-2 dark:text-gray-400'>
               They will be able to resubmit their {documentType} document.
             </p>
           </div>

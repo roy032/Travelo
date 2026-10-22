@@ -4,8 +4,13 @@ import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { useTranslation } from "../hooks/useTranslation";
+import LanguageSelect from "../components/ui/LanguageSelect";
 
 const RegisterPage = () => {
+  const { t } = useTranslation();
+  usePageTitle(t("auth.register.pageTitle"));
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -24,32 +29,32 @@ const RegisterPage = () => {
 
     // Name validation
     if (!formData.name) {
-      newErrors.name = "Name is required";
+      newErrors.name = t("auth.register.nameRequired");
     } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      newErrors.name = t("auth.register.nameTooShort");
     } else if (formData.name.length > 100) {
-      newErrors.name = "Name must be less than 100 characters";
+      newErrors.name = t("auth.register.nameTooLong");
     }
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("auth.emailRequired");
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t("auth.emailInvalid");
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("auth.passwordRequired");
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.password = t("auth.register.passwordTooShort");
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
+      newErrors.confirmPassword = t("auth.register.confirmRequired");
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = t("auth.register.mismatch");
     }
 
     setErrors(newErrors);
@@ -94,19 +99,19 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
       <div className='max-w-md w-full space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
-            Create your account
-          </h2>
-          <p className='mt-2 text-center text-sm text-gray-600'>
-            Already have an account?{" "}
+          <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100'>
+            {t("auth.register.heading")}
+          </h1>
+          <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
+            {t("auth.register.haveAccount")}{" "}
             <Link
               to='/login'
-              className='font-medium text-blue-600 hover:text-blue-500'
+              className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
             >
-              Sign in
+              {t("auth.register.signIn")}
             </Link>
           </p>
         </div>
@@ -114,48 +119,48 @@ const RegisterPage = () => {
         <Card>
           <form className='space-y-6' onSubmit={handleSubmit}>
             <Input
-              label='Full Name'
+              label={t("auth.register.name")}
               type='text'
               name='name'
               value={formData.name}
               onChange={handleChange}
-              placeholder='John Doe'
+              placeholder={t("auth.register.namePlaceholder")}
               error={errors.name}
               required
               autoComplete='name'
             />
 
             <Input
-              label='Email address'
+              label={t("auth.email")}
               type='email'
               name='email'
               value={formData.email}
               onChange={handleChange}
-              placeholder='you@example.com'
+              placeholder={t("auth.emailPlaceholder")}
               error={errors.email}
               required
               autoComplete='email'
             />
 
             <Input
-              label='Password'
+              label={t("auth.password")}
               type='password'
               name='password'
               value={formData.password}
               onChange={handleChange}
-              placeholder='At least 8 characters'
+              placeholder={t("auth.register.passwordPlaceholder")}
               error={errors.password}
               required
               autoComplete='new-password'
             />
 
             <Input
-              label='Confirm Password'
+              label={t("auth.register.confirmPassword")}
               type='password'
               name='confirmPassword'
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder='Re-enter your password'
+              placeholder={t("auth.register.confirmPlaceholder")}
               error={errors.confirmPassword}
               required
               autoComplete='new-password'
@@ -168,10 +173,14 @@ const RegisterPage = () => {
               loading={loading}
               disabled={loading}
             >
-              Create account
+              {t("auth.register.submit")}
             </Button>
           </form>
         </Card>
+        {/* Small screens: the navbar has no room for the language picker */}
+        <div className='flex justify-center sm:hidden'>
+          <LanguageSelect />
+        </div>
       </div>
     </div>
   );

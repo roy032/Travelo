@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 import { X, ChevronLeft, ChevronRight, User, Calendar } from "lucide-react";
 import Button from "../../ui/Button";
 
@@ -18,6 +19,10 @@ const PhotoLightbox = ({
   onNavigate,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const isVisible = Boolean(isOpen && photos?.length);
+  useFocusTrap(dialogRef, isVisible, closeButtonRef);
 
   useEffect(() => {
     // Reset image error when photo changes
@@ -103,26 +108,32 @@ const PhotoLightbox = ({
 
   return (
     <div
-      className='fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center'
+      ref={dialogRef}
+      className='fixed inset-0 z-50 bg-black/95 flex items-center justify-center'
       onClick={handleBackdropClick}
+      role='dialog'
+      aria-modal='true'
+      aria-label={`Photo ${currentIndex + 1} of ${photos.length}`}
+      tabIndex={-1}
     >
       {/* Close Button */}
       <button
+        ref={closeButtonRef}
         onClick={onClose}
-        className='absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors'
-        aria-label='Close lightbox'
+        className='absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
+        aria-label='Close photo viewer'
       >
-        <X className='h-8 w-8' />
+        <X className='h-8 w-8' aria-hidden='true' />
       </button>
 
       {/* Previous Button */}
       {hasPrevious && (
         <button
           onClick={handlePrevious}
-          className='absolute left-4 z-10 text-white hover:text-gray-300 transition-colors'
+          className='absolute left-4 z-10 text-white hover:text-gray-300 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
           aria-label='Previous photo'
         >
-          <ChevronLeft className='h-12 w-12' />
+          <ChevronLeft className='h-12 w-12' aria-hidden='true' />
         </button>
       )}
 
@@ -130,10 +141,10 @@ const PhotoLightbox = ({
       {hasNext && (
         <button
           onClick={handleNext}
-          className='absolute right-4 z-10 text-white hover:text-gray-300 transition-colors'
+          className='absolute right-4 z-10 text-white hover:text-gray-300 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
           aria-label='Next photo'
         >
-          <ChevronRight className='h-12 w-12' />
+          <ChevronRight className='h-12 w-12' aria-hidden='true' />
         </button>
       )}
 
@@ -169,7 +180,7 @@ const PhotoLightbox = ({
         </div>
 
         {/* Photo Info */}
-        <div className='bg-black bg-opacity-50 rounded-lg p-4 max-w-2xl w-full'>
+        <div className='bg-black/50 rounded-lg p-4 max-w-2xl w-full'>
           {/* Caption */}
           {currentPhoto.caption && (
             <p className='text-white text-lg mb-3'>{currentPhoto.caption}</p>

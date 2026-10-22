@@ -8,11 +8,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { tripApi } from "../../services/api.service";
 import toast from "react-hot-toast";
 import ReportButton from "../report/ReportButton";
+import FavoriteButton from "../favorites/FavoriteButton";
 
 /**
  * TripCard - Displays a single trip in the public explore view
@@ -22,6 +23,13 @@ const TripCard = ({ trip }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requesting, setRequesting] = useState(false);
+  const [requested, setRequested] = useState(false);
+  // Saved trips can include ones the user has since joined or that have started
+  const isMember = Boolean(
+    user?.id &&
+      (trip.ownerId === user.id || trip.members?.includes(user.id))
+  );
+  const hasStarted = new Date(trip.startDate) <= new Date();
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -47,13 +55,15 @@ const TripCard = ({ trip }) => {
   const handleJoinRequest = async () => {
     if (!user) {
       toast.error("Please log in to request to join this trip");
-      navigate("/login");
+      // Come back to Explore after signing in
+      navigate("/login", { state: { from: { pathname: "/explore" } } });
       return;
     }
 
     try {
       setRequesting(true);
       await tripApi.requestToJoin(trip.id, user.id);
+      setRequested(true);
     } catch (error) {
       // Error handling is done in api.service.js
       console.error("Join request error:", error);
@@ -63,89 +73,118 @@ const TripCard = ({ trip }) => {
   };
 
   return (
-    <div className='bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden'>
+    <div className='bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden dark:bg-gray-900'>
       {/* Header */}
       <div className='bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white'>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
-            <h3 className='text-2xl font-bold mb-2'>{trip.title}</h3>
+            <h2 className='text-2xl font-bold mb-2'>{trip.title}</h2>
             {trip.description && (
               <p className='text-blue-50 text-sm line-clamp-2'>
                 {trip.description}
               </p>
             )}
           </div>
-          <span className='text-4xl ml-4'>
-            {destinationTypeIcons[trip.destinationType] || "🗺️"}
-          </span>
+          <div className='flex flex-col items-center gap-3 ml-4'>
+            <span className='text-4xl' aria-hidden='true'>
+              {destinationTypeIcons[trip.destinationType] || "🗺️"}
+            </span>
+            <FavoriteButton
+              itemType='trip'
+              itemId={trip.id}
+              label={trip.title}
+              size='sm'
+            />
+          </div>
         </div>
       </div>
 
       {/* Trip Details */}
       <div className='p-6 space-y-4'>
         {/* Date Information */}
-        <div className='flex items-center space-x-3 text-gray-700'>
+        <div className='flex items-center space-x-3 text-gray-700 dark:text-gray-300'>
           <Calendar className='w-5 h-5 text-blue-500' />
           <div className='text-sm'>
             <span className='font-semibold'>
               {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
             </span>
-            <span className='text-gray-500 ml-2'>
-              ({getDurationDays(trip.startDate, trip.endDate)} days)
+            <span className='text-gray-500 ml-2 dark:text-gray-400'>
+              ({trip.durationDays ?? getDurationDays(trip.startDate, trip.endDate)} days)
             </span>
           </div>
         </div>
 
         {/* Destination Type */}
-        <div className='flex items-center space-x-3 text-gray-700'>
+        <div className='flex items-center space-x-3 text-gray-700 dark:text-gray-300'>
           <MapPin className='w-5 h-5 text-purple-500' />
           <div className='text-sm'>
             <span className='font-semibold capitalize'>
               {trip.destinationType || "Unknown"}
             </span>
-            <span className='text-gray-500 ml-2'>
+            <span className='text-gray-500 ml-2 dark:text-gray-400'>
               ({trip.tripCategory || "domestic"})
             </span>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className='flex items-center space-x-6 pt-2 border-t border-gray-200'>
-          <div className='flex items-center space-x-2 text-sm text-gray-600'>
-            <Activity className='w-4 h-4 text-green-500' />
-            <span>
-              {trip.activityCount}{" "}
-              {trip.activityCount === 1 ? "activity" : "activities"}
-            </span>
+        {/* Stats (not included for saved trips) */}
+        {trip.activityCount !== undefined && (
+          <div className='flex items-center space-x-6 pt-2 border-t border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400'>
+              <Activity className='w-4 h-4 text-green-700 dark:text-green-300' />
+              <span>
+                {trip.activityCount}{" "}
+                {trip.activityCount === 1 ? "activity" : "activities"}
+              </span>
+            </div>
+            <div className='flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400'>
+              <ListChecks className='w-4 h-4 text-orange-700 dark:text-orange-300' />
+              <span>
+                {trip.checklistCount}{" "}
+                {trip.checklistCount === 1 ? "item" : "items"}
+              </span>
+            </div>
           </div>
-          <div className='flex items-center space-x-2 text-sm text-gray-600'>
-            <ListChecks className='w-4 h-4 text-orange-500' />
-            <span>
-              {trip.checklistCount}{" "}
-              {trip.checklistCount === 1 ? "item" : "items"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Join Request Button */}
-        <div className='pt-4 border-t border-gray-200 space-y-2'>
-          <button
-            onClick={handleJoinRequest}
-            disabled={requesting}
-            className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2'
-          >
-            {requesting ? (
-              <>
-                <Loader2 className='w-5 h-5 animate-spin' />
-                <span>Sending Request...</span>
-              </>
-            ) : (
-              <>
-                <UserPlus className='w-5 h-5' />
-                <span>{user ? "Request to Join" : "Log in to Join"}</span>
-              </>
-            )}
-          </button>
+        <div className='pt-4 border-t border-gray-200 space-y-2 dark:border-gray-700'>
+          {isMember ? (
+            <Link
+              to={`/trips/${trip.id}`}
+              className='w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center'
+            >
+              Open Trip
+            </Link>
+          ) : hasStarted ? (
+            <p className='w-full text-center text-sm text-gray-500 py-3 dark:text-gray-400'>
+              This trip has already started
+            </p>
+          ) : (
+            <button
+              onClick={handleJoinRequest}
+              disabled={requesting || requested}
+              className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 dark:disabled:bg-gray-600'
+            >
+              {requesting ? (
+                <>
+                  <Loader2 className='w-5 h-5 animate-spin' />
+                  <span>Sending Request...</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className='w-5 h-5' />
+                  <span>
+                    {requested
+                      ? "Request Sent"
+                      : user
+                        ? "Request to Join"
+                        : "Log in to Join"}
+                  </span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Report Button */}
           <div className='flex justify-center'>
@@ -171,8 +210,9 @@ TripCard.propTypes = {
     endDate: PropTypes.string.isRequired,
     destinationType: PropTypes.string,
     tripCategory: PropTypes.string,
-    activities: PropTypes.array,
-    checklist: PropTypes.array,
+    durationDays: PropTypes.number,
+    ownerId: PropTypes.string,
+    members: PropTypes.arrayOf(PropTypes.string),
     activityCount: PropTypes.number,
     checklistCount: PropTypes.number,
   }).isRequired,

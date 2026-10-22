@@ -16,17 +16,16 @@ const MemberCard = ({
 }) => {
   const isSelf = member._id === currentUserId;
   const isMemberOwner = member._id === isOwner || member.isOwner;
-  console.log(member);
 
   return (
-    <div className='flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow'>
+    <div className='flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow dark:bg-gray-900 dark:border-gray-700'>
       <div className='flex items-center gap-3 flex-1'>
         <Avatar src={member.avatar} name={member.name} size='md' />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2'>
-            <p className='text-sm font-medium text-gray-900 truncate'>
+            <p className='text-sm font-medium text-gray-900 truncate dark:text-gray-100'>
               {member.name}
-              {isSelf && <span className='text-gray-500'> (You)</span>}
+              {isSelf && <span className='text-gray-500 dark:text-gray-400'> (You)</span>}
             </p>
             {isMemberOwner && (
               <Badge variant='warning' className='flex items-center gap-1'>
@@ -35,7 +34,7 @@ const MemberCard = ({
               </Badge>
             )}
           </div>
-          <p className='text-sm text-gray-500 truncate'>{member.email}</p>
+          <p className='text-sm text-gray-500 truncate dark:text-gray-400'>{member.email}</p>
         </div>
       </div>
 

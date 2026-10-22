@@ -1,0 +1,5 @@
+# Secrets that were committed in the past and have since been rotated.
+# They stay in git history, so they are ignored by fingerprint here.
+# Never add a secret that is still valid; rotate it first.
+5e11b3559dac43fbec1632271c5ecc0b34c10337:server/.env.example:generic-api-key:8
+5e11b3559dac43fbec1632271c5ecc0b34c10337:server/.env.example:database-uri-with-credentials:6

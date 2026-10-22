@@ -73,10 +73,18 @@ The application follows WCAG 2.1 Level AA guidelines and implements various acce
 - `aria-labelledby` for modal title
 
 ### Navigation Component
-- `role="navigation"` with `aria-label`
-- `role="menubar"` and `role="menuitem"` for menu items
-- `aria-expanded` for dropdown menus
-- `aria-haspopup` for menu buttons
+- `<nav>` with `aria-label`, links in plain lists (no menu roles, so Tab works as expected)
+- `aria-current="page"` and a visible highlight on the current page's link
+- Account and mobile menus are disclosure buttons with `aria-expanded` and `aria-controls`
+- Escape closes an open menu and returns focus to its button
+
+### Tabs (trip sections, saved items)
+- `role="tablist"`, `role="tab"` with `aria-selected`, and a labelled `role="tabpanel"`
+- Arrow keys (plus Home and End on the trip page) move between tabs; only the selected tab is in the Tab order
+
+### Clickable cards and rows
+- Trip cards are links; notification rows and photo tiles open through a real button, so they work with Enter and Space
+- Photo tile actions (download, delete) appear on keyboard focus as well as on hover
 
 ### Empty State Component
 - `role="status"` for status messages
@@ -87,6 +95,19 @@ The application follows WCAG 2.1 Level AA guidelines and implements various acce
 - `role="status"` for loading indicators
 - `aria-live="polite"` for updates
 - Screen reader text with `.sr-only` class
+
+## Dark Mode
+
+- Follows the device's light or dark setting by default and updates live when it changes
+- The theme button in the navigation cycles System, Light and Dark; the choice is saved in `localStorage` (`travelo-theme`)
+- `public/theme-init.js` applies the saved theme before the first paint, so there is no flash of the light theme
+- Dark styles are Tailwind `dark:` classes driven by a `.dark` class on `<html>`; both themes meet WCAG AA contrast
+
+## Automated Checks
+
+- `client/src/__tests__/accessibility.test.jsx` runs axe-core (WCAG 2.1 A/AA) on the sign-in, registration and explore pages, the navigation, modals and the FAQ, and tests keyboard behaviour (menus, focus trap, current page)
+- `e2e/tests/accessibility.spec.js` runs axe, including colour contrast, on every page and every trip tab in both the light and dark themes, and checks the theme switch and keyboard tabs
+- When adding UI, add `dark:` variants next to light colours and run `npm test` in `client/`
 
 ## Testing Recommendations
 

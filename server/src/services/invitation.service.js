@@ -2,6 +2,8 @@ import Invitation from "#models/invitation.model.js";
 import Trip from "#models/trip.model.js";
 import User from "#models/user.model.js";
 import Notification from "#models/notification.model.js";
+import { emailUser } from "#services/email/notify.js";
+import { tripInvitationTemplate } from "#services/email/templates.js";
 
 /**
  * Send an invitation to join a trip
@@ -74,6 +76,15 @@ export const sendInvitation = async (tripId, inviterId, email) => {
       relatedTrip: trip._id,
       relatedResource: invitation._id,
     });
+
+    emailUser(userToInvite._id, (invitee) =>
+      tripInvitationTemplate({
+        name: invitee.name,
+        inviterName: invitation.invitedBy.name,
+        tripTitle: trip.title,
+        invitationId: invitation._id.toString(),
+      })
+    );
 
     // Create notification for the inviter
     await Notification.create({

@@ -89,11 +89,11 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
     <Modal isOpen={isOpen} onClose={handleClose} title='Report Trip'>
       <div className='space-y-4'>
         {/* Warning message */}
-        <div className='flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg'>
-          <AlertTriangle className='w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5' />
-          <div className='text-sm text-yellow-800'>
+        <div className='flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-950/40 dark:border-yellow-800'>
+          <AlertTriangle className='w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5 dark:text-yellow-300' />
+          <div className='text-sm text-yellow-800 dark:text-yellow-200'>
             <p className='font-medium mb-1'>Report: {tripTitle}</p>
-            <p className='text-yellow-700'>
+            <p className='text-yellow-700 dark:text-yellow-300'>
               False reports may result in account restrictions. Please provide
               accurate information.
             </p>
@@ -103,8 +103,8 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
         <form onSubmit={handleSubmit} className='space-y-4'>
           {/* Category Selection */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Report Category <span className='text-red-500'>*</span>
+            <label className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
+              Report Category <span className='text-red-600 dark:text-red-400'>*</span>
             </label>
             <div className='space-y-2'>
               {reportCategories.map((category) => (
@@ -112,8 +112,8 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
                   key={category.value}
                   className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
                     formData.category === category.value
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
+                      : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-500"
                   }`}
                 >
                   <input
@@ -128,10 +128,10 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
                     disabled={isSubmitting}
                   />
                   <div className='flex-1'>
-                    <div className='font-medium text-gray-900'>
+                    <div className='font-medium text-gray-900 dark:text-gray-100'>
                       {category.label}
                     </div>
-                    <div className='text-sm text-gray-500'>
+                    <div className='text-sm text-gray-500 dark:text-gray-400'>
                       {category.description}
                     </div>
                   </div>
@@ -144,9 +144,9 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
           <div>
             <label
               htmlFor='description'
-              className='block text-sm font-medium text-gray-700 mb-2'
+              className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'
             >
-              Description <span className='text-red-500'>*</span>
+              Description <span className='text-red-600 dark:text-red-400'>*</span>
             </label>
             <textarea
               id='description'
@@ -157,11 +157,11 @@ const ReportModal = ({ isOpen, onClose, tripId, tripTitle }) => {
               placeholder="Please provide details about why you're reporting this trip..."
               rows={4}
               maxLength={1000}
-              className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none'
+              className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none dark:border-gray-600'
               disabled={isSubmitting}
               required
             />
-            <p className='mt-1 text-sm text-gray-500 text-right'>
+            <p className='mt-1 text-sm text-gray-500 text-right dark:text-gray-400'>
               {formData.description.length}/1000 characters
             </p>
           </div>

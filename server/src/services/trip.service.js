@@ -1,6 +1,6 @@
 import Trip from "#models/trip.model.js";
 import Notification from "#models/notification.model.js";
-import User from "#models/user.model.js";
+import { escapeRegex } from "#validations/search.validation.js";
 
 /**
  * Create a new trip
@@ -113,6 +113,7 @@ export const updateTrip = async (tripId, userId, updateData) => {
       destinationType: trip.destinationType,
       owner: trip.owner,
       members: trip.members,
+      shareToken: trip.shareToken ?? null,
       updatedAt: trip.updatedAt,
     };
   } catch (e) {
@@ -219,6 +220,7 @@ export const getTripById = async (tripId, userId) => {
       tripCategory: trip.tripCategory,
       owner: trip.owner,
       members: trip.members,
+      shareToken: trip.shareToken ?? null,
       createdAt: trip.createdAt,
       updatedAt: trip.updatedAt,
     };
@@ -433,71 +435,124 @@ export const getTripMembers = async (tripId, userId) => {
   }
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const tripDurationDays = (trip) =>
+  Math.ceil(Math.abs(trip.endDate - trip.startDate) / DAY_MS);
+
 /**
- * Get all upcoming trips for public exploration (NO AUTH REQUIRED)
- * Returns only non-sensitive data: title, description, dates, destination type, activities, and checklist
- * @returns {Promise<Array>} Array of sanitized trip objects with activities and checklist
+ * Get upcoming public trips for the explore page, with optional filters
+ * @param {Object} [filters] - Already validated filters (see exploreQuerySchema)
+ * @param {string} [filters.search] - Text matched against title and description
+ * @param {string} [filters.destinationType] - beach, mountain, city, countryside or other
+ * @param {string} [filters.tripCategory] - domestic or international
+ * @param {Date} [filters.from] - Trip starts on or after this date
+ * @param {Date} [filters.to] - Trip starts on or before this day (the whole day is included)
+ * @param {number} [filters.minDays] - Minimum trip length in days
+ * @param {number} [filters.maxDays] - Maximum trip length in days
+ * @param {string} [filters.sort] - soonest (default), latest, newest, shortest or longest
+ * @returns {Promise<Array>} Array of trip summaries
  */
-export const getPublicUpcomingTrips = async () => {
-  try {
-    const now = new Date();
+export const getPublicUpcomingTrips = async (filters = {}) => {
+  const {
+    search,
+    destinationType,
+    tripCategory,
+    from,
+    to,
+    minDays,
+    maxDays,
+    sort = "soonest",
+  } = filters;
 
-    // Import Activity and ChecklistItem models
-    const Activity = (await import("#models/activity.model.js")).default;
-    const ChecklistItem = (await import("#models/checklist.model.js")).default;
-
-    // Find all upcoming trips that are not deleted
-    const trips = await Trip.find({
-      startDate: { $gte: now },
-      isDeleted: false,
-    }).sort({ startDate: 1 });
-
-    // Fetch activities and checklist for each trip
-    const tripsWithDetails = await Promise.all(
-      trips.map(async (trip) => {
-        // Get activities for this trip
-        const activities = await Activity.find({ trip: trip._id })
-          .select("title description date time location category")
-          .sort({ date: 1, time: 1 })
-          .limit(10); // Limit to 10 activities per trip
-
-        // Get checklist items for this trip
-        const checklistItems = await ChecklistItem.find({ trip: trip._id })
-          .select("text isChecked")
-          .limit(20); // Limit to 20 items per trip
-
-        return {
-          id: trip._id,
-          title: trip.title,
-          description: trip.description,
-          startDate: trip.startDate,
-          endDate: trip.endDate,
-          destinationType: trip.destinationType,
-          tripCategory: trip.tripCategory,
-          ownerId: trip.owner.toString(), // Include owner ID for filtering
-          members: trip.members.map((m) => m.toString()), // Include member IDs for filtering
-          activities: activities.map((act) => ({
-            id: act._id,
-            title: act.title,
-            description: act.description,
-            date: act.date,
-            time: act.time,
-            location: act.location?.name || null,
-            category: act.category,
-          })),
-          checklist: checklistItems.map((item) => ({
-            id: item._id,
-            text: item.text,
-            isChecked: item.isChecked,
-          })),
-          activityCount: activities.length,
-          checklistCount: checklistItems.length,
-        };
-      })
-    );
-
-    return tripsWithDetails;
-  } catch (e) {
-    throw e;
+  const now = new Date();
+  const query = {
+    startDate: { $gte: from && from > now ? from : now },
+    isDeleted: false,
+  };
+  if (to) {
+    query.startDate.$lt = new Date(to.getTime() + DAY_MS);
   }
+  if (destinationType) {
+    query.destinationType = destinationType;
+  }
+  if (tripCategory) {
+    query.tripCategory = tripCategory;
+  }
+  if (search) {
+    const pattern = escapeRegex(search.slice(0, 100));
+    query.$or = [
+      { title: { $regex: pattern, $options: "i" } },
+      { description: { $regex: pattern, $options: "i" } },
+    ];
+  }
+
+  // Duration is shown as whole days, rounded up (see tripDurationDays)
+  const durationMs = { $subtract: ["$endDate", "$startDate"] };
+  const durationChecks = [];
+  if (minDays) {
+    durationChecks.push({ $gt: [durationMs, (minDays - 1) * DAY_MS] });
+  }
+  if (maxDays) {
+    durationChecks.push({ $lte: [durationMs, maxDays * DAY_MS] });
+  }
+  if (durationChecks.length > 0) {
+    query.$expr = { $and: durationChecks };
+  }
+
+  const sortOptions = {
+    soonest: { startDate: 1 },
+    latest: { startDate: -1 },
+    newest: { createdAt: -1 },
+  };
+
+  const trips = await Trip.find(query)
+    .select(
+      "title description startDate endDate destinationType tripCategory owner members createdAt"
+    )
+    .sort(sortOptions[sort] || { startDate: 1 })
+    .limit(200)
+    .lean();
+
+  if (sort === "shortest" || sort === "longest") {
+    const direction = sort === "shortest" ? 1 : -1;
+    trips.sort(
+      (a, b) =>
+        direction * (tripDurationDays(a) - tripDurationDays(b)) ||
+        a.startDate - b.startDate
+    );
+  }
+
+  // Count activities and checklist items for all trips in two queries
+  const Activity = (await import("#models/activity.model.js")).default;
+  const ChecklistItem = (await import("#models/checklist.model.js")).default;
+  const tripIds = trips.map((trip) => trip._id);
+  const countByTrip = async (Model) => {
+    const rows = await Model.aggregate([
+      { $match: { trip: { $in: tripIds } } },
+      { $group: { _id: "$trip", count: { $sum: 1 } } },
+    ]);
+    return new Map(rows.map((row) => [row._id.toString(), row.count]));
+  };
+  const [activityCounts, checklistCounts] = await Promise.all([
+    countByTrip(Activity),
+    countByTrip(ChecklistItem),
+  ]);
+
+  return trips.map((trip) => ({
+    id: trip._id.toString(),
+    title: trip.title,
+    description: trip.description,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    durationDays: tripDurationDays(trip),
+    destinationType: trip.destinationType,
+    tripCategory: trip.tripCategory,
+    ownerId: trip.owner.toString(), // Include owner ID for filtering
+    members: trip.members.map((m) => m.toString()), // Include member IDs for filtering
+    memberCount: trip.members.length,
+    activityCount: activityCounts.get(trip._id.toString()) || 0,
+    checklistCount: checklistCounts.get(trip._id.toString()) || 0,
+    createdAt: trip.createdAt,
+  }));
 };

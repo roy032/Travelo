@@ -16,7 +16,6 @@ import {
 import {
   getWeatherForecast,
   generatePackingSuggestions,
-  getWeatherDescription,
 } from "../../../services/weather.service";
 import { activityApi } from "../../../services/api.service";
 import Loader from "../../ui/Loader";
@@ -29,7 +28,7 @@ import Loader from "../../ui/Loader";
 const PackageHelper = ({ tripId, startDate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [weatherData, setWeatherData] = useState(null);
+  const [, setWeatherData] = useState(null);
   const [suggestions, setSuggestions] = useState(null);
   const [showHelper, setShowHelper] = useState(false);
   const [location, setLocation] = useState(null);
@@ -115,12 +114,12 @@ const PackageHelper = ({ tripId, startDate }) => {
 
   if (!showHelper) {
     return (
-      <div className='bg-blue-50 border border-blue-200 rounded-lg p-6 text-center'>
+      <div className='bg-blue-50 border border-blue-200 rounded-lg p-6 text-center dark:bg-blue-950/40 dark:border-blue-800'>
         <Package className='mx-auto h-12 w-12 text-blue-400 mb-3' />
-        <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+        <h2 className='text-lg font-semibold text-gray-900 mb-2 dark:text-gray-100'>
           Package Helper
-        </h3>
-        <p className='text-sm text-gray-600'>
+        </h2>
+        <p className='text-sm text-gray-600 dark:text-gray-400'>
           Weather-based packing suggestions will appear when your trip is within
           15 days.
         </p>
@@ -130,14 +129,14 @@ const PackageHelper = ({ tripId, startDate }) => {
 
   if (!location || !location.latitude || !location.longitude) {
     return (
-      <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-6'>
+      <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-6 dark:bg-yellow-950/40 dark:border-yellow-800'>
         <div className='flex items-start space-x-3'>
-          <AlertCircle className='h-5 w-5 text-yellow-600 mt-0.5 shrink-0' />
+          <AlertCircle className='h-5 w-5 text-yellow-700 mt-0.5 shrink-0 dark:text-yellow-300' />
           <div>
-            <h3 className='text-sm font-semibold text-gray-900 mb-1'>
+            <h2 className='text-sm font-semibold text-gray-900 mb-1 dark:text-gray-100'>
               Location Required
-            </h3>
-            <p className='text-sm text-gray-600'>
+            </h2>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
               Add location coordinates to your trip activities to get
               weather-based packing suggestions.
             </p>
@@ -149,7 +148,7 @@ const PackageHelper = ({ tripId, startDate }) => {
 
   if (loading) {
     return (
-      <div className='bg-white rounded-lg border border-gray-200 p-8'>
+      <div className='bg-white rounded-lg border border-gray-200 p-8 dark:bg-gray-900 dark:border-gray-700'>
         <Loader text='Fetching weather forecast...' />
       </div>
     );
@@ -157,12 +156,12 @@ const PackageHelper = ({ tripId, startDate }) => {
 
   if (error) {
     return (
-      <div className='bg-red-50 border border-red-200 rounded-lg p-6'>
+      <div className='bg-red-50 border border-red-200 rounded-lg p-6 dark:bg-red-950/40 dark:border-red-800'>
         <div className='flex items-start space-x-3'>
-          <AlertCircle className='h-5 w-5 text-red-600 mt-0.5 shrink-0' />
+          <AlertCircle className='h-5 w-5 text-red-600 mt-0.5 shrink-0 dark:text-red-400' />
           <div>
-            <h3 className='text-sm font-semibold text-gray-900 mb-1'>Error</h3>
-            <p className='text-sm text-gray-600'>{error}</p>
+            <h2 className='text-sm font-semibold text-gray-900 mb-1 dark:text-gray-100'>Error</h2>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>{error}</p>
           </div>
         </div>
       </div>
@@ -194,55 +193,55 @@ const PackageHelper = ({ tripId, startDate }) => {
       </div>
 
       {/* Weather Summary */}
-      <div className='bg-white rounded-lg border border-gray-200 p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2'>
+      <div className='bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700'>
+        <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2 dark:text-gray-100'>
           <Cloud className='h-5 w-5 text-blue-500' />
           <span>Weather Forecast</span>
         </h3>
 
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
           {/* Max Temperature */}
-          <div className='bg-orange-50 rounded-lg p-4'>
+          <div className='bg-orange-50 rounded-lg p-4 dark:bg-orange-950/40'>
             <div className='flex items-center space-x-2 mb-1'>
-              <Thermometer className='h-4 w-4 text-orange-600' />
-              <span className='text-xs font-medium text-orange-900'>High</span>
+              <Thermometer className='h-4 w-4 text-orange-700 dark:text-orange-300' />
+              <span className='text-xs font-medium text-orange-900 dark:text-orange-200'>High</span>
             </div>
-            <p className='text-2xl font-bold text-orange-600'>
+            <p className='text-2xl font-bold text-orange-700 dark:text-orange-300'>
               {weatherSummary.maxTemp}°C
             </p>
           </div>
 
           {/* Min Temperature */}
-          <div className='bg-blue-50 rounded-lg p-4'>
+          <div className='bg-blue-50 rounded-lg p-4 dark:bg-blue-950/40'>
             <div className='flex items-center space-x-2 mb-1'>
-              <Snowflake className='h-4 w-4 text-blue-600' />
-              <span className='text-xs font-medium text-blue-900'>Low</span>
+              <Snowflake className='h-4 w-4 text-blue-600 dark:text-blue-400' />
+              <span className='text-xs font-medium text-blue-900 dark:text-blue-200'>Low</span>
             </div>
-            <p className='text-2xl font-bold text-blue-600'>
+            <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
               {weatherSummary.minTemp}°C
             </p>
           </div>
 
           {/* Avg Max */}
-          <div className='bg-yellow-50 rounded-lg p-4'>
+          <div className='bg-yellow-50 rounded-lg p-4 dark:bg-yellow-950/40'>
             <div className='flex items-center space-x-2 mb-1'>
-              <Sun className='h-4 w-4 text-yellow-600' />
-              <span className='text-xs font-medium text-yellow-900'>
+              <Sun className='h-4 w-4 text-yellow-700 dark:text-yellow-300' />
+              <span className='text-xs font-medium text-yellow-900 dark:text-yellow-200'>
                 Avg High
               </span>
             </div>
-            <p className='text-2xl font-bold text-yellow-600'>
+            <p className='text-2xl font-bold text-yellow-700 dark:text-yellow-300'>
               {weatherSummary.avgMaxTemp}°C
             </p>
           </div>
 
           {/* Rain Chance */}
-          <div className='bg-cyan-50 rounded-lg p-4'>
+          <div className='bg-cyan-50 rounded-lg p-4 dark:bg-cyan-950/40'>
             <div className='flex items-center space-x-2 mb-1'>
-              <Droplets className='h-4 w-4 text-cyan-600' />
-              <span className='text-xs font-medium text-cyan-900'>Rain</span>
+              <Droplets className='h-4 w-4 text-cyan-600 dark:text-cyan-400' />
+              <span className='text-xs font-medium text-cyan-900 dark:text-cyan-200'>Rain</span>
             </div>
-            <p className='text-2xl font-bold text-cyan-600'>
+            <p className='text-2xl font-bold text-cyan-600 dark:text-cyan-400'>
               {weatherSummary.rainChance}%
             </p>
           </div>
@@ -252,20 +251,20 @@ const PackageHelper = ({ tripId, startDate }) => {
       {/* Packing Suggestions */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         {/* Clothing */}
-        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+        <div className='bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700'>
           <div className='flex items-center space-x-2 mb-4'>
-            <div className='bg-purple-100 p-2 rounded-lg'>
-              <Shirt className='h-5 w-5 text-purple-600' />
+            <div className='bg-purple-100 p-2 rounded-lg dark:bg-purple-900/40'>
+              <Shirt className='h-5 w-5 text-purple-600 dark:text-purple-400' />
             </div>
-            <h3 className='text-lg font-semibold text-gray-900'>Clothing</h3>
+            <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>Clothing</h3>
           </div>
           <ul className='space-y-2'>
             {suggestions.clothing.map((item, index) => (
               <li
                 key={index}
-                className='flex items-start space-x-2 text-sm text-gray-700'
+                className='flex items-start space-x-2 text-sm text-gray-700 dark:text-gray-300'
               >
-                <CheckCircle2 className='h-4 w-4 text-green-500 mt-0.5 shrink-0' />
+                <CheckCircle2 className='h-4 w-4 text-green-700 mt-0.5 shrink-0 dark:text-green-300' />
                 <span>{item}</span>
               </li>
             ))}
@@ -273,26 +272,26 @@ const PackageHelper = ({ tripId, startDate }) => {
         </div>
 
         {/* Accessories */}
-        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+        <div className='bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700'>
           <div className='flex items-center space-x-2 mb-4'>
-            <div className='bg-blue-100 p-2 rounded-lg'>
-              <Watch className='h-5 w-5 text-blue-600' />
+            <div className='bg-blue-100 p-2 rounded-lg dark:bg-blue-900/40'>
+              <Watch className='h-5 w-5 text-blue-600 dark:text-blue-400' />
             </div>
-            <h3 className='text-lg font-semibold text-gray-900'>Accessories</h3>
+            <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>Accessories</h3>
           </div>
           <ul className='space-y-2'>
             {suggestions.accessories.length > 0 ? (
               suggestions.accessories.map((item, index) => (
                 <li
                   key={index}
-                  className='flex items-start space-x-2 text-sm text-gray-700'
+                  className='flex items-start space-x-2 text-sm text-gray-700 dark:text-gray-300'
                 >
-                  <CheckCircle2 className='h-4 w-4 text-green-500 mt-0.5 shrink-0' />
+                  <CheckCircle2 className='h-4 w-4 text-green-700 mt-0.5 shrink-0 dark:text-green-300' />
                   <span>{item}</span>
                 </li>
               ))
             ) : (
-              <li className='text-sm text-gray-500 italic'>
+              <li className='text-sm text-gray-500 italic dark:text-gray-400'>
                 No special accessories needed
               </li>
             )}
@@ -300,20 +299,20 @@ const PackageHelper = ({ tripId, startDate }) => {
         </div>
 
         {/* Essentials */}
-        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+        <div className='bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700'>
           <div className='flex items-center space-x-2 mb-4'>
-            <div className='bg-green-100 p-2 rounded-lg'>
-              <ShoppingBag className='h-5 w-5 text-green-600' />
+            <div className='bg-green-100 p-2 rounded-lg dark:bg-green-900/40'>
+              <ShoppingBag className='h-5 w-5 text-green-700 dark:text-green-300' />
             </div>
-            <h3 className='text-lg font-semibold text-gray-900'>Essentials</h3>
+            <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>Essentials</h3>
           </div>
           <ul className='space-y-2'>
             {suggestions.essentials.map((item, index) => (
               <li
                 key={index}
-                className='flex items-start space-x-2 text-sm text-gray-700'
+                className='flex items-start space-x-2 text-sm text-gray-700 dark:text-gray-300'
               >
-                <CheckCircle2 className='h-4 w-4 text-green-500 mt-0.5 shrink-0' />
+                <CheckCircle2 className='h-4 w-4 text-green-700 mt-0.5 shrink-0 dark:text-green-300' />
                 <span>{item}</span>
               </li>
             ))}
@@ -322,14 +321,14 @@ const PackageHelper = ({ tripId, startDate }) => {
       </div>
 
       {/* Tip */}
-      <div className='bg-amber-50 border border-amber-200 rounded-lg p-4'>
+      <div className='bg-amber-50 border border-amber-200 rounded-lg p-4 dark:bg-amber-950/40 dark:border-amber-800'>
         <div className='flex items-start space-x-3'>
-          <AlertCircle className='h-5 w-5 text-amber-600 mt-0.5 shrink-0' />
+          <AlertCircle className='h-5 w-5 text-amber-600 mt-0.5 shrink-0 dark:text-amber-400' />
           <div>
-            <h4 className='text-sm font-semibold text-amber-900 mb-1'>
+            <h4 className='text-sm font-semibold text-amber-900 mb-1 dark:text-amber-200'>
               Packing Tip
             </h4>
-            <p className='text-sm text-amber-800'>
+            <p className='text-sm text-amber-800 dark:text-amber-200'>
               Weather forecasts can change. Check again closer to your trip date
               and pack layers to adapt to temperature changes.
             </p>

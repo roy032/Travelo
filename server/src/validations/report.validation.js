@@ -4,11 +4,11 @@ export const createReportSchema = z.object({
   category: z.enum(
     ["spam", "inappropriate", "fake", "unsafe", "copyright", "other"],
     {
-      errorMap: () => ({ message: "Invalid report category" }),
+      error: "Invalid report category",
     }
   ),
   description: z
-    .string({ required_error: "Description is required" })
+    .string({ error: "Description is required" })
     .min(10, "Description must be at least 10 characters")
     .max(1000, "Description must not exceed 1000 characters")
     .trim(),
@@ -16,10 +16,10 @@ export const createReportSchema = z.object({
 
 export const updateReportStatusSchema = z.object({
   status: z.enum(["resolved"], {
-    errorMap: () => ({ message: "Invalid status" }),
+    error: "Invalid status",
   }),
   message: z
-    .string({ required_error: "Action message is required" })
+    .string({ error: "Action message is required" })
     .min(10, "Message must be at least 10 characters")
     .max(1000, "Message must not exceed 1000 characters")
     .trim(),

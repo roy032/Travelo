@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { notificationApi } from "../../../services/api.service";
 import NotificationDropdown from "./NotificationDropdown";
-import toast from "react-hot-toast";
 
 /**
  * NotificationBell component with unread badge
@@ -12,7 +11,6 @@ import toast from "react-hot-toast";
 const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Fetch unread count on mount and periodically
   useEffect(() => {
@@ -51,7 +49,7 @@ const NotificationBell = () => {
     <div className='relative'>
       <button
         onClick={toggleDropdown}
-        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
         aria-label='Notifications'
       >
         <Bell size={24} />

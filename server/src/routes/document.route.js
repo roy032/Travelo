@@ -1,6 +1,12 @@
 import express from 'express';
-import { uploadDocument } from '#controllers/document.controller.js';
-import { authenticateToken } from '#middlewares/auth.middleware.js';
+import {
+  uploadDocument,
+  getLocalDocument,
+} from '#controllers/document.controller.js';
+import {
+  authenticateToken,
+  requireRole,
+} from '#middlewares/auth.middleware.js';
 import {
   uploadDocument as uploadMiddleware,
   handleUploadError,
@@ -17,6 +23,15 @@ router.post(
   handleUploadError,
   validateFileContent,
   uploadDocument
+);
+
+// GET /documents/file/:fileName - View a locally stored identity document
+// (development without UploadThing). Admins only.
+router.get(
+  '/file/:fileName',
+  authenticateToken,
+  requireRole(['admin']),
+  getLocalDocument
 );
 
 export default router;
