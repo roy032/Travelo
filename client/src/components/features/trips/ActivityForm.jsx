@@ -253,7 +253,7 @@ const ActivityForm = ({
       <div>
         <label
           htmlFor='description'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Description
         </label>
@@ -264,10 +264,10 @@ const ActivityForm = ({
           onChange={handleChange}
           placeholder='Add details about this activity...'
           rows={3}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         />
         {errors.description && (
-          <p className='mt-1 text-sm text-red-600'>{errors.description}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.description}</p>
         )}
       </div>
 
@@ -306,7 +306,7 @@ const ActivityForm = ({
           required
         />
         {geocodingStatus === "loading" && (
-          <p className='mt-1 text-sm text-blue-600 flex items-center'>
+          <p className='mt-1 text-sm text-blue-600 flex items-center dark:text-blue-400'>
             <svg
               className='animate-spin h-4 w-4 mr-2'
               xmlns='http://www.w3.org/2000/svg'
@@ -331,7 +331,7 @@ const ActivityForm = ({
           </p>
         )}
         {geocodingStatus === "success" && cachedCoordinates && (
-          <p className='mt-1 text-sm text-green-600 flex items-center'>
+          <p className='mt-1 text-sm text-green-700 flex items-center dark:text-green-300'>
             <svg
               className='h-4 w-4 mr-2'
               fill='currentColor'
@@ -350,7 +350,7 @@ const ActivityForm = ({
         )}
         {geocodingStatus === "error" &&
           formData.location.name.trim().length >= 3 && (
-            <p className='mt-1 text-sm text-orange-600 flex items-center'>
+            <p className='mt-1 text-sm text-orange-700 flex items-center dark:text-orange-300'>
               <svg
                 className='h-4 w-4 mr-2'
                 fill='currentColor'

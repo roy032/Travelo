@@ -22,7 +22,7 @@ const MapView = ({ tripId, tripStartDate }) => {
 
   if (error) {
     return (
-      <p className='text-center py-12 text-gray-600'>
+      <p className='text-center py-12 text-gray-600 dark:text-gray-400'>
         The map couldn&apos;t be loaded. Please try again.
       </p>
     );
@@ -31,8 +31,8 @@ const MapView = ({ tripId, tripStartDate }) => {
   return (
     <div>
       <div className='mb-4'>
-        <h2 className='text-2xl font-bold text-gray-900'>Map View</h2>
-        <p className='text-gray-600 mt-1'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>Map View</h2>
+        <p className='text-gray-600 mt-1 dark:text-gray-400'>
           {activities.length} {activities.length === 1 ? "stop" : "stops"} in
           visiting order
         </p>

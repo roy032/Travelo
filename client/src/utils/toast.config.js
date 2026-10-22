@@ -13,12 +13,12 @@ export const toastConfig = {
   success: {
     duration: 3000,
     style: {
-      background: '#10B981',
+      background: '#047857',
       color: '#fff',
     },
     iconTheme: {
       primary: '#fff',
-      secondary: '#10B981',
+      secondary: '#047857',
     },
   },
 
@@ -26,19 +26,19 @@ export const toastConfig = {
   error: {
     duration: 5000,
     style: {
-      background: '#EF4444',
+      background: '#B91C1C',
       color: '#fff',
     },
     iconTheme: {
       primary: '#fff',
-      secondary: '#EF4444',
+      secondary: '#B91C1C',
     },
   },
 
   // Loading toast styling
   loading: {
     style: {
-      background: '#3B82F6',
+      background: '#1D4ED8',
       color: '#fff',
     },
   },

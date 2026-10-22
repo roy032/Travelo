@@ -54,7 +54,7 @@ const NoteCard = ({ note, currentUserId, onEdit, onDelete, canEdit }) => {
         {/* Header with title and visibility */}
         <div className='flex items-start justify-between'>
           <div className='flex-1 min-w-0'>
-            <h3 className='text-lg font-semibold text-gray-900 truncate'>
+            <h3 className='text-lg font-semibold text-gray-900 truncate dark:text-gray-100'>
               {note.title || "Untitled Note"}
             </h3>
           </div>
@@ -63,8 +63,8 @@ const NoteCard = ({ note, currentUserId, onEdit, onDelete, canEdit }) => {
             <div
               className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
                 isPrivate
-                  ? "bg-gray-100 text-gray-700"
-                  : "bg-blue-100 text-blue-700"
+                  ? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
               }`}
               title={isPrivate ? "Private note" : "Shared with all members"}
             >
@@ -84,13 +84,13 @@ const NoteCard = ({ note, currentUserId, onEdit, onDelete, canEdit }) => {
         </div>
 
         {/* Content preview */}
-        <p className='text-gray-600 text-sm line-clamp-3'>
+        <p className='text-gray-600 text-sm line-clamp-3 dark:text-gray-400'>
           {truncateContent(note.content)}
         </p>
 
         {/* Footer with metadata and actions */}
-        <div className='flex items-center justify-between pt-2 border-t border-gray-100'>
-          <div className='text-xs text-gray-500'>
+        <div className='flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800'>
+          <div className='text-xs text-gray-500 dark:text-gray-400'>
             <span className='font-medium'>{creatorName}</span>
             {formattedDate && <span> • {formattedDate}</span>}
           </div>
@@ -103,7 +103,7 @@ const NoteCard = ({ note, currentUserId, onEdit, onDelete, canEdit }) => {
                   e.stopPropagation();
                   onEdit(note);
                 }}
-                className='p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors'
+                className='p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/40'
                 title='Edit note'
               >
                 <Edit2 size={16} />
@@ -114,7 +114,7 @@ const NoteCard = ({ note, currentUserId, onEdit, onDelete, canEdit }) => {
                   handleDelete();
                 }}
                 disabled={isDeleting}
-                className='p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50'
+                className='p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-950/40'
                 title='Delete note'
               >
                 <Trash2 size={16} />

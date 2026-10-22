@@ -37,14 +37,14 @@ const DestinationsGrid = () => {
   ];
 
   return (
-    <div className='bg-gradient-to-b from-gray-50 to-white py-20'>
+    <div className='bg-gradient-to-b from-gray-50 to-white py-20 dark:from-gray-950 dark:to-gray-900'>
       <div className='max-w-screen-xl mx-auto px-6'>
         {/* Section Header */}
         <div className='text-center mb-12'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
             Featured Destinations
           </h2>
-          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto dark:text-gray-400'>
             Explore our handpicked selection of breathtaking destinations around
             the world
           </p>

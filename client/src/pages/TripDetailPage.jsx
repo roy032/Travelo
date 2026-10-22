@@ -327,10 +327,10 @@ const TripDetailPage = () => {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
             Trip not found
           </h2>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-400'>
             The trip you're looking for doesn't exist.
           </p>
         </div>
@@ -356,8 +356,34 @@ const TripDetailPage = () => {
     { id: "package-helper", label: "Package Helper" },
     { id: "photos", label: "Photos" },
   ];
+
+  const selectTab = (tabId, tabElement) => {
+    setActiveTab(tabId);
+    tabElement?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  };
+
+  // Arrow keys, Home and End move between tabs (WAI-ARIA tabs pattern)
+  const handleTabKeyDown = (event) => {
+    const index = tabs.findIndex((tab) => tab.id === activeTab);
+    const nextIndex = {
+      ArrowRight: (index + 1) % tabs.length,
+      ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+      Home: 0,
+      End: tabs.length - 1,
+    }[event.key];
+    if (nextIndex === undefined) return;
+    event.preventDefault();
+    const nextTab = document.getElementById(`trip-tab-${tabs[nextIndex].id}`);
+    nextTab?.focus();
+    selectTab(tabs[nextIndex].id, nextTab);
+  };
+
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950'>
       <TripHeader
         trip={trip}
         isOwner={isOwner}
@@ -366,64 +392,69 @@ const TripDetailPage = () => {
       />
 
       {/* Tab Navigation */}
-      <div className='bg-white border-b border-gray-200'>
+      <div className='bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <nav
+          <div
             className='flex space-x-6 sm:space-x-8 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0'
-            aria-label='Tabs'
+            role='tablist'
+            aria-label='Trip sections'
+            onKeyDown={handleTabKeyDown}
           >
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={(event) => {
-                  setActiveTab(tab.id);
-                  event.currentTarget.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center",
-                  });
-                }}
-                aria-current={activeTab === tab.id ? "page" : undefined}
+                type='button'
+                role='tab'
+                id={`trip-tab-${tab.id}`}
+                aria-selected={activeTab === tab.id}
+                aria-controls='trip-tabpanel'
+                tabIndex={activeTab === tab.id ? 0 : -1}
+                onClick={(event) => selectTab(tab.id, event.currentTarget)}
                 className={`
-                  py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
+                  py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500
                   ${
                     activeTab === tab.id
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500"
                   }
                 `}
               >
                 {tab.label}
               </button>
             ))}
-          </nav>
+          </div>
         </div>
       </div>
 
       {/* Tab Content */}
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'>
+      <div
+        className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'
+        role='tabpanel'
+        id='trip-tabpanel'
+        aria-labelledby={`trip-tab-${activeTab}`}
+      >
         {activeTab === "overview" && (
           <div className='space-y-6'>
             {/* Join Requests Panel - Only visible to owner */}
             <JoinRequestsPanel tripId={tripId} isOwner={isOwner} />
 
             {/* Trip Overview */}
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
+              <h2 className='text-xl font-semibold text-gray-900 mb-4 dark:text-gray-100'>
                 Trip Overview
               </h2>
               <div className='space-y-4'>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
                     Description
                   </h3>
-                  <p className='mt-1 text-gray-900'>
+                  <p className='mt-1 text-gray-900 dark:text-gray-100'>
                     {trip.description || "No description provided"}
                   </p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Members</h3>
-                  <p className='mt-1 text-gray-900'>
+                  <h3 className='text-sm font-medium text-gray-500 dark:text-gray-400'>Members</h3>
+                  <p className='mt-1 text-gray-900 dark:text-gray-100'>
                     {trip.members?.length || 0}{" "}
                     {trip.members?.length === 1 ? "member" : "members"}
                   </p>
@@ -434,7 +465,7 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "itinerary" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             <ItineraryView
               tripId={tripId}
               tripStartDate={trip.startDate}
@@ -447,13 +478,13 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "map" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             <MapView tripId={tripId} tripStartDate={trip.startDate} />
           </div>
         )}
 
         {activeTab === "members" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             {loadingMembers ? (
               <div className='flex justify-center py-8'>
                 <Loader />
@@ -479,7 +510,7 @@ const TripDetailPage = () => {
 
         {activeTab === "expenses" && (
           <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
               <ExpenseList
                 tripId={tripId}
                 onAddExpense={handleAddExpense}
@@ -487,20 +518,20 @@ const TripDetailPage = () => {
                 refreshKey={expenseRefreshKey}
               />
             </div>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
               <SplitSummary tripId={tripId} refreshKey={expenseRefreshKey} />
             </div>
           </div>
         )}
 
         {activeTab === "checklist" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             <ChecklistView tripId={tripId} canEdit={true} />
           </div>
         )}
 
         {activeTab === "notes" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             <NotesList
               key={noteRefreshKey}
               tripId={tripId}
@@ -513,19 +544,19 @@ const TripDetailPage = () => {
         )}
 
         {activeTab === "package-helper" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             <PackageHelper tripId={tripId} startDate={trip.startDate} />
           </div>
         )}
 
         {activeTab === "photos" && (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
             {/* Header with Upload Button */}
             <div className='flex items-center justify-between mb-6'>
-              <h2 className='text-xl font-semibold text-gray-900'>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                 Gallery
                 {photos.length > 0 && (
-                  <span className='ml-2 text-sm font-normal text-gray-500'>
+                  <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
                     ({photos.length} {photos.length === 1 ? "photo" : "photos"})
                   </span>
                 )}
@@ -548,12 +579,12 @@ const TripDetailPage = () => {
 
         {activeTab === "place-images" && (
           <div className='space-y-6'>
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 dark:bg-gray-900 dark:border-gray-700'>
               <div className='mb-6'>
-                <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
                   Place Images from Wikimedia Commons
                 </h2>
-                <p className='text-gray-600'>
+                <p className='text-gray-600 dark:text-gray-400'>
                   Explore images of your trip destinations sourced from
                   Wikimedia Commons. Images are shown for activities with
                   location coordinates.
@@ -565,11 +596,11 @@ const TripDetailPage = () => {
                   <Loader size='lg' text='Loading place images...' />
                 </div>
               ) : placeImages.length === 0 ? (
-                <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
-                  <p className='text-gray-600 mb-2'>
+                <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 dark:bg-gray-950 dark:border-gray-600'>
+                  <p className='text-gray-600 mb-2 dark:text-gray-400'>
                     No places with coordinates found
                   </p>
-                  <p className='text-sm text-gray-500'>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
                     Add coordinates to your activities in the itinerary to see
                     images from Wikimedia Commons
                   </p>

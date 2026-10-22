@@ -42,10 +42,10 @@ const DaySection = ({
           <span className='text-2xl font-bold'>{getDay(date)}</span>
         </div>
         <div>
-          <h3 className='text-lg sm:text-xl font-semibold text-gray-900'>
+          <h3 className='text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100'>
             {formatDate(date)}
           </h3>
-          <p className='text-sm text-gray-500'>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             {activities.length}{" "}
             {activities.length === 1 ? "activity" : "activities"}
           </p>

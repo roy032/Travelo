@@ -211,11 +211,11 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gray-50 py-8 dark:bg-gray-950'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>Profile Settings</h1>
-          <p className='mt-2 text-sm text-gray-600'>
+          <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>Profile Settings</h1>
+          <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
             Manage your account information and verification status
           </p>
         </div>
@@ -225,7 +225,7 @@ const ProfilePage = () => {
           <Card>
             <div className='space-y-4'>
               <div className='flex items-center justify-between'>
-                <h2 className='text-xl font-semibold text-gray-900'>
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                   Profile Information
                 </h2>
                 {!isEditingProfile && (
@@ -282,27 +282,27 @@ const ProfilePage = () => {
                 </form>
               ) : (
                 <div className='space-y-3'>
-                  <div className='flex items-center gap-3 text-gray-700'>
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
                     <User className='w-5 h-5 text-gray-400' />
                     <div>
-                      <p className='text-sm text-gray-500'>Name</p>
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>Name</p>
                       <p className='font-medium'>{user?.name}</p>
                     </div>
                   </div>
 
-                  <div className='flex items-center gap-3 text-gray-700'>
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
                     <Mail className='w-5 h-5 text-gray-400' />
                     <div>
-                      <p className='text-sm text-gray-500'>Email</p>
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>Email</p>
                       <p className='font-medium'>
                         {user?.email}
                         {user?.emailVerified === true && (
-                          <span className='ml-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800'>
+                          <span className='ml-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/40 dark:text-green-300'>
                             Confirmed
                           </span>
                         )}
                         {user?.emailVerified === false && (
-                          <span className='ml-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800'>
+                          <span className='ml-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'>
                             Not confirmed
                           </span>
                         )}
@@ -310,10 +310,10 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  <div className='flex items-center gap-3 text-gray-700'>
+                  <div className='flex items-center gap-3 text-gray-700 dark:text-gray-300'>
                     <Calendar className='w-5 h-5 text-gray-400' />
                     <div>
-                      <p className='text-sm text-gray-500'>Member Since</p>
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>Member Since</p>
                       <p className='font-medium'>
                         {formatDate(user?.createdAt)}
                       </p>
@@ -361,8 +361,8 @@ const ProfilePage = () => {
             <div className='space-y-4'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
-                  <Lock className='w-5 h-5 text-gray-700' />
-                  <h2 className='text-xl font-semibold text-gray-900'>
+                  <Lock className='w-5 h-5 text-gray-700 dark:text-gray-300' />
+                  <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                     Change Password
                   </h2>
                 </div>
@@ -432,7 +432,7 @@ const ProfilePage = () => {
                   </div>
                 </form>
               ) : (
-                <p className='text-sm text-gray-600'>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>
                   Keep your account secure by using a strong password
                 </p>
               )}

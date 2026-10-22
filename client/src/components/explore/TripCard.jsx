@@ -73,12 +73,12 @@ const TripCard = ({ trip }) => {
   };
 
   return (
-    <div className='bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden'>
+    <div className='bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden dark:bg-gray-900'>
       {/* Header */}
       <div className='bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white'>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
-            <h3 className='text-2xl font-bold mb-2'>{trip.title}</h3>
+            <h2 className='text-2xl font-bold mb-2'>{trip.title}</h2>
             {trip.description && (
               <p className='text-blue-50 text-sm line-clamp-2'>
                 {trip.description}
@@ -102,26 +102,26 @@ const TripCard = ({ trip }) => {
       {/* Trip Details */}
       <div className='p-6 space-y-4'>
         {/* Date Information */}
-        <div className='flex items-center space-x-3 text-gray-700'>
+        <div className='flex items-center space-x-3 text-gray-700 dark:text-gray-300'>
           <Calendar className='w-5 h-5 text-blue-500' />
           <div className='text-sm'>
             <span className='font-semibold'>
               {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
             </span>
-            <span className='text-gray-500 ml-2'>
+            <span className='text-gray-500 ml-2 dark:text-gray-400'>
               ({trip.durationDays ?? getDurationDays(trip.startDate, trip.endDate)} days)
             </span>
           </div>
         </div>
 
         {/* Destination Type */}
-        <div className='flex items-center space-x-3 text-gray-700'>
+        <div className='flex items-center space-x-3 text-gray-700 dark:text-gray-300'>
           <MapPin className='w-5 h-5 text-purple-500' />
           <div className='text-sm'>
             <span className='font-semibold capitalize'>
               {trip.destinationType || "Unknown"}
             </span>
-            <span className='text-gray-500 ml-2'>
+            <span className='text-gray-500 ml-2 dark:text-gray-400'>
               ({trip.tripCategory || "domestic"})
             </span>
           </div>
@@ -129,16 +129,16 @@ const TripCard = ({ trip }) => {
 
         {/* Stats (not included for saved trips) */}
         {trip.activityCount !== undefined && (
-          <div className='flex items-center space-x-6 pt-2 border-t border-gray-200'>
-            <div className='flex items-center space-x-2 text-sm text-gray-600'>
-              <Activity className='w-4 h-4 text-green-500' />
+          <div className='flex items-center space-x-6 pt-2 border-t border-gray-200 dark:border-gray-700'>
+            <div className='flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400'>
+              <Activity className='w-4 h-4 text-green-700 dark:text-green-300' />
               <span>
                 {trip.activityCount}{" "}
                 {trip.activityCount === 1 ? "activity" : "activities"}
               </span>
             </div>
-            <div className='flex items-center space-x-2 text-sm text-gray-600'>
-              <ListChecks className='w-4 h-4 text-orange-500' />
+            <div className='flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400'>
+              <ListChecks className='w-4 h-4 text-orange-700 dark:text-orange-300' />
               <span>
                 {trip.checklistCount}{" "}
                 {trip.checklistCount === 1 ? "item" : "items"}
@@ -148,7 +148,7 @@ const TripCard = ({ trip }) => {
         )}
 
         {/* Join Request Button */}
-        <div className='pt-4 border-t border-gray-200 space-y-2'>
+        <div className='pt-4 border-t border-gray-200 space-y-2 dark:border-gray-700'>
           {isMember ? (
             <Link
               to={`/trips/${trip.id}`}
@@ -157,14 +157,14 @@ const TripCard = ({ trip }) => {
               Open Trip
             </Link>
           ) : hasStarted ? (
-            <p className='w-full text-center text-sm text-gray-500 py-3'>
+            <p className='w-full text-center text-sm text-gray-500 py-3 dark:text-gray-400'>
               This trip has already started
             </p>
           ) : (
             <button
               onClick={handleJoinRequest}
               disabled={requesting || requested}
-              className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2'
+              className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 dark:disabled:bg-gray-600'
             >
               {requesting ? (
                 <>

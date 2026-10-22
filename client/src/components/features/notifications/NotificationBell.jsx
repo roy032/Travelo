@@ -49,7 +49,7 @@ const NotificationBell = () => {
     <div className='relative'>
       <button
         onClick={toggleDropdown}
-        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
         aria-label='Notifications'
       >
         <Bell size={24} />

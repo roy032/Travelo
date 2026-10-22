@@ -110,21 +110,21 @@ const DestinationsPage = () => {
   };
 
   const selectClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+    "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600 dark:bg-gray-900";
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gray-50 py-8 dark:bg-gray-950'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='mb-8 text-center'>
-          <Globe2 className='w-12 h-12 text-blue-600 mx-auto mb-4' aria-hidden='true' />
-          <h1 className='text-4xl font-bold text-gray-900 mb-2'>Destinations</h1>
-          <p className='text-lg text-gray-600'>
+          <Globe2 className='w-12 h-12 text-blue-600 mx-auto mb-4 dark:text-blue-400' aria-hidden='true' />
+          <h1 className='text-4xl font-bold text-gray-900 mb-2 dark:text-gray-100'>Destinations</h1>
+          <p className='text-lg text-gray-600 dark:text-gray-400'>
             Find your next place to go, and see what other travelers thought
           </p>
         </div>
 
         {/* Filters */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-4'>
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-4 dark:bg-gray-900 dark:border-gray-700'>
           <div className='relative'>
             <Search
               className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400'
@@ -139,7 +139,7 @@ const DestinationsPage = () => {
               placeholder='Search by name, country or description...'
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600'
             />
           </div>
 
@@ -153,7 +153,7 @@ const DestinationsPage = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   category === option.value
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
                 {option.label}
@@ -163,7 +163,7 @@ const DestinationsPage = () => {
 
           <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
             <div>
-              <label htmlFor='destination-country' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='destination-country' className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'>
                 Country
               </label>
               <select
@@ -181,7 +181,7 @@ const DestinationsPage = () => {
               </select>
             </div>
             <div>
-              <label htmlFor='destination-rating' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='destination-rating' className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'>
                 Rating
               </label>
               <select
@@ -198,7 +198,7 @@ const DestinationsPage = () => {
               </select>
             </div>
             <div>
-              <label htmlFor='destination-sort' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='destination-sort' className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'>
                 Sort by
               </label>
               <select
@@ -219,11 +219,11 @@ const DestinationsPage = () => {
           </div>
 
           {hasFilters && (
-            <div className='pt-3 border-t border-gray-200'>
+            <div className='pt-3 border-t border-gray-200 dark:border-gray-700'>
               <button
                 type='button'
                 onClick={clearFilters}
-                className='inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50'
+                className='inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800'
               >
                 <X size={16} aria-hidden='true' />
                 Clear filters
@@ -236,12 +236,12 @@ const DestinationsPage = () => {
         <div aria-live='polite'>
           {loading ? (
             <div className='flex flex-col items-center justify-center py-20'>
-              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4' />
-              <p className='text-gray-600'>Loading destinations...</p>
+              <Loader2 className='w-12 h-12 text-blue-600 animate-spin mb-4 dark:text-blue-400' />
+              <p className='text-gray-600 dark:text-gray-400'>Loading destinations...</p>
             </div>
           ) : error ? (
-            <div className='bg-red-50 border border-red-200 rounded-lg p-6 text-center'>
-              <p className='text-red-700 mb-4'>{error}</p>
+            <div className='bg-red-50 border border-red-200 rounded-lg p-6 text-center dark:bg-red-950/40 dark:border-red-800'>
+              <p className='text-red-700 mb-4 dark:text-red-300'>{error}</p>
               <button
                 type='button'
                 onClick={() => setRetry((n) => n + 1)}
@@ -253,10 +253,10 @@ const DestinationsPage = () => {
           ) : destinations.length === 0 ? (
             <div className='text-center py-20'>
               <Globe2 className='w-16 h-16 text-gray-400 mx-auto mb-4' aria-hidden='true' />
-              <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+              <h2 className='text-xl font-semibold text-gray-900 mb-2 dark:text-gray-100'>
                 No destinations found
               </h2>
-              <p className='text-gray-600 mb-4'>
+              <p className='text-gray-600 mb-4 dark:text-gray-400'>
                 {hasFilters
                   ? "Try a different search or fewer filters."
                   : "Check back soon for new destinations."}
@@ -265,7 +265,7 @@ const DestinationsPage = () => {
                 <button
                   type='button'
                   onClick={clearFilters}
-                  className='text-blue-600 hover:text-blue-700 font-medium'
+                  className='text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300'
                 >
                   Clear filters
                 </button>
@@ -273,7 +273,7 @@ const DestinationsPage = () => {
             </div>
           ) : (
             <>
-              <p className='text-sm text-gray-600 mb-4'>
+              <p className='text-sm text-gray-600 mb-4 dark:text-gray-400'>
                 {destinations.length}{" "}
                 {destinations.length === 1 ? "destination" : "destinations"}
               </p>

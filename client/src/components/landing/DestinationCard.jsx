@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 
 const DestinationCard = ({ image, title, location, price, description }) => {
   return (
-    <div className='group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2'>
+    <div className='group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 dark:bg-gray-900'>
       {/* Image Container */}
       <div className='relative h-64 overflow-hidden'>
         <img
@@ -14,22 +14,22 @@ const DestinationCard = ({ image, title, location, price, description }) => {
         <div className='absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent'></div>
 
         {/* Price Badge */}
-        <div className='absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg'>
-          <span className='text-blue-600 font-bold text-lg'>${price}</span>
+        <div className='absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg dark:bg-gray-900/95'>
+          <span className='text-blue-600 font-bold text-lg dark:text-blue-400'>${price}</span>
         </div>
       </div>
 
       {/* Content */}
       <div className='p-6'>
-        <h3 className='text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors'>
+        <h3 className='text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors dark:text-gray-100 dark:group-hover:text-blue-400'>
           {title}
         </h3>
-        <div className='flex items-center gap-2 text-gray-600 mb-3'>
+        <div className='flex items-center gap-2 text-gray-600 mb-3 dark:text-gray-400'>
           <MapPin size={16} className='text-blue-500' />
           <span className='text-sm'>{location}</span>
         </div>
         {description && (
-          <p className='text-sm text-gray-600 line-clamp-2'>{description}</p>
+          <p className='text-sm text-gray-600 line-clamp-2 dark:text-gray-400'>{description}</p>
         )}
       </div>
     </div>
