@@ -125,6 +125,7 @@ export const deleteNote = async (noteId, userId) => {
     return {
       message: 'Note deleted successfully',
       noteId,
+      tripId: note.trip,
     };
   } catch (e) {
     throw e;

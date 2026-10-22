@@ -41,6 +41,14 @@ export const disconnectSocket = () => {
 };
 
 /**
+ * ID of the connected socket, sent with API writes so the server doesn't echo
+ * live trip updates back to the tab that made them
+ * @returns {string|undefined}
+ */
+export const getSocketId = () =>
+  socket && socket.connected ? socket.id : undefined;
+
+/**
  * Check if socket is connected
  * @returns {boolean}
  */

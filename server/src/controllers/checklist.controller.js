@@ -109,6 +109,7 @@ export const toggleItemController = async (req, res, next) => {
     if (!allowed) return;
 
     const checklistItem = await toggleChecklistItem(itemId, req.user.id);
+    res.locals.liveChange = { tripId: checklistItem.trip, resource: "checklist" };
 
     // Get all trip members for notifications
     const trip = await Trip.findById(checklistItem.trip).populate(
@@ -166,6 +167,7 @@ export const deleteItemController = async (req, res, next) => {
     const itemText = item.text;
 
     const result = await deleteChecklistItem(itemId);
+    res.locals.liveChange = { tripId, resource: "checklist" };
 
     // Get all trip members for notifications
     const trip = await Trip.findById(tripId).populate("members", "_id");

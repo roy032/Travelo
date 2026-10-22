@@ -16,6 +16,7 @@ import {
   getPublicUpcomingTrips,
 } from "#services/trip.service.js";
 import User from "#models/user.model.js";
+import { removeFromTripLive } from "#src/socket/tripLive.js";
 import { emailUser } from "#services/email/notify.js";
 import {
   joinRequestAcceptedTemplate,
@@ -323,6 +324,8 @@ export const removeMemberController = async (req, res, next) => {
     const { tripId, memberId } = req.params;
 
     const trip = await removeMember(tripId, req.user.id, memberId);
+    // Stop live updates reaching the removed member
+    await removeFromTripLive(tripId, memberId);
 
     res.status(200).json({
       message: "Member removed successfully",
