@@ -1,33 +1,41 @@
 import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
+import { resolveSession } from "#services/session.service.js";
 
-export const authenticateToken = (req, res, next) => {
+export const authenticateToken = async (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({
+      error: "Authentication required",
+      message: "No access token provided",
+    });
+  }
+
+  let decoded;
   try {
-    const token = req.cookies.token;
+    decoded = jwtToken.verify(token);
+  } catch {
+    return res.status(401).json({
+      error: "Authentication failed",
+      message: "Invalid or expired token",
+    });
+  }
 
-    if (!token) {
-      return res.status(401).json({
-        error: "Authentication required",
-        message: "No access token provided",
-      });
-    }
-
-    const decoded = jwtToken.verify(token);
-    req.user = decoded;
-
-    next();
-  } catch (e) {
-    if (e.message === "Failed to verify token") {
+  try {
+    // Role and status come from the database, so blocking a user, changing
+    // their role or revoking their sessions takes effect immediately
+    const user = await resolveSession(decoded);
+    if (!user) {
       return res.status(401).json({
         error: "Authentication failed",
-        message: "Invalid or expired token",
+        message: "Session expired. Please sign in again.",
       });
     }
-
-    return res.status(500).json({
-      error: "Internal server error",
-      message: "Error during authentication",
-    });
+    req.user = user;
+    next();
+  } catch (e) {
+    next(e);
   }
 };
 
@@ -62,28 +70,18 @@ export const requireRole = (allowedRoles) => {
  * Optional authentication - attaches user if token exists, but doesn't require it
  * Use this for endpoints that work for both authenticated and unauthenticated users
  */
-export const optionalAuth = (req, res, next) => {
-  try {
-    const token = req.cookies.token;
-
-    if (token) {
-      try {
-        const decoded = jwtToken.verify(token);
-        req.user = decoded;
-      } catch (e) {
-        // Invalid token - continue without user
-        req.user = null;
-      }
-    } else {
+export const optionalAuth = async (req, res, next) => {
+  req.user = null;
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      req.user = await resolveSession(jwtToken.verify(token));
+    } catch {
+      // Invalid token - continue without user
       req.user = null;
     }
-
-    next();
-  } catch (e) {
-    // Any error - continue without user
-    req.user = null;
-    next();
   }
+  next();
 };
 /*
  *

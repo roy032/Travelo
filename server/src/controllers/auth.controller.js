@@ -14,7 +14,7 @@ import {
   sendVerificationEmail,
   verifyEmail,
 } from "#services/account.service.js";
-import { jwtToken } from "#utils/jwt.js";
+import { signSessionToken } from "#services/session.service.js";
 import { cookies } from "#utils/cookies.js";
 
 export const signup = async (req, res, next) => {
@@ -44,14 +44,7 @@ export const signup = async (req, res, next) => {
       domesticVerification: { status: verificationStatus },
       internationalVerification: { status: verificationStatus },
     });
-    const token = jwtToken.sign({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      verificationStatus: user.verificationStatus,
-      domesticVerification: user.domesticVerification,
-      internationalVerification: user.internationalVerification,
-    });
+    const token = signSessionToken(user);
 
     cookies.set(res, "token", token);
 
@@ -94,14 +87,7 @@ export const signIn = async (req, res, next) => {
 
     const user = await authenticateUser({ email, password });
 
-    const token = jwtToken.sign({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      verificationStatus: user.verificationStatus,
-      domesticVerification: user.domesticVerification,
-      internationalVerification: user.internationalVerification,
-    });
+    const token = signSessionToken(user);
 
     cookies.set(res, "token", token);
 

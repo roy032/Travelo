@@ -67,6 +67,7 @@ export const updateProfile = async (id, updates) => {
     }
 
     let emailChanged = false;
+    let passwordChanged = false;
 
     // Handle email update with uniqueness check
     if (updates.email && updates.email !== user.email) {
@@ -108,6 +109,9 @@ export const updateProfile = async (id, updates) => {
 
       // Set new password (will be hashed by pre-save hook)
       user.password = updates.newPassword;
+      // Other devices are signed out; the caller re-issues this session
+      user.tokenVersion = (user.tokenVersion || 0) + 1;
+      passwordChanged = true;
     }
 
     await user.save();
@@ -130,6 +134,15 @@ export const updateProfile = async (id, updates) => {
       verificationDocument: user.verificationDocument,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      // Not sent to the client; tells the controller to re-issue the cookie
+      sessionRenewal: passwordChanged
+        ? {
+            id: user._id,
+            email: user.email,
+            role: user.role,
+            tokenVersion: user.tokenVersion,
+          }
+        : undefined,
     };
   } catch (e) {
     throw e;

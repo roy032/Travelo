@@ -11,6 +11,7 @@ export const makeAuth = (overrides = {}) => ({
   register: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
+  clearSession: vi.fn(),
   updateUser: vi.fn(),
   checkAuth: vi.fn(),
   ...overrides,

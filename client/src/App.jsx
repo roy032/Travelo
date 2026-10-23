@@ -19,6 +19,7 @@ const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
 const AdminReportsPage = lazy(() => import("./pages/AdminReportsPage"));
@@ -77,6 +78,8 @@ function App() {
                           element={<ResetPasswordPage />}
                         />
                         <Route path='/verify-email' element={<VerifyEmailPage />} />
+                        <Route path='/privacy' element={<LegalPage page='privacy' />} />
+                        <Route path='/terms' element={<LegalPage page='terms' />} />
                         <Route
                           path='/profile'
                           element={

@@ -6,25 +6,29 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "How do I book a trip?",
+      question: "What is Travelo?",
       answer:
-        "Booking a trip is easy! Simply search for your desired destination, select your dates, choose your accommodation, and proceed to checkout. Our secure payment system ensures your information is safe.",
+        "Travelo is a free planner for group trips. Create a trip, invite friends, and plan it together: a day-by-day itinerary with a map, shared expenses with automatic splits, a group chat, checklists, notes, photos and a packing list with the weather forecast.",
     },
     {
-      question: "What is Travelo and how does it work?",
+      question: "Can I book flights or hotels on Travelo?",
       answer:
-        "Travelo is a comprehensive travel planning platform that helps you discover, plan, and book amazing trips. We offer curated destinations, expert recommendations, and seamless booking experiences all in one place.",
+        "No. Travelo is for planning and organising, not booking. Add your bookings to the itinerary or notes so the whole group can see them.",
     },
     {
-      question: "How can I get ahead about?",
+      question: "How do shared expenses work?",
       answer:
-        "Stay informed by subscribing to our newsletter, following us on social media, and checking our blog for the latest travel tips, destination guides, and exclusive deals. You can also enable notifications in your account settings.",
+        "Whoever pays adds the expense and picks who it is split between, in any currency. Travelo converts it to the trip's currency, keeps a running balance for everyone and suggests the fewest payments to settle up.",
     },
     {
-      question:
-        "What do I need to cancel my trip or get a refund after booking my hotel?",
+      question: "Why do some trips ask me to verify my identity?",
       answer:
-        "Cancellation policies vary by hotel and booking type. Most bookings can be canceled through your account dashboard. Refunds are processed according to the specific terms of your reservation. Free cancellation options are clearly marked during booking.",
+        "Trip owners can require verified members. You upload an NID for domestic trips or a passport for international ones, and an admin reviews it. Documents are only visible to admins and are deleted with your account.",
+    },
+    {
+      question: "Can I take my data with me or delete my account?",
+      answer:
+        "Yes. On your profile page you can download everything you have added as a JSON file, sign out on every device, or delete your account permanently.",
     },
   ];
 
@@ -38,10 +42,10 @@ const FAQ = () => {
         {/* Section Header */}
         <div className='text-center mb-12'>
           <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
-            Frequently Asked Question
+            Frequently Asked Questions
           </h2>
           <p className='text-lg text-gray-600 dark:text-gray-400'>
-            Find answers to common questions about our services
+            Answers to common questions about Travelo
           </p>
         </div>
 

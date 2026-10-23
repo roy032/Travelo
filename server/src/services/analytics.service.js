@@ -67,7 +67,7 @@ export const getAnalytics = async (days, now = new Date()) => {
       .limit(10)
       .select("status method path message createdAt")
       .lean(),
-    User.countDocuments(),
+    User.countDocuments({ deletedAt: null }),
   ]);
 
   const series = [];

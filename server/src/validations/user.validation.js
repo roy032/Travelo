@@ -54,3 +54,8 @@ export const updateProfileSchema = z
       path: ['currentPassword'],
     }
   );
+// Deleting an account needs the password again, so a session left open on a
+// shared computer can't be used to do it
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password is required').max(128),
+});

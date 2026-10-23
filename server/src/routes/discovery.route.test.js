@@ -1,7 +1,13 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 
-// These checks run before any database access, so no MongoDB is needed
+// These checks run before any database access, so no MongoDB is needed; the
+// session lookup is stubbed to trust the signed token
+vi.mock('#services/session.service.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  resolveSession: async (decoded) => ({ id: decoded.id, role: decoded.role }),
+}));
+
 let app;
 let token;
 

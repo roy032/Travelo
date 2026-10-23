@@ -31,7 +31,7 @@ for (const colorScheme of ["light", "dark"]) {
     test("public pages", async ({ page }) => {
       for (const path of [
         "/", "/login", "/register", "/forgot-password", "/reset-password?token=e2e",
-        "/explore", "/destinations", "/no-such-page",
+        "/explore", "/destinations", "/privacy", "/terms", "/no-such-page",
       ]) {
         await page.goto(path);
         await expect(page.locator("html")).toHaveClass(

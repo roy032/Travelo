@@ -85,6 +85,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // The server already ended the session (account deleted, signed out on
+  // every device): forget the user and their saved trips locally
+  const clearSession = async () => {
+    await clearOfflineData();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
   const updateUser = useCallback((userData) => {
     setUser((prev) => ({ ...prev, ...userData }));
   }, []);
@@ -96,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    clearSession,
     updateUser,
     checkAuth,
   };

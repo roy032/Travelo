@@ -248,6 +248,30 @@ export const profileApi = {
     }
   },
 
+  // Address of the JSON download with all of the user's data
+  exportUrl: `${API_BASE_URL}/profile/export`,
+
+  deleteAccount: async (password) => {
+    try {
+      return await fetchWithAuth("/profile", {
+        method: "DELETE",
+        body: JSON.stringify({ password }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  signOutEverywhere: async () => {
+    try {
+      return await fetchWithAuth("/auth/sign-out-everywhere", {
+        method: "POST",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   uploadDocument: async (file, documentType = "nid") => {
     try {
       const formData = new FormData();

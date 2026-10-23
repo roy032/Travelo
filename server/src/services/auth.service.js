@@ -121,7 +121,7 @@ export const authenticateUser = async ({ email, password }) => {
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       "+password"
     );
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new Error("User not found");
     }
 
@@ -149,6 +149,7 @@ export const authenticateUser = async ({ email, password }) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      tokenVersion: user.tokenVersion,
       emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: { status: user.domesticVerification?.status },

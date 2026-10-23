@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
+import { resolveSession } from "#services/session.service.js";
 import Trip from "#models/trip.model.js";
 import { createMessage } from "#services/message.service.js";
 import { registerTripLiveHandlers, setTripLiveServer } from "./tripLive.js";
@@ -37,9 +38,12 @@ export const initializeSocket = (httpServer) => {
       }
 
       // Verify JWT token
-      const decoded = jwtToken.verify(token);
-      socket.userId = decoded.id;
-      socket.userRole = decoded.role;
+      const user = await resolveSession(jwtToken.verify(token));
+      if (!user) {
+        return next(new Error("Authentication failed"));
+      }
+      socket.userId = user.id;
+      socket.userRole = user.role;
 
       next();
     } catch (error) {
@@ -53,6 +57,8 @@ export const initializeSocket = (httpServer) => {
   // Connection handler
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.userId}`);
+    // Lets disconnectUserSockets end every connection of this user
+    socket.join(`user:${socket.userId}`);
 
     // Presence and change notifications for the trip page
     registerTripLiveHandlers(socket);
@@ -246,4 +252,12 @@ export const getIO = () => {
     throw new Error("Socket.IO not initialized");
   }
   return io;
+};
+
+/**
+ * Close every open connection of a user, after their sessions are revoked
+ * @param {string} userId
+ */
+export const disconnectUserSockets = (userId) => {
+  io?.in(`user:${userId}`).disconnectSockets(true);
 };

@@ -74,6 +74,10 @@ const en = {
       passwordTooShort: "Password must be at least 8 characters",
       confirmRequired: "Please confirm your password",
       mismatch: "Passwords do not match",
+      agreeBefore: "By creating an account, you agree to the",
+      terms: "Terms of Service",
+      agreeMiddle: "and the",
+      privacy: "Privacy Policy",
     },
     forgot: {
       pageTitle: "Forgot password",

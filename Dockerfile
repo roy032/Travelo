@@ -12,6 +12,11 @@ ENV VITE_API_URL=""
 # automatically for environment variables with the same name)
 ARG VITE_SENTRY_DSN=""
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
+# Shown in the footer and on the privacy and terms pages
+ARG VITE_SUPPORT_EMAIL=""
+ENV VITE_SUPPORT_EMAIL=$VITE_SUPPORT_EMAIL
+ARG VITE_OPERATOR_NAME=""
+ENV VITE_OPERATOR_NAME=$VITE_OPERATOR_NAME
 RUN npm run build
 
 FROM node:22-slim

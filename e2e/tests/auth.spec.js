@@ -80,4 +80,28 @@ test.describe("Sign up, log in and log out", () => {
     await expect(page.getByRole("button", { name: "7 days" })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("heading", { name: "Recent server errors" })).toBeVisible();
   });
+
+  test("a user downloads their data and deletes their account", async ({ page }) => {
+    const user = newUser("Leaver");
+    await signUp(page, user);
+    await page.goto("/profile");
+
+    const exportLink = page.getByRole("link", { name: "Download data" });
+    const response = await page.request.get(await exportLink.getAttribute("href"));
+    expect(response.status()).toBe(200);
+    expect((await response.json()).account.email).toBe(user.email);
+
+    await page.getByRole("button", { name: "Delete account" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Password").fill(user.password);
+    await dialog.getByLabel("Type DELETE to confirm").fill("DELETE");
+    await dialog.getByRole("button", { name: "Delete my account" }).click();
+
+    await expect(page).toHaveURL(/\/$/);
+    await page.goto("/login");
+    await page.getByLabel("Email address").fill(user.email);
+    await page.getByLabel("Password").fill(user.password);
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByText("Invalid email or password")).toBeVisible();
+  });
 });

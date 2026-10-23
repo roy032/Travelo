@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Part of every session token; raising it signs the user out everywhere
+    // (password change or reset, block, "sign out of all devices")
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
+    // Set when the user deletes their account. The document stays as an
+    // anonymous placeholder so shared trip records (expenses, itinerary)
+    // still resolve, but every personal field is wiped.
+    deletedAt: {
+      type: Date,
+    },
     // Set once the user opens the link in the verification email
     emailVerified: {
       type: Boolean,

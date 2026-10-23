@@ -106,6 +106,8 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 | `APP_URL` | no | Base URL for links in emails; defaults to `SITE_URL`, then the first `CLIENT_URL` |
 | `SENTRY_DSN` | no | Server error tracking |
 | `VITE_SENTRY_DSN` | no | Browser error tracking (build time) |
+| `VITE_SUPPORT_EMAIL` | yes for launch | Contact address in the footer, privacy policy and terms (build time) |
+| `VITE_OPERATOR_NAME` | yes for launch | Person or company that runs the site, named in the legal pages (build time) |
 | `SENTRY_TRACES_SAMPLE_RATE` | no | Performance tracing sample rate, default `0` |
 | `AUTH_RATE_LIMIT_MAX` | no | Auth attempts per 15 minutes, default `10` |
 | `API_RATE_LIMIT_MAX` | no | API requests per minute, default `300` |

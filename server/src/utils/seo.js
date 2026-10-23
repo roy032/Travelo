@@ -24,13 +24,29 @@ export const PUBLIC_PAGES = {
     title: `Sign in | ${SITE_NAME}`,
     description: "Sign in to Travelo to plan and manage your trips.",
   },
+  "/destinations": {
+    title: `Destinations | ${SITE_NAME}`,
+    description:
+      "Find your next destination on Travelo: search places by country and category, read traveller reviews and start planning a trip.",
+  },
+  "/privacy": {
+    title: `Privacy Policy | ${SITE_NAME}`,
+    description: "What Travelo stores about you, why, and how to export or delete it.",
+  },
+  "/terms": {
+    title: `Terms of Service | ${SITE_NAME}`,
+    description: "The rules for using Travelo.",
+  },
 };
 
 // Pages listed in the sitemap, with how often their content changes
 const SITEMAP_PAGES = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/explore", changefreq: "daily", priority: "0.8" },
+  { path: "/destinations", changefreq: "weekly", priority: "0.8" },
   { path: "/register", changefreq: "monthly", priority: "0.5" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.2" },
+  { path: "/terms", changefreq: "yearly", priority: "0.2" },
 ];
 
 const PRIVATE_PREFIXES = [
@@ -39,7 +55,7 @@ const PRIVATE_PREFIXES = [
   "/notifications",
   "/invitations",
   "/join-requests",
-  "/destinations",
+  "/favorites",
   "/admin",
 ];
 

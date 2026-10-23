@@ -20,6 +20,9 @@ const useSocket = (tripId) => {
 
     // Connect socket
     connectSocket();
+    // Another hook (such as useTripLive) may have connected the shared socket
+    // already, in which case no further "connect" event arrives
+    setIsConnected(socketInstance.connected);
 
     // Connection event handlers
     const handleConnect = () => {

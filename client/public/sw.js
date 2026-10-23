@@ -56,13 +56,14 @@ const isStaticAsset = (url) =>
   url.pathname === "/favicon.svg" ||
   url.pathname === "/theme-init.js";
 
-// API reads worth having offline. Sign-in, health checks and identity
-// documents (NID, passport scans) are never stored.
+// API reads worth having offline. Sign-in, health checks, identity
+// documents (NID, passport scans) and account data exports are never stored.
 const isCacheableApi = (url) =>
   url.pathname.startsWith("/api/") &&
   !url.pathname.startsWith("/api/auth/") &&
   !url.pathname.startsWith("/api/health") &&
-  !url.pathname.startsWith("/api/documents");
+  !url.pathname.startsWith("/api/documents") &&
+  url.pathname !== "/api/profile/export";
 
 // Network first so online users always see fresh data; the saved copy is
 // only used when the request fails

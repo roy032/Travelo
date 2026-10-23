@@ -11,16 +11,17 @@ const StatsBlock = () => {
             {/* Stats Section */}
             <div className='text-center md:text-left'>
               <div className='inline-flex items-baseline gap-2 mb-4'>
-                <span className='text-5xl md:text-6xl lg:text-7xl font-bold text-blue-600 dark:text-blue-400'>
-                  120+
+                <span className='text-4xl md:text-5xl lg:text-6xl font-bold text-blue-600 dark:text-blue-400'>
+                  Plan together
                 </span>
                 <Compass className='text-blue-500 w-8 h-8 md:w-10 md:h-10' />
               </div>
               <p className='text-xl md:text-2xl text-gray-700 font-semibold mb-2 dark:text-gray-300'>
-                Amazing Destinations
+                One trip, one shared plan
               </p>
               <p className='text-gray-600 dark:text-gray-400'>
-                Curated recommendations from travel experts
+                Itinerary, expenses, chat and checklists in one place for the
+                whole group
               </p>
             </div>
 
@@ -28,7 +29,7 @@ const StatsBlock = () => {
             <div className='flex flex-col sm:flex-row gap-4'>
               <button
                 className='bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1'
-                onClick={() => navigate("/explore")}
+                onClick={() => navigate("/destinations")}
               >
                 Explore Destinations
                 <ArrowRight size={20} />
@@ -37,7 +38,7 @@ const StatsBlock = () => {
                 className='bg-white hover:bg-gray-50 text-blue-600 border-2 border-blue-500 px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-blue-400'
                 onClick={() => navigate("/explore")}
               >
-                View All Trips
+                Browse Public Trips
               </button>
             </div>
           </div>

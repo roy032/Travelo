@@ -175,6 +175,23 @@ const RegisterPage = () => {
             >
               {t("auth.register.submit")}
             </Button>
+            <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
+              {t("auth.register.agreeBefore")}{" "}
+              <Link
+                to='/terms'
+                className='font-medium text-blue-700 underline dark:text-blue-300'
+              >
+                {t("auth.register.terms")}
+              </Link>{" "}
+              {t("auth.register.agreeMiddle")}{" "}
+              <Link
+                to='/privacy'
+                className='font-medium text-blue-700 underline dark:text-blue-300'
+              >
+                {t("auth.register.privacy")}
+              </Link>
+              .
+            </p>
           </form>
         </Card>
         {/* Small screens: the navbar has no room for the language picker */}

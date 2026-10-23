@@ -73,6 +73,10 @@ const es = {
       passwordTooShort: "La contraseña debe tener al menos 8 caracteres",
       confirmRequired: "Confirma tu contraseña",
       mismatch: "Las contraseñas no coinciden",
+      agreeBefore: "Al crear una cuenta, aceptas los",
+      terms: "Términos del servicio",
+      agreeMiddle: "y la",
+      privacy: "Política de privacidad",
     },
     forgot: {
       pageTitle: "Contraseña olvidada",

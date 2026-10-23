@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "crypto";
 import User from "#models/user.model.js";
+import { disconnectUserSockets } from "#src/socket/chatSocket.js";
 import { appLink, queueEmail } from "#services/email/email.service.js";
 import {
   passwordChangedTemplate,
@@ -135,7 +136,10 @@ export const resetPassword = async (token, password) => {
   user.passwordResetExpires = undefined;
   // Opening the link proves the user controls the inbox
   user.emailVerified = true;
+  // Whoever knew the old password is signed out everywhere
+  user.tokenVersion = (user.tokenVersion || 0) + 1;
   await user.save();
+  disconnectUserSockets(String(user._id));
 
   queueEmail({ to: user.email, ...passwordChangedTemplate({ name: user.name }) });
 
