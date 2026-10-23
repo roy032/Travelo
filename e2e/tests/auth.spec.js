@@ -97,8 +97,8 @@ test.describe("Sign up, log in and log out", () => {
     await dialog.getByLabel("Type DELETE to confirm").fill("DELETE");
     await dialog.getByRole("button", { name: "Delete my account" }).click();
 
-    await expect(page).toHaveURL(/\/$/);
-    await page.goto("/login");
+    await expect(page.getByText("Your account has been deleted")).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
     await page.getByLabel("Email address").fill(user.email);
     await page.getByLabel("Password").fill(user.password);
     await page.getByRole("button", { name: "Sign in" }).click();

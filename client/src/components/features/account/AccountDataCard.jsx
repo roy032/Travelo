@@ -26,9 +26,9 @@ const AccountDataCard = () => {
     setSigningOut(true);
     try {
       await profileApi.signOutEverywhere();
+      navigate("/login", { replace: true });
       await clearSession();
       toast.success("Signed out on all devices");
-      navigate("/login");
     } catch {
       // Error toast shown by the API service
       setSigningOut(false);
@@ -47,9 +47,11 @@ const AccountDataCard = () => {
     setDeleting(true);
     try {
       await profileApi.deleteAccount(password);
+      // The profile page is protected, so once signed out it goes to
+      // sign-in either way
+      navigate("/login", { replace: true });
       await clearSession();
       toast.success("Your account has been deleted");
-      navigate("/");
     } catch {
       setDeleting(false);
     }

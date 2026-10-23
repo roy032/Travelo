@@ -82,6 +82,11 @@ const fakePlan = (start) => ({
   ],
 });
 
+// page.route can't see requests the service worker makes, so keep it out of
+// the way of the stubbed planner endpoints
+test.describe("AI planner", () => {
+  test.use({ serviceWorkers: "block" });
+
 for (const colorScheme of ["light", "dark"]) {
   test(`the AI planner adds chosen activities (${colorScheme} theme)`, async ({ page }) => {
     // Claude isn't called in tests: the planner's two read-only endpoints are
@@ -131,3 +136,4 @@ for (const colorScheme of ["light", "dark"]) {
     await expect(page.getByText("Chimbuk Hill")).toHaveCount(0);
   });
 }
+});

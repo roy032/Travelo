@@ -44,7 +44,7 @@ describe("AccountDataCard", () => {
     await user.click(submit);
     expect(profileApi.deleteAccount).toHaveBeenCalledWith("secret-pass");
     expect(auth.clearSession).toHaveBeenCalled();
-    expect(screen.getByTestId("location")).toHaveTextContent("/");
+    expect(screen.getByTestId("location")).toHaveTextContent("/login");
   });
 
   it("signs out everywhere and goes to sign-in", async () => {
