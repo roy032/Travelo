@@ -13,11 +13,13 @@ import { invitationApi } from "../services/api.service";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import { format } from "date-fns";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * PendingInvitationsPage - Shows all pending trip invitations for the user
  */
 const PendingInvitationsPage = () => {
+  usePageTitle("Invitations");
   const navigate = useNavigate();
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,30 +95,30 @@ const PendingInvitationsPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-950'>
         <div className='text-center'>
           <Loader2
             size={48}
             className='animate-spin text-primary-600 mx-auto mb-4'
           />
-          <p className='text-gray-600'>Loading invitations...</p>
+          <p className='text-gray-600 dark:text-gray-400'>Loading invitations...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
       <div className='max-w-4xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <div className='flex items-center gap-3 mb-2'>
             <Mail size={32} className='text-primary-600' />
-            <h1 className='text-3xl font-bold text-gray-900'>
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
               Trip Invitations
             </h1>
           </div>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-400'>
             You have {invitations.length} pending invitation
             {invitations.length !== 1 ? "s" : ""}
           </p>
@@ -124,12 +126,12 @@ const PendingInvitationsPage = () => {
 
         {/* Invitations List */}
         {invitations.length === 0 ? (
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center'>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center dark:bg-gray-900 dark:border-gray-700'>
             <Mail size={64} className='mx-auto text-gray-300 mb-4' />
-            <h3 className='text-xl font-semibold text-gray-900 mb-2'>
+            <h2 className='text-xl font-semibold text-gray-900 mb-2 dark:text-gray-100'>
               No pending invitations
-            </h3>
-            <p className='text-gray-600 mb-6'>
+            </h2>
+            <p className='text-gray-600 mb-6 dark:text-gray-400'>
               You don't have any trip invitations at the moment
             </p>
             <Button
@@ -145,14 +147,14 @@ const PendingInvitationsPage = () => {
             {invitations.map((invitation) => (
               <div
                 key={invitation._id}
-                className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow'
+                className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-700'
               >
                 {/* Trip Title and Categories */}
                 <div className='mb-4'>
                   <div className='flex items-start justify-between mb-2'>
-                    <h3 className='text-xl font-semibold text-gray-900'>
+                    <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
                       {invitation.trip.title}
-                    </h3>
+                    </h2>
                     <div className='flex gap-2'>
                       {invitation.trip.destinationType && (
                         <Badge
@@ -174,7 +176,7 @@ const PendingInvitationsPage = () => {
                   </div>
 
                   {invitation.trip.description && (
-                    <p className='text-gray-600 text-sm'>
+                    <p className='text-gray-600 text-sm dark:text-gray-400'>
                       {invitation.trip.description}
                     </p>
                   )}
@@ -182,7 +184,7 @@ const PendingInvitationsPage = () => {
 
                 {/* Trip Details */}
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                  <div className='flex items-center gap-2 text-sm text-gray-600'>
+                  <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
                     <Calendar size={16} className='text-gray-400' />
                     <span>
                       {format(
@@ -194,11 +196,11 @@ const PendingInvitationsPage = () => {
                     </span>
                   </div>
 
-                  <div className='flex items-center gap-2 text-sm text-gray-600'>
+                  <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400'>
                     <User size={16} className='text-gray-400' />
                     <span>
                       Invited by{" "}
-                      <span className='font-medium text-gray-900'>
+                      <span className='font-medium text-gray-900 dark:text-gray-100'>
                         {invitation.invitedBy.name}
                       </span>
                     </span>
@@ -206,7 +208,7 @@ const PendingInvitationsPage = () => {
                 </div>
 
                 {/* Invitation Time */}
-                <div className='mb-4 text-xs text-gray-500'>
+                <div className='mb-4 text-xs text-gray-500 dark:text-gray-400'>
                   Invited{" "}
                   {format(
                     new Date(invitation.createdAt),

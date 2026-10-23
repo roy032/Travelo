@@ -17,12 +17,37 @@ export const comparePassword = async (password, hashedPassword) => {
   }
 };
 
-export const getUserCount = async () => {
-  try {
-    return await User.countDocuments();
-  } catch (e) {
-    throw new Error("Error counting users");
-  }
+/**
+ * Emails listed in ADMIN_EMAILS (comma-separated) are made admins when they
+ * sign in. Signing up never grants admin: there is no email verification, so
+ * anyone could register an address before its owner does.
+ */
+export const getConfiguredAdminEmails = () =>
+  (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+export const isConfiguredAdmin = (email) =>
+  typeof email === "string" &&
+  getConfiguredAdminEmails().includes(email.trim().toLowerCase());
+
+/**
+ * Promote a user to admin (and mark them verified)
+ * @param {string} email - The user's email address
+ * @returns {Promise<Object|null>} Updated user, or null if no such user
+ */
+export const promoteToAdmin = async (email) => {
+  return await User.findOneAndUpdate(
+    { email: email.trim().toLowerCase() },
+    {
+      role: "admin",
+      verificationStatus: "verified",
+      "domesticVerification.status": "verified",
+      "internationalVerification.status": "verified",
+    },
+    { new: true }
+  );
 };
 
 /**
@@ -70,6 +95,7 @@ export const createUser = async ({
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: user.domesticVerification,
       internationalVerification: user.internationalVerification,
@@ -95,7 +121,7 @@ export const authenticateUser = async ({ email, password }) => {
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       "+password"
     );
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new Error("User not found");
     }
 
@@ -109,12 +135,22 @@ export const authenticateUser = async ({ email, password }) => {
       throw new Error("User is blocked");
     }
 
+    if (user.role !== "admin" && isConfiguredAdmin(user.email)) {
+      const promoted = await promoteToAdmin(user.email);
+      user.role = promoted.role;
+      user.verificationStatus = promoted.verificationStatus;
+      user.domesticVerification = promoted.domesticVerification;
+      user.internationalVerification = promoted.internationalVerification;
+    }
+
     // Return user without password
     return {
       id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      tokenVersion: user.tokenVersion,
+      emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: { status: user.domesticVerification?.status },
       internationalVerification: {

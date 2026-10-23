@@ -4,8 +4,13 @@ import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { useTranslation } from "../hooks/useTranslation";
+import LanguageSelect from "../components/ui/LanguageSelect";
 
 const LoginPage = () => {
+  const { t } = useTranslation();
+  usePageTitle(t("auth.login.pageTitle"));
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -25,14 +30,14 @@ const LoginPage = () => {
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("auth.emailRequired");
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t("auth.emailInvalid");
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("auth.passwordRequired");
     }
 
     setErrors(newErrors);
@@ -76,19 +81,19 @@ const LoginPage = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
       <div className='max-w-md w-full space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
-            Sign in to your account
-          </h2>
-          <p className='mt-2 text-center text-sm text-gray-600'>
-            Or{" "}
+          <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100'>
+            {t("auth.login.heading")}
+          </h1>
+          <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
+            {t("auth.login.or")}{" "}
             <Link
               to='/register'
-              className='font-medium text-blue-600 hover:text-blue-500'
+              className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
             >
-              create a new account
+              {t("auth.login.createAccount")}
             </Link>
           </p>
         </div>
@@ -96,28 +101,37 @@ const LoginPage = () => {
         <Card>
           <form className='space-y-6' onSubmit={handleSubmit}>
             <Input
-              label='Email address'
+              label={t("auth.email")}
               type='email'
               name='email'
               value={formData.email}
               onChange={handleChange}
-              placeholder='you@example.com'
+              placeholder={t("auth.emailPlaceholder")}
               error={errors.email}
               required
               autoComplete='email'
             />
 
             <Input
-              label='Password'
+              label={t("auth.password")}
               type='password'
               name='password'
               value={formData.password}
               onChange={handleChange}
-              placeholder='Enter your password'
+              placeholder={t("auth.login.passwordPlaceholder")}
               error={errors.password}
               required
               autoComplete='current-password'
             />
+
+            <div className='-mt-3 text-right text-sm'>
+              <Link
+                to='/forgot-password'
+                className='font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400'
+              >
+                {t("auth.login.forgot")}
+              </Link>
+            </div>
 
             <Button
               type='submit'
@@ -126,10 +140,14 @@ const LoginPage = () => {
               loading={loading}
               disabled={loading}
             >
-              Sign in
+              {t("auth.login.submit")}
             </Button>
           </form>
         </Card>
+        {/* Small screens: the navbar has no room for the language picker */}
+        <div className='flex justify-center sm:hidden'>
+          <LanguageSelect />
+        </div>
       </div>
     </div>
   );

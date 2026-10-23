@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { errorHandler, notFoundHandler } from './error.middleware.js';
 import {
-  AppError,
   ValidationError,
   AuthenticationError,
   AuthorizationError,
   NotFoundError,
   ConflictError,
-  FileUploadError,
 } from '#errors/AppError.js';
 
 describe('Error Middleware', () => {

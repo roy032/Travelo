@@ -126,33 +126,33 @@ const ReportDetails = ({
               {report.category}
             </Badge>
           </div>
-          <p className='text-sm text-gray-500'>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             <Calendar className='w-4 h-4 inline mr-1' />
             {formatDate(report.createdAt)}
           </p>
         </div>
 
         {/* Trip Information */}
-        <div className='bg-gray-50 p-4 rounded-lg'>
-          <h3 className='font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+        <div className='bg-gray-50 p-4 rounded-lg dark:bg-gray-950'>
+          <h3 className='font-semibold text-gray-900 mb-3 flex items-center gap-2 dark:text-gray-100'>
             <FileText className='w-5 h-5' />
             Reported Trip
           </h3>
           <div className='space-y-2'>
-            <p className='text-gray-900'>
+            <p className='text-gray-900 dark:text-gray-100'>
               <span className='font-medium'>Title:</span>{" "}
               {report.trip?.title || "Deleted Trip"}
             </p>
             {report.trip?.description && (
-              <p className='text-gray-700'>
+              <p className='text-gray-700 dark:text-gray-300'>
                 <span className='font-medium'>Description:</span>{" "}
                 {report.trip.description}
               </p>
             )}
             {report.trip?.isDeleted && (
               <div className='flex items-center gap-2 mt-2'>
-                <AlertTriangle className='w-4 h-4 text-red-500' />
-                <span className='text-red-600 font-medium'>
+                <AlertTriangle className='w-4 h-4 text-red-600 dark:text-red-400' />
+                <span className='text-red-600 font-medium dark:text-red-400'>
                   This trip has been deleted
                 </span>
               </div>
@@ -161,24 +161,24 @@ const ReportDetails = ({
         </div>
 
         {/* Reporter Information */}
-        <div className='bg-blue-50 p-4 rounded-lg'>
-          <h3 className='font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+        <div className='bg-blue-50 p-4 rounded-lg dark:bg-blue-950/40'>
+          <h3 className='font-semibold text-gray-900 mb-3 flex items-center gap-2 dark:text-gray-100'>
             <User className='w-5 h-5' />
             Reporter
           </h3>
           <div className='space-y-1'>
-            <p className='text-gray-900'>{report.reporter?.name}</p>
-            <p className='text-gray-600 text-sm'>{report.reporter?.email}</p>
+            <p className='text-gray-900 dark:text-gray-100'>{report.reporter?.name}</p>
+            <p className='text-gray-600 text-sm dark:text-gray-400'>{report.reporter?.email}</p>
           </div>
         </div>
 
         {/* Report Description */}
         <div>
-          <h3 className='font-semibold text-gray-900 mb-2'>
+          <h3 className='font-semibold text-gray-900 mb-2 dark:text-gray-100'>
             Report Description
           </h3>
-          <div className='p-4 bg-gray-50 rounded-lg border border-gray-200'>
-            <p className='text-gray-700 whitespace-pre-wrap'>
+          <div className='p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-950 dark:border-gray-700'>
+            <p className='text-gray-700 whitespace-pre-wrap dark:text-gray-300'>
               {report.description}
             </p>
           </div>
@@ -186,21 +186,21 @@ const ReportDetails = ({
 
         {/* Review Information */}
         {report.reviewedBy && (
-          <div className='bg-green-50 p-4 rounded-lg border border-green-200'>
-            <h3 className='font-semibold text-gray-900 mb-2'>
+          <div className='bg-green-50 p-4 rounded-lg border border-green-200 dark:bg-green-950/40 dark:border-green-800'>
+            <h3 className='font-semibold text-gray-900 mb-2 dark:text-gray-100'>
               Review Information
             </h3>
             <div className='space-y-2 text-sm'>
-              <p className='text-gray-700'>
+              <p className='text-gray-700 dark:text-gray-300'>
                 <span className='font-medium'>Reviewed by:</span>{" "}
                 {report.reviewedBy?.name}
               </p>
-              <p className='text-gray-700'>
+              <p className='text-gray-700 dark:text-gray-300'>
                 <span className='font-medium'>Reviewed at:</span>{" "}
                 {formatDate(report.reviewedAt)}
               </p>
               {report.resolution && (
-                <p className='text-gray-700'>
+                <p className='text-gray-700 dark:text-gray-300'>
                   <span className='font-medium'>Resolution:</span>{" "}
                   {report.resolution}
                 </p>
@@ -212,15 +212,15 @@ const ReportDetails = ({
         {/* Admin Actions */}
         {report.status === "pending" && (
           <div className='space-y-4 pt-4 border-t'>
-            <h3 className='font-semibold text-gray-900'>Admin Actions</h3>
+            <h3 className='font-semibold text-gray-900 dark:text-gray-100'>Admin Actions</h3>
 
             {/* Action Message - Required */}
             <div>
               <label
                 htmlFor='message'
-                className='block text-sm font-medium text-gray-700 mb-2'
+                className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'
               >
-                Action Message <span className='text-red-500'>*</span>
+                Action Message <span className='text-red-600 dark:text-red-400'>*</span>
               </label>
               <textarea
                 id='message'
@@ -231,8 +231,8 @@ const ReportDetails = ({
                 maxLength={1000}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 resize-none ${
                   message.trim().length > 0 && message.trim().length < 10
-                    ? "border-red-300 focus:ring-red-500"
-                    : "border-gray-300"
+                    ? "border-red-300 focus:ring-red-500 dark:border-red-700"
+                    : "border-gray-300 dark:border-gray-600"
                 }`}
                 required
               />
@@ -240,15 +240,15 @@ const ReportDetails = ({
                 <span
                   className={
                     message.trim().length < 10
-                      ? "text-red-500"
-                      : "text-gray-500"
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-gray-500 dark:text-gray-400"
                   }
                 >
                   {message.trim().length < 10 && message.trim().length > 0
                     ? `${10 - message.trim().length} more characters required`
                     : "Minimum 10 characters required"}
                 </span>
-                <span className='text-gray-500'>
+                <span className='text-gray-500 dark:text-gray-400'>
                   {message.length}/1000 characters
                 </span>
               </div>
@@ -288,23 +288,23 @@ const ReportDetails = ({
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className='p-4 bg-red-50 border border-red-200 rounded-lg'>
+          <div className='p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950/40 dark:border-red-800'>
             <div className='flex items-start gap-3 mb-4'>
-              <AlertTriangle className='w-5 h-5 text-red-600 shrink-0 mt-0.5' />
+              <AlertTriangle className='w-5 h-5 text-red-600 shrink-0 mt-0.5 dark:text-red-400' />
               <div>
-                <h4 className='font-semibold text-red-900 mb-1'>
+                <h4 className='font-semibold text-red-900 mb-1 dark:text-red-200'>
                   Confirm Trip Deletion
                 </h4>
-                <p className='text-sm text-red-700 mb-2'>
+                <p className='text-sm text-red-700 mb-2 dark:text-red-300'>
                   This will permanently delete the trip "{report.trip?.title}".
                   This action cannot be undone.
                 </p>
-                <p className='text-sm text-red-700'>
+                <p className='text-sm text-red-700 dark:text-red-300'>
                   The following message will be sent to the trip owner, members,
                   and reporter:
                 </p>
-                <div className='mt-2 p-2 bg-white rounded border border-red-300'>
-                  <p className='text-sm text-gray-700 italic'>"{message}"</p>
+                <div className='mt-2 p-2 bg-white rounded border border-red-300 dark:bg-gray-900 dark:border-red-700'>
+                  <p className='text-sm text-gray-700 italic dark:text-gray-300'>"{message}"</p>
                 </div>
               </div>
             </div>

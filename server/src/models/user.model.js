@@ -36,6 +36,35 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Part of every session token; raising it signs the user out everywhere
+    // (password change or reset, block, "sign out of all devices")
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
+    // Set when the user deletes their account. The document stays as an
+    // anonymous placeholder so shared trip records (expenses, itinerary)
+    // still resolve, but every personal field is wiped.
+    deletedAt: {
+      type: Date,
+    },
+    // Set once the user opens the link in the verification email
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // Trip updates (join requests, invitations) by email; in-app
+    // notifications are always created
+    emailNotifications: {
+      type: Boolean,
+      default: true,
+    },
+    // SHA-256 hashes of single-use tokens sent by email; the raw token only
+    // ever exists in the email link
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
     // Legacy verification fields (kept for backward compatibility)
     verificationStatus: {
       type: String,
@@ -101,8 +130,9 @@ const userSchema = new mongoose.Schema(
 );
 
 // Create indexes
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ verificationStatus: 1 });
+userSchema.index({ emailVerificationToken: 1 }, { sparse: true });
+userSchema.index({ passwordResetToken: 1 }, { sparse: true });
 
 // Pre-save hook for password hashing
 userSchema.pre("save", async function () {

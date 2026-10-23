@@ -1,9 +1,53 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Settings, Shield } from "lucide-react";
-import { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  Shield,
+  Download,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import NotificationBell from "../features/notifications/NotificationBell";
 import Avatar from "../ui/Avatar";
+import ThemeToggle from "../ui/ThemeToggle";
+import LanguageSelect from "../ui/LanguageSelect";
+import { useTranslation } from "../../hooks/useTranslation";
+
+const MAIN_LINKS = [
+  { to: "/trips", label: "nav.myTrips" },
+  { to: "/explore", label: "nav.explore" },
+  { to: "/destinations", label: "nav.destinations" },
+  { to: "/favorites", label: "nav.saved" },
+  { to: "/join-requests", label: "nav.joinRequests" },
+];
+
+const desktopLinkClass = ({ isActive }) =>
+  `px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    isActive
+      ? "text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40"
+      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+  }`;
+
+const mobileLinkClass = ({ isActive }) =>
+  `block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    isActive
+      ? "text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40"
+      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+  }`;
+
+const publicLinkClass = ({ isActive }) =>
+  `px-2 sm:px-4 py-2 text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap ${
+    isActive
+      ? "text-blue-700 dark:text-blue-300"
+      : "text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+  }`;
+
+const menuItemClass =
+  "flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800";
 
 /**
  * Navbar component
@@ -14,6 +58,47 @@ const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const userMenuButtonRef = useRef(null);
+  const mobileMenuButtonRef = useRef(null);
+  const installApp = useInstallPrompt();
+  const { t } = useTranslation();
+
+  // Close the user menu on a tap or click outside it
+  useEffect(() => {
+    if (!isUserMenuOpen) return undefined;
+    const handlePointerDown = (event) => {
+      if (!userMenuRef.current?.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isUserMenuOpen]);
+
+  // Escape closes an open menu and returns focus to its button
+  useEffect(() => {
+    if (!isUserMenuOpen && !isMobileMenuOpen) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+      if (isUserMenuOpen) {
+        setIsUserMenuOpen(false);
+        userMenuButtonRef.current?.focus();
+      } else {
+        setIsMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isUserMenuOpen, isMobileMenuOpen]);
+
+  // Moving focus out of the user menu (e.g. tabbing past it) closes it
+  const handleUserMenuBlur = (event) => {
+    if (!userMenuRef.current?.contains(event.relatedTarget)) {
+      setIsUserMenuOpen(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -24,20 +109,11 @@ const Navbar = () => {
     }
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleUserMenu = () => {
-    setIsUserMenuOpen(!isUserMenuOpen);
-  };
-
   // Show simplified navbar for unauthenticated users
   if (!isAuthenticated) {
     return (
       <nav
-        className='bg-white shadow-sm border-b border-gray-200'
-        role='navigation'
+        className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'
         aria-label='Main navigation'
       >
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -46,35 +122,39 @@ const Navbar = () => {
             <div className='flex items-center'>
               <Link
                 to='/'
-                className='flex items-center'
-                aria-label='Travelo home'
+                className='flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
+                aria-label={t("common.home")}
               >
-                <span className='text-2xl font-bold text-blue-600'>
+                <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                   Travelo
                 </span>
               </Link>
             </div>
 
             {/* Public links and Auth buttons */}
-            <div className='flex items-center gap-4'>
-              <Link
-                to='/explore'
-                className='px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+            <div className='flex items-center gap-1 sm:gap-4'>
+              <NavLink
+                to='/destinations'
+                className={(state) =>
+                  `hidden sm:inline ${publicLinkClass(state)}`
+                }
               >
-                Explore
-              </Link>
-              <Link
-                to='/login'
-                className='px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
-              >
-                Sign In
-              </Link>
+                {t("nav.destinations")}
+              </NavLink>
+              <NavLink to='/explore' className={publicLinkClass}>
+                {t("nav.explore")}
+              </NavLink>
+              <NavLink to='/login' className={publicLinkClass}>
+                {t("nav.signIn")}
+              </NavLink>
               <Link
                 to='/register'
-                className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='px-3 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 whitespace-nowrap'
               >
-                Get Started
+                {t("nav.getStarted")}
               </Link>
+              <LanguageSelect className='hidden sm:flex' />
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -84,8 +164,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className='bg-white shadow-sm border-b border-gray-200'
-      role='navigation'
+      className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'
       aria-label='Main navigation'
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -94,114 +173,131 @@ const Navbar = () => {
           <div className='flex items-center'>
             <Link
               to='/trips'
-              className='flex items-center'
-              aria-label='Travelo home'
+              className='flex items-center rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
+              aria-label={t("common.home")}
             >
-              <span className='text-2xl font-bold text-blue-600'>Travelo</span>
+              <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
+                Travelo
+              </span>
             </Link>
 
             {/* Desktop navigation links */}
-            <div className='hidden md:ml-8 md:flex md:space-x-4' role='menubar'>
-              <Link
-                to='/trips'
-                className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
-                role='menuitem'
-              >
-                My Trips
-              </Link>
-              <Link
-                to='/explore'
-                className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
-                role='menuitem'
-              >
-                Explore
-              </Link>
-              <Link
-                to='/join-requests'
-                className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
-                role='menuitem'
-              >
-                Join Requests
-              </Link>
+            <ul className='hidden md:ml-8 md:flex md:space-x-4'>
+              {MAIN_LINKS.map(({ to, label }) => (
+                <li key={to}>
+                  <NavLink to={to} className={desktopLinkClass}>
+                    {t(label)}
+                  </NavLink>
+                </li>
+              ))}
               {user?.role === "admin" && (
-                <Link
-                  to='/admin'
-                  className='px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  role='menuitem'
-                >
-                  <Shield size={16} aria-hidden='true' />
-                  Admin
-                </Link>
+                <li>
+                  <NavLink to='/admin' className={desktopLinkClass}>
+                    <Shield size={16} aria-hidden='true' />
+                    {t("nav.admin")}
+                  </NavLink>
+                </li>
               )}
-            </div>
+            </ul>
           </div>
 
-          {/* Right side - Notifications and user menu */}
-          <div className='flex items-center gap-4'>
+          {/* Right side - Theme, notifications and user menu */}
+          <div className='flex items-center gap-1 sm:gap-3'>
+            <LanguageSelect className='hidden sm:flex' />
+            <ThemeToggle />
+
             {/* Notification Bell */}
             <NotificationBell />
 
             {/* User menu */}
-            <div className='relative'>
+            <div
+              className='relative'
+              ref={userMenuRef}
+              onBlur={handleUserMenuBlur}
+            >
               <button
-                onClick={toggleUserMenu}
-                className='flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500'
-                aria-label='User menu'
+                ref={userMenuButtonRef}
+                onClick={() => setIsUserMenuOpen((open) => !open)}
+                className='flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:bg-gray-800'
+                aria-label={t("nav.accountMenu", { name: user?.name || t("nav.you") })}
                 aria-expanded={isUserMenuOpen}
-                aria-haspopup='true'
+                aria-controls='user-menu'
               >
                 <Avatar name={user?.name} size='sm' />
-                <span className='hidden md:block text-sm font-medium text-gray-700'>
+                <span
+                  className='hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300'
+                  aria-hidden='true'
+                >
                   {user?.name}
                 </span>
               </button>
 
               {/* User dropdown menu */}
               {isUserMenuOpen && (
-                <div
-                  className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50'
-                  role='menu'
-                  aria-label='User menu options'
+                <ul
+                  id='user-menu'
+                  className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 dark:bg-gray-900 dark:border-gray-700'
                 >
-                  <Link
-                    to='/profile'
-                    onClick={() => setIsUserMenuOpen(false)}
-                    className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100'
-                    role='menuitem'
-                  >
-                    <User size={16} aria-hidden='true' />
-                    Profile
-                  </Link>
-                  <Link
-                    to='/notifications'
-                    onClick={() => setIsUserMenuOpen(false)}
-                    className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 md:hidden focus:outline-none focus:bg-gray-100'
-                    role='menuitem'
-                  >
-                    <Settings size={16} aria-hidden='true' />
-                    Notifications
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className='flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50'
-                    role='menuitem'
-                  >
-                    <LogOut size={16} aria-hidden='true' />
-                    Logout
-                  </button>
-                </div>
+                  <li>
+                    <Link
+                      to='/profile'
+                      className={menuItemClass}
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <User size={16} aria-hidden='true' />
+                      {t("nav.profile")}
+                    </Link>
+                  </li>
+                  <li className='md:hidden'>
+                    <Link
+                      to='/notifications'
+                      className={menuItemClass}
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <Settings size={16} aria-hidden='true' />
+                      {t("nav.notifications")}
+                    </Link>
+                  </li>
+                  {installApp && (
+                    <li>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          installApp();
+                        }}
+                        className={menuItemClass}
+                      >
+                        <Download size={16} aria-hidden='true' />
+                        {t("nav.installApp")}
+                      </button>
+                    </li>
+                  )}
+                  <li>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className='flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 dark:focus:bg-red-950/40'
+                    >
+                      <LogOut size={16} aria-hidden='true' />
+                      {t("nav.logout")}
+                    </button>
+                  </li>
+                </ul>
               )}
             </div>
 
             {/* Mobile menu button */}
             <button
-              onClick={toggleMobileMenu}
-              className='md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              ref={mobileMenuButtonRef}
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className='md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800'
+              aria-label={isMobileMenuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               aria-expanded={isMobileMenuOpen}
+              aria-controls='mobile-menu'
             >
               {isMobileMenuOpen ? (
                 <X size={24} aria-hidden='true' />
@@ -216,46 +312,51 @@ const Navbar = () => {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div
-          className='md:hidden border-t border-gray-200'
-          role='menu'
-          aria-label='Mobile navigation menu'
+          id='mobile-menu'
+          className='md:hidden border-t border-gray-200 dark:border-gray-700'
         >
-          <div className='px-2 pt-2 pb-3 space-y-1'>
-            <Link
-              to='/trips'
-              onClick={() => setIsMobileMenuOpen(false)}
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
-              role='menuitem'
-            >
-              My Trips
-            </Link>
-            <Link
-              to='/explore'
-              onClick={() => setIsMobileMenuOpen(false)}
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
-              role='menuitem'
-            >
-              Explore
-            </Link>
-            <Link
-              to='/join-requests'
-              onClick={() => setIsMobileMenuOpen(false)}
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
-              role='menuitem'
-            >
-              Join Requests
-            </Link>
+          <ul className='px-2 pt-2 pb-3 space-y-1'>
+            {MAIN_LINKS.map(({ to, label }) => (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  className={mobileLinkClass}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {t(label)}
+                </NavLink>
+              </li>
+            ))}
             {user?.role === "admin" && (
-              <Link
-                to='/admin'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                role='menuitem'
-              >
-                Admin Dashboard
-              </Link>
+              <li>
+                <NavLink
+                  to='/admin'
+                  className={mobileLinkClass}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {t("nav.adminDashboard")}
+                </NavLink>
+              </li>
             )}
-          </div>
+            {installApp && (
+              <li>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    installApp();
+                  }}
+                  className='flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300 dark:hover:bg-blue-950/40'
+                >
+                  <Download size={18} aria-hidden='true' />
+                  {t("nav.installTravelo")}
+                </button>
+              </li>
+            )}
+            <li className='px-3 py-2 sm:hidden'>
+              <LanguageSelect className='w-fit' />
+            </li>
+          </ul>
         </div>
       )}
     </nav>

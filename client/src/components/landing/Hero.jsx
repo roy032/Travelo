@@ -90,18 +90,12 @@ const Hero = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Handle search logic
-    navigate("/explore");
+    const query = location.trim();
+    navigate(
+      query ? `/destinations?search=${encodeURIComponent(query)}` : "/destinations"
+    );
   };
 
-  const partners = [
-    { name: "Tripadvisor", icon: "/main/img1.jpeg" },
-    { name: "Expedia", icon: "/main/img2.webp" },
-    { name: "Booking", icon: "/main/img3.jpeg" },
-    { name: "Airbnb", icon: "/main/img4.jpg" },
-    { name: "Trivago", icon: "/main/img5.webp" },
-    { name: "Priceline", icon: "/main/img6.jpg" },
-  ];
 
   return (
     <div className='relative min-h-[600px] lg:min-h-[700px] bg-linear-to-br from-blue-400 to-cyan-500 overflow-hidden'>
@@ -157,27 +151,28 @@ const Hero = () => {
             </p>
 
             {/* Search Form */}
-            <div className='bg-white rounded-2xl shadow-2xl p-4 md:p-6'>
+            <div className='bg-white rounded-2xl shadow-2xl p-4 md:p-6 dark:bg-gray-900'>
               <form
                 onSubmit={handleSearch}
                 className='flex flex-col md:flex-row gap-4'
               >
                 {/* Location Input */}
-                <div className='flex-1 flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:border-blue-400 transition-colors'>
+                <div className='flex-1 flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:border-blue-400 transition-colors dark:border-gray-700'>
                   <MapPin className='text-blue-500 shrink-0' size={20} />
                   <input
                     type='text'
-                    placeholder='Location'
+                    placeholder='Where to? Try a city or country'
+                    aria-label='Search destinations'
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className='w-full outline-none text-gray-700 placeholder-gray-400'
+                    className='w-full outline-none text-gray-700 placeholder-gray-400 dark:text-gray-300 dark:placeholder-gray-500'
                   />
                 </div>
 
                 {/* Search Button */}
                 <button
                   type='submit'
-                  className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors shadow-lg hover:shadow-xl'
+                  className='bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors shadow-lg hover:shadow-xl'
                 >
                   <Search size={20} />
                   Explore
@@ -215,23 +210,6 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Partner Logos */}
-        <div className='mt-16'>
-          <div className='flex flex-wrap items-center justify-center gap-8 md:gap-12'>
-            {partners.map((partner, index) => (
-              <div
-                key={index}
-                className='w-16 h-16 md:w-20 md:h-20 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center p-3 hover:scale-110 transition-transform'
-              >
-                <img
-                  src={partner.icon}
-                  alt={partner.name}
-                  className='w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity'
-                />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

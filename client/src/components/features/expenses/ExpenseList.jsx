@@ -8,12 +8,16 @@ import { EmptyExpenses } from "../../ui/EmptyState";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { successMessages } from "../../../utils/toast.config";
+import { DEFAULT_CURRENCY, formatMoney } from "../../../utils/currency";
 
 /**
  * ExpenseList component - displays all expenses for a trip in a table layout
  */
 const ExpenseList = ({
   tripId,
+  baseCurrency = DEFAULT_CURRENCY,
+  members = [],
+  onChange,
   onAddExpense,
   onViewReceipt,
   refreshKey = 0,
@@ -47,28 +51,32 @@ const ExpenseList = ({
       await expenseApi.deleteExpense(tripId, expenseId);
       toast.success(successMessages.deleted);
       fetchExpenses();
+      onChange?.();
     } catch (error) {
       console.error("Error deleting expense:", error);
       toast.error("Failed to delete expense");
     }
   };
 
-  const calculateTotal = () => {
-    return expenses
-      .reduce((sum, expense) => sum + expense.amount, 0)
-      .toFixed(2);
-  };
+  // In the trip currency; older expenses have no convertedAmount
+  const calculateTotal = () =>
+    formatMoney(
+      expenses.reduce(
+        (sum, expense) => sum + (expense.convertedAmount ?? expense.amount),
+        0
+      ),
+      baseCurrency
+    );
 
-  console.log(expenses);
   if (loading) {
     return (
       <div className='space-y-4'>
         <div className='flex justify-between items-center mb-6'>
           <div>
-            <div className='h-7 w-24 bg-gray-200 rounded animate-pulse'></div>
-            <div className='h-4 w-40 bg-gray-200 rounded animate-pulse mt-2'></div>
+            <div className='h-7 w-24 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
+            <div className='h-4 w-40 bg-gray-200 rounded animate-pulse mt-2 dark:bg-gray-700'></div>
           </div>
-          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse'></div>
+          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse dark:bg-gray-700'></div>
         </div>
         <SkeletonList count={3} />
       </div>
@@ -79,10 +87,10 @@ const ExpenseList = ({
     <div>
       <div className='flex justify-between items-center mb-6'>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>Expenses</h2>
-          <p className='text-sm text-gray-600 mt-1'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Expenses</h2>
+          <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
             {expenses.length} {expenses.length === 1 ? "expense" : "expenses"} •
-            Total: ৳{calculateTotal()}
+            Total: {calculateTotal()}
           </p>
         </div>
         <Button onClick={() => onAddExpense()} variant='primary' size='md'>
@@ -99,6 +107,7 @@ const ExpenseList = ({
             <ExpenseCard
               key={expense.id}
               expense={expense}
+              members={members}
               onDelete={() => handleDelete(expense.id)}
               onViewReceipt={onViewReceipt}
             />

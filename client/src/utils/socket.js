@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // VITE_API_URL is the server origin (no /api suffix)
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 let socket = null;
 
@@ -39,6 +39,14 @@ export const disconnectSocket = () => {
     socket.disconnect();
   }
 };
+
+/**
+ * ID of the connected socket, sent with API writes so the server doesn't echo
+ * live trip updates back to the tab that made them
+ * @returns {string|undefined}
+ */
+export const getSocketId = () =>
+  socket && socket.connected ? socket.id : undefined;
 
 /**
  * Check if socket is connected

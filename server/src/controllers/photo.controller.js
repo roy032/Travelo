@@ -3,7 +3,8 @@ import {
   deletePhoto,
   getPhotosByTrip,
 } from "#services/photo.service.js";
-import { utapi } from "#config/uploadthing.config.js";
+import { storeFile } from "#config/uploadthing.config.js";
+import { compressUpload } from "#utils/image.js";
 
 /**
  * Upload a photo to a trip
@@ -20,29 +21,15 @@ export const uploadPhotoController = async (req, res, next) => {
       });
     }
 
-    // Upload file to UploadThing using proper File format
-    const file = new File([req.file.buffer], req.file.originalname, {
-      type: req.file.mimetype,
-    });
-
-    const uploadResult = await utapi.uploadFiles([file]);
-
-    // UploadThing returns array when passed array, get first result
-    const result = Array.isArray(uploadResult) ? uploadResult[0] : uploadResult;
-
-    // Check for errors
-    if (result?.error || !result?.data) {
-      console.error("UploadThing error:", result);
-      throw new Error(
-        result?.error?.message || "Failed to upload photo to cloud storage"
-      );
-    }
+    // Resize and re-encode the photo before storing it
+    const file = await compressUpload(req.file);
+    const stored = await storeFile(file, { folder: "photos" });
 
     const photoData = {
       trip: tripId,
-      filename: req.file.originalname,
-      url: result.data.url,
-      fileKey: result.data.key,
+      filename: file.originalname,
+      url: stored.url,
+      fileKey: stored.key,
       caption: req.body.caption || "",
       uploader: req.user.id, // From authentication middleware
     };
@@ -70,9 +57,9 @@ export const uploadPhotoController = async (req, res, next) => {
  */
 export const deletePhotoController = async (req, res, next) => {
   try {
-    const { photoId } = req.params;
+    const { tripId, photoId } = req.params;
 
-    const result = await deletePhoto(photoId, req.user.id);
+    const result = await deletePhoto(photoId, req.user.id, tripId);
 
     res.status(200).json(result);
   } catch (e) {

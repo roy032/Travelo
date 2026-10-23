@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getSocket, connectSocket, disconnectSocket } from "../utils/socket";
+import { getSocket, connectSocket } from "../utils/socket";
 
 /**
  * Custom hook for managing Socket.IO connection and trip chatroom
@@ -20,16 +20,17 @@ const useSocket = (tripId) => {
 
     // Connect socket
     connectSocket();
+    // Another hook (such as useTripLive) may have connected the shared socket
+    // already, in which case no further "connect" event arrives
+    setIsConnected(socketInstance.connected);
 
     // Connection event handlers
     const handleConnect = () => {
-      console.log("Socket connected");
       setIsConnected(true);
       setError(null);
     };
 
     const handleDisconnect = () => {
-      console.log("Socket disconnected");
       setIsConnected(false);
       setIsJoined(false);
     };

@@ -5,6 +5,7 @@ import {
   rejectUserVerification,
   fetchAllUsers,
   getUserStatistics,
+  fetchAnalytics,
   updateUserRole,
   toggleUserBlockStatus,
   deleteUserAccount,
@@ -41,6 +42,9 @@ router.get("/users", fetchAllUsers);
 
 // GET /admin/statistics - Get user statistics
 router.get("/statistics", getUserStatistics);
+
+// GET /admin/analytics?days=30 - Daily sign-ups, active trips and errors
+router.get("/analytics", fetchAnalytics);
 
 // PATCH /admin/users/:userId/role - Update user role
 router.patch("/users/:userId/role", updateUserRole);

@@ -30,6 +30,7 @@ export const updateProfileSchema = z
     email: z.string().email('Please provide a valid email address').max(255).toLowerCase().trim().optional(),
     currentPassword: z.string().min(1, 'Current password is required').max(128).optional(),
     newPassword: z.string().min(8, 'New password must be at least 8 characters').max(128).optional(),
+    emailNotifications: z.boolean().optional(),
   })
   .refine(
     data => {
@@ -53,3 +54,8 @@ export const updateProfileSchema = z
       path: ['currentPassword'],
     }
   );
+// Deleting an account needs the password again, so a session left open on a
+// shared computer can't be used to do it
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password is required').max(128),
+});

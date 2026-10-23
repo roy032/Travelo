@@ -1,6 +1,8 @@
 import { getUserProfile, updateProfile } from '#services/users.service.js';
 import { updateProfileSchema } from '#validations/user.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { cookies } from '#utils/cookies.js';
+import { signSessionToken } from '#services/session.service.js';
 
 /**
  * Get current user's profile
@@ -56,7 +58,15 @@ export const updateUserProfile = async (req, res, next) => {
 
     const updates = validationResult.data;
 
-    const updatedProfile = await updateProfile(req.user.id, updates);
+    const { sessionRenewal, ...updatedProfile } = await updateProfile(
+      req.user.id,
+      updates
+    );
+
+    // A password change signs out other devices but keeps this one
+    if (sessionRenewal) {
+      cookies.set(res, 'token', signSessionToken(sessionRenewal));
+    }
 
     res.json({
       message: 'Profile updated successfully',

@@ -5,6 +5,8 @@ import {
   deleteExpenseController,
   getExpensesController,
   getSplitsController,
+  createSettlementController,
+  deleteSettlementController,
 } from '#controllers/expense.controller.js';
 import { authenticateToken, isTripMember } from '#middlewares/auth.middleware.js';
 import {
@@ -20,6 +22,14 @@ router.use(authenticateToken);
 
 // Get expense splits for a trip (member only) - must come before :expenseId route
 router.get('/trips/:tripId/expenses/splits', isTripMember, getSplitsController);
+
+// Record or remove a payment that settles a debt (member only)
+router.post('/trips/:tripId/settlements', isTripMember, createSettlementController);
+router.delete(
+  '/trips/:tripId/settlements/:settlementId',
+  isTripMember,
+  deleteSettlementController
+);
 
 // Get all expenses for a trip (member only)
 router.get('/trips/:tripId/expenses', isTripMember, getExpensesController);

@@ -97,10 +97,10 @@ const NoteEditor = ({ note, onSubmit, onCancel, loading = false }) => {
       <div>
         <label
           htmlFor='content'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Content
-          <span className='text-red-500 ml-1'>*</span>
+          <span className='text-red-600 ml-1 dark:text-red-400'>*</span>
         </label>
         <textarea
           id='content'
@@ -113,13 +113,13 @@ const NoteEditor = ({ note, onSubmit, onCancel, loading = false }) => {
           className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors resize-none ${
             errors.content
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-          } ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+              : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600"
+          } ${loading ? "bg-gray-100 cursor-not-allowed dark:bg-gray-800" : ""}`}
         />
         {errors.content && (
-          <p className='mt-1 text-sm text-red-600'>{errors.content}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.content}</p>
         )}
-        <p className='mt-1 text-xs text-gray-500'>
+        <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
           {formData.content.length} / 10,000 characters
         </p>
       </div>

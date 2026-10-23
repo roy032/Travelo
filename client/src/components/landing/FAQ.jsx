@@ -6,25 +6,29 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "How do I book a trip?",
+      question: "What is Travelo?",
       answer:
-        "Booking a trip is easy! Simply search for your desired destination, select your dates, choose your accommodation, and proceed to checkout. Our secure payment system ensures your information is safe.",
+        "Travelo is a free planner for group trips. Create a trip, invite friends, and plan it together: a day-by-day itinerary with a map, shared expenses with automatic splits, a group chat, checklists, notes, photos and a packing list with the weather forecast.",
     },
     {
-      question: "What is Travelo and how does it work?",
+      question: "Can I book flights or hotels on Travelo?",
       answer:
-        "Travelo is a comprehensive travel planning platform that helps you discover, plan, and book amazing trips. We offer curated destinations, expert recommendations, and seamless booking experiences all in one place.",
+        "No. Travelo is for planning and organising, not booking. Add your bookings to the itinerary or notes so the whole group can see them.",
     },
     {
-      question: "How can I get ahead about?",
+      question: "How do shared expenses work?",
       answer:
-        "Stay informed by subscribing to our newsletter, following us on social media, and checking our blog for the latest travel tips, destination guides, and exclusive deals. You can also enable notifications in your account settings.",
+        "Whoever pays adds the expense and picks who it is split between, in any currency. Travelo converts it to the trip's currency, keeps a running balance for everyone and suggests the fewest payments to settle up.",
     },
     {
-      question:
-        "What do I need to cancel my trip or get a refund after booking my hotel?",
+      question: "Why do some trips ask me to verify my identity?",
       answer:
-        "Cancellation policies vary by hotel and booking type. Most bookings can be canceled through your account dashboard. Refunds are processed according to the specific terms of your reservation. Free cancellation options are clearly marked during booking.",
+        "Trip owners can require verified members. You upload an NID for domestic trips or a passport for international ones, and an admin reviews it. Documents are only visible to admins and are deleted with your account.",
+    },
+    {
+      question: "Can I take my data with me or delete my account?",
+      answer:
+        "Yes. On your profile page you can download everything you have added as a JSON file, sign out on every device, or delete your account permanently.",
     },
   ];
 
@@ -33,15 +37,15 @@ const FAQ = () => {
   };
 
   return (
-    <div className='bg-gradient-to-b from-gray-50 to-white py-20'>
+    <div className='bg-gradient-to-b from-gray-50 to-white py-20 dark:from-gray-950 dark:to-gray-900'>
       <div className='max-w-4xl mx-auto px-6'>
         {/* Section Header */}
         <div className='text-center mb-12'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4'>
-            Frequently Asked Question
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
+            Frequently Asked Questions
           </h2>
-          <p className='text-lg text-gray-600'>
-            Find answers to common questions about our services
+          <p className='text-lg text-gray-600 dark:text-gray-400'>
+            Answers to common questions about Travelo
           </p>
         </div>
 
@@ -50,28 +54,37 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg'
+              className='bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg dark:bg-gray-900'
             >
               <button
+                type='button'
                 onClick={() => toggleFAQ(index)}
-                className='w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-gray-50'
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-answer-${index}`}
+                id={`faq-question-${index}`}
+                className='w-full flex items-center justify-between p-6 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'
               >
-                <span className='text-lg font-semibold text-gray-900 pr-8'>
+                <span className='text-lg font-semibold text-gray-900 pr-8 dark:text-gray-100'>
                   {faq.question}
                 </span>
                 <ChevronDown
-                  className={`flex-shrink-0 w-6 h-6 text-blue-600 transition-transform duration-300 ${
+                  className={`flex-shrink-0 w-6 h-6 text-blue-600 transition-transform duration-300 dark:text-blue-400 ${
                     openIndex === index ? "transform rotate-180" : ""
                   }`}
+                  aria-hidden='true'
                 />
               </button>
 
               <div
+                id={`faq-answer-${index}`}
+                role='region'
+                aria-labelledby={`faq-question-${index}`}
+                inert={openIndex !== index}
                 className={`overflow-hidden transition-all duration-300 ${
-                  openIndex === index ? "max-h-96" : "max-h-0"
+                  openIndex === index ? "max-h-96" : "max-h-0 invisible"
                 }`}
               >
-                <div className='px-6 pb-6 text-gray-600 leading-relaxed'>
+                <div className='px-6 pb-6 text-gray-600 leading-relaxed dark:text-gray-400'>
                   {faq.answer}
                 </div>
               </div>

@@ -1,16 +1,39 @@
+import helmet from "helmet";
 
-const securityMiddleware = async (req, res, next) => {
-  try {
-    const role = req.user?.role || 'guest';
+// Browser error reports go to Sentry's ingest hosts when VITE_SENTRY_DSN is set
+const sentryConnectSrc = [
+  "https://*.ingest.sentry.io",
+  "https://*.ingest.us.sentry.io",
+  "https://*.ingest.de.sentry.io",
+];
 
-    // TODO: Implement security checks based on user role
+/**
+ * Security headers for every response: Helmet's defaults (HSTS, nosniff,
+ * frame-ancestors, referrer policy, ...) plus a CSP tuned for the client.
+ */
+export const securityHeaders = helmet({
+  contentSecurityPolicy: {
+    directives: {
+      // Destination photos, map tiles and UploadThing files come from many hosts
+      "img-src": ["'self'", "data:", "blob:", "https:"],
+      "connect-src": [
+        "'self'",
+        "https://nominatim.openstreetmap.org",
+        "https://commons.wikimedia.org",
+        ...sentryConnectSrc,
+      ],
+      "frame-ancestors": ["'none'"],
+      "form-action": ["'self'"],
+    },
+  },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+});
 
-    next();
-  } catch (e) {
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Something went wrong with security middleware',
-    });
-  }
+// The app never needs these browser features
+export const permissionsPolicy = (req, res, next) => {
+  res.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  );
+  next();
 };
-export default securityMiddleware;

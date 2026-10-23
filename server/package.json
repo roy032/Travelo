@@ -16,10 +16,11 @@
     "#errors/*": "./src/errors/*"
   },
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node --import ./src/instrument.js src/index.js",
     "dev": "nodemon src/index.js",
     "test": "vitest",
     "seed:destinations": "node seed-destinations.js",
+    "make-admin": "node make-admin.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -30,7 +31,10 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "@sentry/node": "^10.76.2",
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -40,6 +44,8 @@
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.13",
+    "sharp": "^0.34.5",
     "socket.io": "^4.8.1",
     "uploadthing": "^7.7.4",
     "zod": "^4.1.11"
@@ -52,8 +58,10 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "fast-check": "^4.3.0",
+    "globals": "^16.5.0",
     "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
+    "socket.io-client": "^4.8.1",
     "supertest": "^7.1.4",
     "vitest": "^4.0.14"
   }

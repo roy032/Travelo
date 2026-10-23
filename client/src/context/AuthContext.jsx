@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
+import { clearOfflineData } from "../utils/offline";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -15,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await profileApi.getProfile();
+      const response = await profileApi.getProfile({ silent: true });
       setUser(response.user);
       setIsAuthenticated(true);
     } catch {
@@ -28,10 +29,11 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await authApi.register(userData);
+    await clearOfflineData();
 
     // Fetch complete user profile data after successful registration
     try {
-      const profileResponse = await profileApi.getProfile();
+      const profileResponse = await profileApi.getProfile({ silent: true });
       setUser(profileResponse.user);
       setIsAuthenticated(true);
       toast.success("Registration successful!");
@@ -47,10 +49,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const response = await authApi.login(credentials);
+    // Another account may have used this device; drop its saved trips
+    await clearOfflineData();
 
     // Fetch complete user profile data after successful login
     try {
-      const profileResponse = await profileApi.getProfile();
+      const profileResponse = await profileApi.getProfile({ silent: true });
       setUser(profileResponse.user);
       setIsAuthenticated(true);
       toast.success("Login successful!");
@@ -67,6 +71,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Saved trips belong to this account; don't leave them on a shared device
+    await clearOfflineData();
     try {
       await authApi.logout();
       setUser(null);
@@ -79,9 +85,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (userData) => {
-    setUser((prev) => ({ ...prev, ...userData }));
+  // The server already ended the session (account deleted, signed out on
+  // every device): forget the user and their saved trips locally
+  const clearSession = async () => {
+    await clearOfflineData();
+    setUser(null);
+    setIsAuthenticated(false);
   };
+
+  const updateUser = useCallback((userData) => {
+    setUser((prev) => ({ ...prev, ...userData }));
+  }, []);
 
   const value = {
     user,
@@ -90,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    clearSession,
     updateUser,
     checkAuth,
   };
