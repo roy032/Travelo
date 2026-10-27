@@ -9,6 +9,7 @@ import { SkeletonTripGrid } from "../components/ui/SkeletonLoader";
 import { EmptyTrips, EmptySearchResults } from "../components/ui/EmptyState";
 import Modal from "../components/ui/Modal";
 import TripCreateForm from "../components/features/trips/TripCreateForm";
+import GettingStarted from "../components/features/trips/GettingStarted";
 import { useAuth } from "../hooks/useAuth";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useTranslation } from "../hooks/useTranslation";
@@ -224,6 +225,17 @@ const TripListPage = () => {
 
       {/* Filters and Search */}
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
+        <GettingStarted
+          user={user}
+          trips={trips}
+          onCreateTrip={
+            ["domesticVerification", "internationalVerification"].some(
+              (key) => user?.[key]?.status === "verified"
+            )
+              ? handleCreateTrip
+              : undefined
+          }
+        />
         <div className='flex flex-col sm:flex-row gap-4 mb-6'>
           {/* Filter Buttons */}
           <div className='flex gap-2' role='group' aria-label={t("trips.filterLabel")}>

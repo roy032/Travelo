@@ -42,6 +42,8 @@ for (const colorScheme of ["light", "dark"]) {
     });
 
     test("signed-in pages and every trip tab", async ({ page }) => {
+      // Checks about fifteen pages, each after the network settles
+      test.slow();
       const user = newUser(`A11y ${colorScheme}`);
       await signUp(page, user);
       await markVerified(user.email);
