@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { initMonitoring } from './utils/monitoring'
+import { initAnalytics } from './utils/analytics'
 import { registerServiceWorker } from './utils/offline'
 
 initMonitoring()
+initAnalytics()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

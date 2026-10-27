@@ -5,6 +5,7 @@ import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
 import { getErrorMessage, plannerApi } from "../../../services/api.service";
+import { trackEvent } from "../../../utils/analytics";
 
 const PACES = [
   { value: "relaxed", label: "Relaxed (2-3 a day)" },
@@ -133,6 +134,7 @@ const AiPlannerModal = ({ isOpen, onClose, tripId, trip, onApplied }) => {
     setApplying(true);
     try {
       await plannerApi.applyPlan(tripId, activities);
+      trackEvent("AI plan applied", { activities: activities.length });
       toast.success(
         `Added ${activities.length} ${activities.length === 1 ? "activity" : "activities"} to the itinerary`
       );

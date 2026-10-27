@@ -4,6 +4,7 @@ import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../hooks/useAuth";
+import { trackEvent } from "../../../utils/analytics";
 
 /**
  * TripCreateForm component - form for creating a new trip
@@ -171,6 +172,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
       const tripData = destinationType ? { ...rest, destinationType } : rest;
 
       const newTrip = await tripApi.createTrip(tripData);
+      trackEvent("Trip created", { category: tripData.tripCategory ?? "unknown" });
       toast.success("Trip created successfully!");
       onSuccess(newTrip);
     } catch (error) {

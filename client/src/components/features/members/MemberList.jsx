@@ -7,6 +7,7 @@ import Modal from "../../ui/Modal";
 import Loader from "../../ui/Loader";
 import { tripApi, invitationApi } from "../../../services/api.service";
 import toast from "react-hot-toast";
+import { trackEvent } from "../../../utils/analytics";
 
 /**
  * MemberList component - displays all trip members with management controls
@@ -27,6 +28,7 @@ const MemberList = ({
     setInviting(true);
     try {
       await invitationApi.sendInvitation(tripId, email);
+      trackEvent("Invitation sent");
       setIsInviteModalOpen(false);
 
       // Refresh members list

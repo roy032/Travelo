@@ -38,6 +38,7 @@ import Loader from "../components/ui/Loader";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { trackEvent } from "../utils/analytics";
 
 // How a live change from another member is described in the toast
 const LIVE_SECTIONS = {
@@ -312,6 +313,7 @@ const TripDetailPage = () => {
 
       // Create new expense
       await expenseApi.createExpense(tripId, expenseData, receiptFile);
+      trackEvent("Expense added");
       toast.success("Expense created successfully");
 
       handleCloseExpenseModal();

@@ -40,7 +40,7 @@ The free plan sleeps after 15 minutes without traffic and takes about a minute t
 
 ## 3. Right after the first deploy
 
-1. **Register your own account immediately** with the email in `ADMIN_EMAILS`, then sign out and back in to get admin access. Signing up never grants admin, so if registration says the email already exists, someone else took it: remove it from `ADMIN_EMAILS` and register with another address. You can also promote an existing account from your machine with `MONGODB_URI="..." npm run make-admin -- you@example.com` in `server/`.
+1. **Register your own account immediately** with the email in `ADMIN_EMAILS`, open the confirmation email, then sign out and back in to get admin access. Turn on two-factor sign-in on your profile right after. Signing up never grants admin, so if registration says the email already exists, someone else took it: remove it from `ADMIN_EMAILS` and register with another address. You can also promote an existing account from your machine with `MONGODB_URI="..." npm run make-admin -- you@example.com` in `server/`.
 2. Seed the destination explorer from your machine:
 
    ```bash
@@ -98,7 +98,7 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 | `SITE_URL` | no | Public URL used in share previews, the sitemap and robots.txt; defaults to the first `CLIENT_URL` |
 | `TRUST_PROXY` | behind a proxy | `true` on Render, Railway and Fly.io |
 | `JWT_EXPIRES_IN` | no | Session length, default `1d` |
-| `ADMIN_EMAILS` | to have an admin | Comma-separated emails made admin on sign-in |
+| `ADMIN_EMAILS` | to have an admin | Comma-separated emails made admin on sign-in, once the address is confirmed |
 | `EMAIL_PROVIDER` | for real email | `resend` or `smtp`; default `console` only logs emails |
 | `EMAIL_FROM` | with a provider | Sender, e.g. `Travelo <no-reply@yourdomain.com>` |
 | `RESEND_API_KEY` | with `resend` | Resend API key |
@@ -108,9 +108,23 @@ Leave both unset to disable error tracking. Cookies, auth headers and IP address
 | `VITE_SENTRY_DSN` | no | Browser error tracking (build time) |
 | `VITE_SUPPORT_EMAIL` | yes for launch | Contact address in the footer, privacy policy and terms (build time) |
 | `VITE_OPERATOR_NAME` | yes for launch | Person or company that runs the site, named in the legal pages (build time) |
+| `VITE_PLAUSIBLE_DOMAIN` | no | Turns on cookie-free Plausible analytics for this site name, e.g. `travelo.app` (build time) |
+| `VITE_PLAUSIBLE_HOST` | no | Plausible server, default `https://plausible.io` (build time) |
+| `ANALYTICS_HOST` | with Plausible | Same host as `VITE_PLAUSIBLE_HOST` (or `https://plausible.io`), allowed by the server's Content Security Policy |
+| `TOTP_ENCRYPTION_KEY` | recommended | Long random string that encrypts two-factor secrets at rest; defaults to one derived from `JWT_SECRET`. Set it before anyone turns on two-factor and never change it, or their codes stop working |
+| `LOG_LEVEL` | no | `debug`, `info` (default), `warn` or `error` |
+| `LOG_FORMAT` | no | `json` (default in production) or `text` |
+| `USER_RATE_LIMIT_MULTIPLIER` | no | Multiplies the per-account caps on messages, photos, trips, invitations, join requests, reports and reviews; default `1` |
 | `SENTRY_TRACES_SAMPLE_RATE` | no | Performance tracing sample rate, default `0` |
 | `AUTH_RATE_LIMIT_MAX` | no | Auth attempts per 15 minutes, default `10` |
 | `API_RATE_LIMIT_MAX` | no | API requests per minute, default `300` |
 | `PORT` | no | Set by the host; defaults to `3000` |
 
 `NODE_ENV=production` and `CLIENT_DIST` are set inside the Docker image.
+
+## Operations
+
+- **Logs:** each request writes one JSON line with `requestId`, `method`, `path` (no query string), `status`, `durationMs` and `userId`. Every response carries an `X-Request-Id` header, and 500 errors show the same ID to the user, so a support message like "reference 3f2a…" leads straight to the log line and the Sentry event (tagged `request_id`).
+- **Scheduled jobs** run inside the web process: checklist reminders, and a daily purge (03:15 server time) of trips deleted more than 30 days ago, with their photos, receipts and messages. If you run more than one instance, run the jobs on one only.
+- **Admin audit log:** blocks, role changes, deletions and verification decisions are recorded with the admin and time, and are listed on the admin dashboard.
+- **Abuse limits:** besides the per-IP limits, each account has hourly caps (60 photos, 30 trips, 50 invitations, 20 join requests, 10 reports) and 60 chat messages a minute. All counters are in memory, so they reset on restart and are per instance.

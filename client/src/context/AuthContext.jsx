@@ -3,6 +3,7 @@ import { authApi, profileApi } from "../services/api.service";
 import toast from "react-hot-toast";
 import { AuthContext } from "./auth-context";
 import { clearOfflineData } from "../utils/offline";
+import { trackEvent } from "../utils/analytics";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await authApi.register(userData);
+    trackEvent("Signup");
     await clearOfflineData();
 
     // Fetch complete user profile data after successful registration

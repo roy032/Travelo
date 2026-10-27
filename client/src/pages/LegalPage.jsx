@@ -77,6 +77,7 @@ const privacySections = [
         <li>File storage (UploadThing) holds photos, receipts and identity documents.</li>
         <li>Our email provider delivers account and trip emails.</li>
         <li>Our error tracker (Sentry) receives technical details when something breaks.</li>
+        <li>Our analytics (Plausible) counts page visits and actions such as &ldquo;trip created&rdquo; without cookies, and never receives your name, email or trip content.</li>
         <li>When you use the AI trip planner, the trip&apos;s destination, dates and your request are sent to Anthropic to generate suggestions.</li>
         <li>Maps load tiles from OpenStreetMap and place images from Wikimedia Commons directly in your browser, which shares your IP address with them.</li>
         <li>Weather and exchange rates are fetched by our server and contain no personal data.</li>
