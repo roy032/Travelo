@@ -109,9 +109,10 @@ const privacySections = [
     heading: "How long we keep data",
     body: (
       <p>
-        We keep your data while your account exists. Deleted content is
-        removed from our live database right away and from backups when they
-        expire. Password reset and email confirmation links expire after 60
+        We keep your data while your account exists. Deleted content and
+        accounts are removed from our live database right away, except trips,
+        which are kept for 30 days so a mistaken deletion can be undone and
+        then removed for good. Backups are deleted when they expire. Password reset and email confirmation links expire after 60
         minutes and 24 hours.
       </p>
     ),

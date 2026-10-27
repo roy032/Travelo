@@ -3,6 +3,7 @@ import app from "./app.js";
 import connectDatabase from "./config/database.js";
 import { initializeSocket } from "./socket/chatSocket.js";
 import { startChecklistNotificationJob } from "./jobs/checklistNotifications.js";
+import { startPurgeDeletedTripsJob } from "./jobs/purgeDeletedTrips.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -32,6 +33,7 @@ const startServer = async () => {
 
     // Start scheduled jobs
     startChecklistNotificationJob();
+    startPurgeDeletedTripsJob();
     console.log("Scheduled jobs initialized");
 
     // Start HTTP server

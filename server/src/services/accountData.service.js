@@ -38,7 +38,7 @@ const removeFiles = async (keys) => {
  * Permanently remove a trip and everything in it
  * @param {string} tripId
  */
-const purgeTrip = async (tripId) => {
+export const purgeTrip = async (tripId) => {
   const [photos, expenses] = await Promise.all([
     Photo.find({ trip: tripId }).select("fileKey").lean(),
     Expense.find({ trip: tripId, "receipt.key": { $exists: true } })
