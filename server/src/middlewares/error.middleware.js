@@ -1,16 +1,17 @@
 import { formatValidationError } from '#utils/format.js';
 import { recordServerError } from '#services/analytics.service.js';
+import { logger } from '#utils/logger.js';
 
 /**
  * Centralized error handling middleware
  * This should be registered as the last middleware in the Express app
  */
 export const errorHandler = (err, req, res, next) => {
-  // Log error for debugging
-  console.error('Error:', {
+  logger.error('Error', {
+    requestId: req.id,
     message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    url: req.originalUrl,
+    path: req.path,
     method: req.method,
   });
 
@@ -110,6 +111,8 @@ export const errorHandler = (err, req, res, next) => {
       process.env.NODE_ENV === 'development'
         ? err.message
         : 'An unexpected error occurred',
+    // Quoted by users in support requests; matches the logs and Sentry
+    ...(req.id && { requestId: req.id }),
   });
 };
 

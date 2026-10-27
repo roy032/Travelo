@@ -103,7 +103,13 @@ export function getErrorMessage(error) {
     case 429:
       return error.message || "Too many attempts. Please try again later";
     default:
-      if (error.status >= 500) return "Server error. Please try again later";
+      if (error.status >= 500) {
+        // The ID matches the server logs, so support can find what failed
+        const reference = error.data?.requestId;
+        return `Server error. Please try again later${
+          reference ? ` (reference ${reference})` : ""
+        }`;
+      }
       return error.message && error.message !== "An error occurred"
         ? error.message
         : "Something went wrong. Please try again";

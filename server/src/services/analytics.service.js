@@ -24,6 +24,7 @@ export const recordServerError = (err, req, status) => {
     // Drop the query string, which can carry tokens
     path: (req.originalUrl || "").split("?")[0].slice(0, 300),
     message: String(err?.message || "Unknown error").slice(0, 500),
+    requestId: req.id,
   }).catch(() => {});
 };
 

@@ -30,6 +30,7 @@ import {
   permissionsPolicy,
 } from "#middlewares/security.middleware.js";
 import { apiRateLimiter } from "#middlewares/rateLimit.middleware.js";
+import { requestContext } from "#middlewares/requestContext.middleware.js";
 import { tripLiveUpdates } from "#src/socket/tripLive.js";
 import aiPlannerRoutes from "#routes/aiPlanner.route.js";
 import favoriteRoutes from "#routes/favorite.route.js";
@@ -62,6 +63,7 @@ if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
 }
 
+app.use(requestContext);
 app.use(securityHeaders);
 app.use(permissionsPolicy);
 app.use(

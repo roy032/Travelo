@@ -10,6 +10,8 @@ const errorEventSchema = new mongoose.Schema(
     method: { type: String },
     path: { type: String, maxlength: 300 },
     message: { type: String, maxlength: 500 },
+    // Matches the X-Request-Id header, the logs and Sentry
+    requestId: { type: String, maxlength: 64 },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
