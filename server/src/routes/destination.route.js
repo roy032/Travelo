@@ -11,7 +11,7 @@ import {
   deleteReviewController,
 } from '#controllers/review.controller.js';
 import { authenticateToken } from '#middlewares/auth.middleware.js';
-import { createRateLimiter } from '#middlewares/rateLimit.middleware.js';
+import { createRateLimiter, userRateLimiter } from '#middlewares/rateLimit.middleware.js';
 
 const router = express.Router();
 
@@ -39,6 +39,7 @@ router.put(
   '/:destinationId/reviews',
   authenticateToken,
   reviewWriteLimiter,
+  userRateLimiter("review"),
   upsertReviewController
 );
 router.delete(

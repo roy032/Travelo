@@ -39,3 +39,40 @@ describe('createRateLimiter', () => {
     await request(app).post('/').send({}).expect(200);
   });
 });
+
+describe("per-user content limits", () => {
+  it("caps one user without affecting another", async () => {
+    const { userRateLimiter, takeUserQuota, CONTENT_LIMITS } = await import(
+      "./rateLimit.middleware.js"
+    );
+    const limiter = userRateLimiter("report");
+    const run = (userId) => {
+      const res = {
+        statusCode: 200,
+        set: () => res,
+        status(code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: () => res,
+      };
+      let passed = false;
+      limiter({ user: { id: userId }, ip: "1.2.3.4" }, res, () => {
+        passed = true;
+      });
+      return { passed, status: res.statusCode };
+    };
+
+    for (let i = 0; i < CONTENT_LIMITS.report.max; i += 1) {
+      expect(run("u1").passed).toBe(true);
+    }
+    expect(run("u1")).toEqual({ passed: false, status: 429 });
+    expect(run("u2").passed).toBe(true);
+
+    // The chat socket shares the message quota
+    for (let i = 0; i < CONTENT_LIMITS.message.max; i += 1) {
+      expect(takeUserQuota("message", "chatty")).toBe(true);
+    }
+    expect(takeUserQuota("message", "chatty")).toBe(false);
+  });
+});

@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
 import { resolveSession } from "#services/session.service.js";
+import { takeUserQuota } from "#middlewares/rateLimit.middleware.js";
 import Trip from "#models/trip.model.js";
 import { createMessage } from "#services/message.service.js";
 import { registerTripLiveHandlers, setTripLiveServer } from "./tripLive.js";
@@ -167,6 +168,13 @@ export const initializeSocket = (httpServer) => {
         // Verify user is in the room
         if (socket.currentTripId !== tripId) {
           return callback?.({ error: "You must join the room first" });
+        }
+
+        // Same per-user cap as the REST endpoint
+        if (!takeUserQuota("message", socket.userId)) {
+          return callback?.({
+            error: "You're sending messages too fast. Wait a moment and try again.",
+          });
         }
 
         // Validate text

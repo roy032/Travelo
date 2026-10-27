@@ -1,4 +1,5 @@
 import express from "express";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   createTripController,
   updateTripController,
@@ -35,7 +36,7 @@ router.get("/explore", getPublicTripsController);
 router.use(authenticateToken);
 
 // Create a new trip
-router.post("/", createTripController);
+router.post("/", userRateLimiter("trip"), createTripController);
 
 // Get all trips for the authenticated user
 router.get("/", getUserTripsController);
@@ -51,7 +52,11 @@ router.post("/:tripId/share", isTripOwner, enableSharingController);
 router.delete("/:tripId/share", isTripOwner, disableSharingController);
 
 // Request to join a trip (authenticated users only)
-router.post("/:id/join-request", requestJoinTripController);
+router.post(
+  "/:id/join-request",
+  userRateLimiter("joinRequest"),
+  requestJoinTripController
+);
 
 // Get join requests for a trip (owner only)
 router.get("/:tripId/join-requests", isTripOwner, getJoinRequestsController);
@@ -80,7 +85,12 @@ router.delete("/:tripId", isTripOwner, deleteTripController);
 router.get("/:tripId/members", isTripMember, getTripMembersController);
 
 // Invite a member to a trip (owner only)
-router.post("/:tripId/members", isTripOwner, inviteMemberController);
+router.post(
+  "/:tripId/members",
+  isTripOwner,
+  userRateLimiter("invitation"),
+  inviteMemberController
+);
 
 // Remove a member from a trip (owner only)
 router.delete(

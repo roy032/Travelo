@@ -10,6 +10,7 @@ import {
   getInvitationPreviewController,
 } from "#controllers/invitation.controller.js";
 import { authenticateToken } from "#middlewares/auth.middleware.js";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 
 const router = express.Router();
 
@@ -41,6 +42,10 @@ router.delete("/invitations/:invitationId", cancelInvitationController);
 router.get("/trips/:tripId/invitations", getTripInvitationsController);
 
 // Send invitation to a trip (moved from trip routes, but kept there for backward compatibility)
-router.post("/trips/:tripId/invitations", sendInvitationController);
+router.post(
+  "/trips/:tripId/invitations",
+  userRateLimiter("invitation"),
+  sendInvitationController
+);
 
 export default router;

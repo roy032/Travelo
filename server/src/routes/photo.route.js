@@ -1,4 +1,5 @@
 import express from "express";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   uploadPhotoController,
   deletePhotoController,
@@ -26,6 +27,7 @@ router.get("/trips/:tripId/photos", isTripMember, getPhotosController);
 router.post(
   "/trips/:tripId/photos",
   isTripMember,
+  userRateLimiter("photo"),
   uploadPhoto,
   handleUploadError,
   validateFileContent,

@@ -48,6 +48,15 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(error)).toBe("Server error. Please try again later");
   });
 
+  it("adds the request ID to 5xx errors so support can find them", () => {
+    const error = new ApiError("An unexpected error occurred", 500, {
+      requestId: "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
+    });
+    expect(getErrorMessage(error)).toBe(
+      "Server error. Please try again later (reference 3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90)"
+    );
+  });
+
   it("handles non-API errors as network errors", () => {
     expect(getErrorMessage(new TypeError("Failed to fetch"))).toMatch(
       /Network error/
