@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AccountDataCard from "../features/account/AccountDataCard";
 import { profileApi } from "../../services/api.service";
@@ -44,7 +44,10 @@ describe("AccountDataCard", () => {
     await user.click(submit);
     expect(profileApi.deleteAccount).toHaveBeenCalledWith("secret-pass");
     expect(auth.clearSession).toHaveBeenCalled();
-    expect(screen.getByTestId("location")).toHaveTextContent("/login");
+    // The router applies navigation in a transition, so it can land a tick later
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent("/login")
+    );
   });
 
   it("signs out everywhere and goes to sign-in", async () => {
@@ -55,6 +58,9 @@ describe("AccountDataCard", () => {
     );
     expect(profileApi.signOutEverywhere).toHaveBeenCalled();
     expect(auth.clearSession).toHaveBeenCalled();
-    expect(screen.getByTestId("location")).toHaveTextContent("/login");
+    // The router applies navigation in a transition, so it can land a tick later
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent("/login")
+    );
   });
 });
