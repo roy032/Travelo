@@ -6,6 +6,7 @@ import {
 import User from "#models/user.model.js";
 import { disconnectUserSockets } from "#src/socket/chatSocket.js";
 import { deleteAccount } from "#services/accountData.service.js";
+import { listAdminActions, logUserAction } from "#services/audit.service.js";
 import { ANALYTICS_RANGES, getAnalytics } from "#services/analytics.service.js";
 
 /**
@@ -50,6 +51,12 @@ export const approveUserVerification = async (req, res, next) => {
     );
 
     const docType = verificationType === "domestic" ? "NID" : "Passport";
+    await logUserAction(req, {
+      actionType: "verification_approved",
+      targetId: userId,
+      message: `Approved ${docType} verification`,
+      metadata: { verificationType },
+    });
     res.status(200).json({
       message: `${docType} verification approved successfully`,
       user: updatedUser,
@@ -97,6 +104,12 @@ export const rejectUserVerification = async (req, res, next) => {
     );
 
     const docType = verificationType === "domestic" ? "NID" : "Passport";
+    await logUserAction(req, {
+      actionType: "verification_rejected",
+      targetId: userId,
+      message: `Rejected ${docType} verification`,
+      metadata: { verificationType },
+    });
     res.status(200).json({
       message: `${docType} verification rejected`,
       user: updatedUser,
@@ -272,8 +285,15 @@ export const updateUserRole = async (req, res, next) => {
       });
     }
 
+    const previousRole = user.role;
     user.role = role;
     await user.save();
+    await logUserAction(req, {
+      actionType: "user_role_changed",
+      targetId: userId,
+      message: `Changed role from ${previousRole} to ${role}`,
+      metadata: { previousRole, role },
+    });
 
     res.status(200).json({
       message: `User role updated to ${role} successfully`,
@@ -329,6 +349,11 @@ export const toggleUserBlockStatus = async (req, res, next) => {
     }
     await user.save();
     if (blocked) disconnectUserSockets(userId);
+    await logUserAction(req, {
+      actionType: blocked ? "user_banned" : "user_unbanned",
+      targetId: userId,
+      message: `${blocked ? "Blocked" : "Unblocked"} ${user.email}`,
+    });
 
     res.status(200).json({
       message: `User ${blocked ? "blocked" : "unblocked"} successfully`,
@@ -371,12 +396,29 @@ export const deleteUserAccount = async (req, res, next) => {
 
     // Same cleanup as self-service deletion: solo trips are removed, shared
     // trips pass to another member and personal data is wiped
+    const { email } = user;
     await deleteAccount(userId);
+    await logUserAction(req, {
+      actionType: "user_deleted",
+      targetId: userId,
+      message: `Deleted the account of ${email}`,
+    });
 
     res.status(200).json({
       message: "User account and all associated data deleted successfully",
       userId,
     });
+  } catch (e) {
+    next(e);
+  }
+};
+
+/**
+ * GET /api/admin/audit-log - who did what, newest first
+ */
+export const fetchAuditLog = async (req, res, next) => {
+  try {
+    res.json(await listAdminActions(req.query));
   } catch (e) {
     next(e);
   }

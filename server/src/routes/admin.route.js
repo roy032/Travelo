@@ -6,6 +6,7 @@ import {
   fetchAllUsers,
   getUserStatistics,
   fetchAnalytics,
+  fetchAuditLog,
   updateUserRole,
   toggleUserBlockStatus,
   deleteUserAccount,
@@ -45,6 +46,9 @@ router.get("/statistics", getUserStatistics);
 
 // GET /admin/analytics?days=30 - Daily sign-ups, active trips and errors
 router.get("/analytics", fetchAnalytics);
+
+// Who did what: admin actions on users, reports and trips
+router.get("/audit-log", fetchAuditLog);
 
 // PATCH /admin/users/:userId/role - Update user role
 router.patch("/users/:userId/role", updateUserRole);

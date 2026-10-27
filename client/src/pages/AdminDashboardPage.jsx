@@ -9,6 +9,7 @@ import Modal from "../components/ui/Modal";
 import Loader from "../components/ui/Loader";
 import VerificationQueue from "../components/features/admin/VerificationQueue";
 import AdminAnalytics from "../components/features/admin/AdminAnalytics";
+import AuditLog from "../components/features/admin/AuditLog";
 import {
   Users,
   CheckCircle,
@@ -348,6 +349,11 @@ const AdminDashboardPage = () => {
               fetchStatistics();
             }}
           />
+        </div>
+
+        {/* Who did what */}
+        <div className='mb-8'>
+          <AuditLog />
         </div>
 
         {/* User Table */}

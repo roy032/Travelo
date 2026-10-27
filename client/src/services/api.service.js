@@ -368,6 +368,14 @@ export const userApi = {
 // ============================================================================
 
 export const adminApi = {
+  getAuditLog: async (params = {}) => {
+    try {
+      return await fetchWithAuth(`/admin/audit-log?${toQueryString(params)}`);
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   getAllUsers: async (params = {}) => {
     try {
       const queryString = new URLSearchParams(params).toString();

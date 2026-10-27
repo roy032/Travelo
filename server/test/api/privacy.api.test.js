@@ -90,6 +90,18 @@ describe.skipIf(!TEST_DB_URI)('Sessions, data export and account deletion', () =
       expect(res.status).toBe(200);
 
       expect((await user.agent.get('/api/profile')).status).toBe(401);
+
+      // The block is in the audit log, with who did it
+      const log = await admin.agent.get('/api/admin/audit-log');
+      expect(log.status).toBe(200);
+      expect(log.body.entries[0]).toMatchObject({
+        actionType: 'user_banned',
+        targetType: 'user',
+        targetId: user.user.id,
+        admin: { email: admin.user.email },
+      });
+      expect(log.body.entries[0].ipAddress).toBeUndefined();
+      expect((await user.agent.get('/api/admin/audit-log')).status).toBe(401);
     });
 
     it('applies a role change without signing in again', async () => {
@@ -106,6 +118,12 @@ describe.skipIf(!TEST_DB_URI)('Sessions, data export and account deletion', () =
         .patch(`/api/admin/users/${user.user.id}/role`)
         .send({ role: 'user' });
       expect((await user.agent.get('/api/admin/users')).status).toBe(403);
+
+      const log = await admin.agent.get('/api/admin/audit-log');
+      expect(log.body.entries.map((e) => e.actionType)).toEqual([
+        'user_role_changed',
+        'user_role_changed',
+      ]);
     });
   });
 
