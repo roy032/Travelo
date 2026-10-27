@@ -66,6 +66,11 @@ test.describe("Offline app", () => {
 
     for (const colorScheme of ["light", "dark"]) {
       await page.emulateMedia({ colorScheme });
+      await expect(page.locator("html")).toHaveClass(
+        colorScheme === "dark" ? /dark/ : /^(?!.*dark)/
+      );
+      // Links fade to the new theme's colours; check contrast once they settle
+      await page.waitForFunction(() => document.getAnimations().length === 0);
       await expectAccessible(page, `offline /trips (${colorScheme})`);
     }
 
