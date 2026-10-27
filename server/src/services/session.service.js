@@ -23,7 +23,8 @@ export const signSessionToken = (user) =>
  * @returns {Promise<Object|null>}
  */
 export const resolveSession = async (decoded) => {
-  if (!decoded?.id) return null;
+  // Purpose tokens (such as the two-factor sign-in challenge) are not sessions
+  if (!decoded?.id || decoded.purpose) return null;
 
   const user = await User.findById(decoded.id)
     .select(

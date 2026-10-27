@@ -15,6 +15,7 @@ import {
   verifyEmail,
 } from "#services/account.service.js";
 import { signSessionToken } from "#services/session.service.js";
+import { createSignInChallenge } from "#services/twoFactor.service.js";
 import { cookies } from "#utils/cookies.js";
 
 export const signup = async (req, res, next) => {
@@ -86,6 +87,15 @@ export const signIn = async (req, res, next) => {
     const { email, password } = validationResult.data;
 
     const user = await authenticateUser({ email, password });
+
+    // The password was right, but the session waits for the app code
+    if (user.twoFactorEnabled) {
+      return res.status(200).json({
+        message: "Enter the code from your authenticator app",
+        twoFactorRequired: true,
+        challenge: createSignInChallenge(user),
+      });
+    }
 
     const token = signSessionToken(user);
 

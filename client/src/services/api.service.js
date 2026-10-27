@@ -169,6 +169,17 @@ export const authApi = {
     }
   },
 
+  verifyTwoFactor: async (data) => {
+    try {
+      return await fetchWithAuth("/auth/2fa/verify", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   logout: async () => {
     try {
       return await fetchWithAuth("/auth/sign-out", {
@@ -256,6 +267,26 @@ export const profileApi = {
       return await fetchWithAuth("/profile", {
         method: "DELETE",
         body: JSON.stringify({ password }),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  twoFactorStatus: async () => {
+    try {
+      return await fetchWithAuth("/auth/2fa");
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // action: "setup" | "enable" | "disable" | "recovery-codes"
+  twoFactor: async (action, data = {}) => {
+    try {
+      return await fetchWithAuth(`/auth/2fa/${action}`, {
+        method: "POST",
+        body: JSON.stringify(data),
       });
     } catch (error) {
       return handleApiError(error);

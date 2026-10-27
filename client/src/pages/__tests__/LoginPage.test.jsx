@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginPage from "../LoginPage";
 import { makeAuth, renderWithProviders } from "../../test/utils";
+import { expectNoAxeViolations } from "../../test/axe";
 
 describe("LoginPage", () => {
   it("validates the form before calling the API", async () => {
@@ -75,5 +76,51 @@ describe("LoginPage", () => {
     await waitFor(() => expect(auth.login).toHaveBeenCalled());
     expect(screen.getByTestId("location")).toHaveTextContent("/login");
     expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
+  });
+
+  it("asks for the app code when two-factor sign-in is on", async () => {
+    const auth = makeAuth({
+      login: vi.fn().mockResolvedValue({ twoFactorRequired: true, challenge: "ch" }),
+      completeTwoFactor: vi.fn().mockResolvedValue({}),
+    });
+    const { container } = renderWithProviders(<LoginPage />, { auth, route: "/login" });
+
+    await userEvent.type(screen.getByLabelText("Email address"), "a@b.com");
+    await userEvent.type(screen.getByLabelText("Password"), "password123");
+    await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Enter your sign-in code" })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/login");
+    await expectNoAxeViolations(container);
+
+    await userEvent.type(screen.getByLabelText("6-digit code"), "123 456");
+    await userEvent.click(screen.getByRole("button", { name: "Verify" }));
+    expect(auth.completeTwoFactor).toHaveBeenCalledWith({ challenge: "ch", code: "123456" });
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent("/trips")
+    );
+  });
+
+  it("accepts a recovery code instead", async () => {
+    const auth = makeAuth({
+      login: vi.fn().mockResolvedValue({ twoFactorRequired: true, challenge: "ch" }),
+      completeTwoFactor: vi.fn().mockResolvedValue({}),
+    });
+    renderWithProviders(<LoginPage />, { auth, route: "/login" });
+
+    await userEvent.type(screen.getByLabelText("Email address"), "a@b.com");
+    await userEvent.type(screen.getByLabelText("Password"), "password123");
+    await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Use a recovery code instead" })
+    );
+    await userEvent.type(screen.getByLabelText("Recovery code"), "abcd-efgh-jkmn");
+    await userEvent.click(screen.getByRole("button", { name: "Verify" }));
+    expect(auth.completeTwoFactor).toHaveBeenCalledWith({
+      challenge: "ch",
+      recoveryCode: "abcd-efgh-jkmn",
+    });
   });
 });

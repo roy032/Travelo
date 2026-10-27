@@ -64,6 +64,9 @@ export const signUpAdmin = async (app, overrides = {}) => {
   process.env.ADMIN_EMAILS = email;
   try {
     const admin = await signUp(app, { email, ...overrides });
+    // Promotion needs a confirmed address
+    const { default: User } = await import('#models/user.model.js');
+    await User.updateOne({ email }, { emailVerified: true });
     const res = await admin.agent
       .post('/api/auth/sign-in')
       .send({ email, password: admin.credentials.password });

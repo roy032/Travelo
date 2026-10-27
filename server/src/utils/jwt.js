@@ -12,9 +12,9 @@ const getSecret = () => {
 };
 
 export const jwtToken = {
-  sign: (payload) => {
+  sign: (payload, { expiresIn = JWT_EXPIRES_IN } = {}) => {
     try {
-      return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN });
+      return jwt.sign(payload, getSecret(), { expiresIn });
     } catch (error) {
       throw new Error("Failed to sign token");
     }

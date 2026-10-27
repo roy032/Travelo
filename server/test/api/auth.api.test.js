@@ -46,6 +46,15 @@ describe.skipIf(!TEST_DB_URI)('Auth API', () => {
       const { agent, user } = await signUp(app, { email: 'Owner@Example.com' });
       expect(user.role).toBe('user');
 
+      // Not while the address is unconfirmed: anyone could sign up with it
+      const early = await agent
+        .post('/api/auth/sign-in')
+        .send({ email: 'owner@example.com', password: 'password123' });
+      expect(early.body.user.role).toBe('user');
+
+      const { default: User } = await import('#models/user.model.js');
+      await User.updateOne({ _id: user.id }, { emailVerified: true });
+
       const res = await agent
         .post('/api/auth/sign-in')
         .send({ email: 'owner@example.com', password: 'password123' });

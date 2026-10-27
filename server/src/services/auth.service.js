@@ -135,7 +135,13 @@ export const authenticateUser = async ({ email, password }) => {
       throw new Error("User is blocked");
     }
 
-    if (user.role !== "admin" && isConfiguredAdmin(user.email)) {
+    // Only a confirmed address counts: anyone can sign up with the owner's
+    // email, but only the owner can open the confirmation link
+    if (
+      user.role !== "admin" &&
+      user.emailVerified &&
+      isConfiguredAdmin(user.email)
+    ) {
       const promoted = await promoteToAdmin(user.email);
       user.role = promoted.role;
       user.verificationStatus = promoted.verificationStatus;
@@ -150,6 +156,7 @@ export const authenticateUser = async ({ email, password }) => {
       email: user.email,
       role: user.role,
       tokenVersion: user.tokenVersion,
+      twoFactorEnabled: Boolean(user.twoFactor?.enabled),
       emailVerified: user.emailVerified,
       verificationStatus: user.verificationStatus,
       domesticVerification: { status: user.domesticVerification?.status },

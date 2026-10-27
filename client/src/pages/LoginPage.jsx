@@ -13,7 +13,7 @@ const LoginPage = () => {
   usePageTitle(t("auth.login.pageTitle"));
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, completeTwoFactor } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,6 +22,10 @@ const LoginPage = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  // Set when the password was right and the account needs an app code
+  const [challenge, setChallenge] = useState(null);
+  const [useRecovery, setUseRecovery] = useState(false);
+  const [code, setCode] = useState("");
 
   const from = location.state?.from?.pathname || "/trips";
 
@@ -69,7 +73,11 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(formData);
+      const result = await login(formData);
+      if (result?.twoFactorRequired) {
+        setChallenge(result.challenge);
+        return;
+      }
 
       navigate(from, { replace: true });
     } catch (error) {
@@ -79,6 +87,106 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+
+  const handleCodeSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await completeTwoFactor(
+        useRecovery
+          ? { challenge, recoveryCode: code.trim() }
+          : { challenge, code: code.replace(/\s/g, "") }
+      );
+      navigate(from, { replace: true });
+    } catch (error) {
+      // An expired challenge means starting again with the password
+      if (error?.status === 401) {
+        setChallenge(null);
+        setCode("");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (challenge) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>
+        <div className='max-w-md w-full space-y-8'>
+          <div>
+            <h1 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100'>
+              {t("auth.login.codeHeading")}
+            </h1>
+            <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
+              {useRecovery ? t("auth.login.recoveryHelp") : t("auth.login.codeHelp")}
+            </p>
+          </div>
+          <Card>
+            <form className='space-y-6' onSubmit={handleCodeSubmit}>
+              {useRecovery ? (
+                <Input
+                  key='recovery'
+                  label={t("auth.login.recoveryLabel")}
+                  name='recoveryCode'
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  autoComplete='off'
+                  required
+                  autoFocus
+                />
+              ) : (
+                <Input
+                  key='code'
+                  label={t("auth.login.codeLabel")}
+                  name='code'
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  inputMode='numeric'
+                  pattern='[0-9 ]{6,7}'
+                  maxLength={7}
+                  autoComplete='one-time-code'
+                  required
+                  autoFocus
+                />
+              )}
+              <Button
+                type='submit'
+                variant='primary'
+                className='w-full'
+                loading={loading}
+                disabled={loading}
+              >
+                {t("auth.login.verify")}
+              </Button>
+              <div className='flex flex-col items-center gap-2 text-sm'>
+                <button
+                  type='button'
+                  className='font-medium text-blue-700 underline dark:text-blue-300'
+                  onClick={() => {
+                    setUseRecovery((value) => !value);
+                    setCode("");
+                  }}
+                >
+                  {useRecovery ? t("auth.login.useApp") : t("auth.login.useRecovery")}
+                </button>
+                <button
+                  type='button'
+                  className='text-gray-700 underline dark:text-gray-300'
+                  onClick={() => {
+                    setChallenge(null);
+                    setCode("");
+                    setUseRecovery(false);
+                  }}
+                >
+                  {t("auth.login.back")}
+                </button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950'>

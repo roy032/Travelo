@@ -76,6 +76,26 @@ export const accountRateLimiter = createRateLimiter({
       : null,
 });
 
+// Per-account limit on the code step of two-factor sign-in, so a password
+// thief can't try codes from many IPs
+export const twoFactorRateLimiter = createRateLimiter({
+  windowMs: AUTH_WINDOW_MS,
+  max: AUTH_MAX,
+  message: "Too many codes tried for this account, please try again later",
+  keyGenerator: (req) => {
+    const challenge = req.body?.challenge;
+    if (typeof challenge !== "string") return null;
+    try {
+      const payload = JSON.parse(
+        Buffer.from(challenge.split(".")[1], "base64url").toString()
+      );
+      return typeof payload?.id === "string" ? `2fa:${payload.id}` : null;
+    } catch {
+      return null;
+    }
+  },
+});
+
 // Coarse limit for the whole API to blunt scraping and floods
 export const apiRateLimiter = createRateLimiter({
   windowMs: 60 * 1000,

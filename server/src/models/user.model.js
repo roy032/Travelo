@@ -42,6 +42,18 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Authenticator-app sign-in codes. The secret is AES-GCM encrypted
+    // (utils/totp.js) and recovery codes are stored as SHA-256 hashes.
+    twoFactor: {
+      enabled: { type: Boolean, default: false },
+      secret: { type: String, select: false },
+      // Set during setup until the first code confirms the app works
+      pendingSecret: { type: String, select: false },
+      // Last time step accepted, so a code can't be used twice
+      lastStep: { type: Number, select: false },
+      recoveryCodes: { type: [String], select: false },
+      enabledAt: Date,
+    },
     // Set when the user deletes their account. The document stays as an
     // anonymous placeholder so shared trip records (expenses, itinerary)
     // still resolve, but every personal field is wiped.

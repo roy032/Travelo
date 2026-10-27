@@ -6,6 +6,7 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import DocumentUpload from "../components/features/admin/DocumentUpload";
 import AccountDataCard from "../components/features/account/AccountDataCard";
+import TwoFactorCard from "../components/features/account/TwoFactorCard";
 import toast from "react-hot-toast";
 import { User, Mail, Calendar, Lock, Bell } from "lucide-react";
 import { usePageTitle } from "../hooks/usePageTitle";
@@ -439,6 +440,9 @@ const ProfilePage = () => {
               )}
             </div>
           </Card>
+
+          {/* Authenticator app codes at sign-in */}
+          <TwoFactorCard />
 
           {/* Document Verification */}
           <DocumentUpload />

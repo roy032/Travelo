@@ -47,27 +47,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (credentials) => {
-    const response = await authApi.login(credentials);
+  // Load the full profile once the server has set the session cookie
+  const finishSignIn = async (response) => {
     // Another account may have used this device; drop its saved trips
     await clearOfflineData();
-
-    // Fetch complete user profile data after successful login
+    let result = response;
     try {
-      const profileResponse = await profileApi.getProfile({ silent: true });
-      setUser(profileResponse.user);
-      setIsAuthenticated(true);
-      toast.success("Login successful!");
-
-      return profileResponse;
-    } catch (error) {
-      // Fallback to login response user data if profile fetch fails
+      result = await profileApi.getProfile({ silent: true });
+      setUser(result.user);
+    } catch {
+      // Fall back to the sign-in response's user data
       setUser(response.user);
-      setIsAuthenticated(true);
-      toast.success("Login successful!");
-
-      return response;
     }
+    setIsAuthenticated(true);
+    toast.success("Login successful!");
+    return result;
+  };
+
+  // Resolves with { twoFactorRequired, challenge } when the account needs a
+  // code from its authenticator app; completeTwoFactor finishes that sign-in
+  const login = async (credentials) => {
+    const response = await authApi.login(credentials);
+    if (response?.twoFactorRequired) return response;
+    return finishSignIn(response);
+  };
+
+  const completeTwoFactor = async (data) => {
+    const response = await authApi.verifyTwoFactor(data);
+    if (response.method === "recovery") {
+      toast(
+        `Recovery code used. ${response.remainingRecoveryCodes} left; you can make new ones on your profile.`,
+        { duration: 8000 }
+      );
+    }
+    return finishSignIn(response);
   };
 
   const logout = async () => {
@@ -103,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     register,
     login,
+    completeTwoFactor,
     logout,
     clearSession,
     updateUser,
