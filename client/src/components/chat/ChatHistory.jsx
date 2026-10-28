@@ -96,7 +96,7 @@ const ChatHistory = ({
 
   if (messages.length === 0 && !loading) {
     return (
-      <div className='flex-1 flex items-center justify-center text-gray-500 p-8'>
+      <div className='flex-1 flex items-center justify-center text-gray-500 p-8 dark:text-gray-400'>
         <div className='text-center'>
           <p className='text-lg font-medium mb-2'>No messages yet</p>
           <p className='text-sm'>Start the conversation!</p>
@@ -141,7 +141,7 @@ const ChatHistory = ({
       {showScrollButton && (
         <button
           onClick={() => scrollToBottom("smooth")}
-          className='absolute bottom-4 right-4 p-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors'
+          className='absolute bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors'
           aria-label='Scroll to bottom'
         >
           <ChevronDown className='w-5 h-5' />

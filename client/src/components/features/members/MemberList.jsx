@@ -7,6 +7,7 @@ import Modal from "../../ui/Modal";
 import Loader from "../../ui/Loader";
 import { tripApi, invitationApi } from "../../../services/api.service";
 import toast from "react-hot-toast";
+import { trackEvent } from "../../../utils/analytics";
 
 /**
  * MemberList component - displays all trip members with management controls
@@ -27,6 +28,7 @@ const MemberList = ({
     setInviting(true);
     try {
       await invitationApi.sendInvitation(tripId, email);
+      trackEvent("Invitation sent");
       setIsInviteModalOpen(false);
 
       // Refresh members list
@@ -83,8 +85,8 @@ const MemberList = ({
       {/* Header with invite button */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-          <Users size={24} className='text-gray-600' />
-          <h3 className='text-lg font-semibold text-gray-900'>
+          <Users size={24} className='text-gray-600 dark:text-gray-400' />
+          <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
             Trip Members ({members.length})
           </h3>
         </div>
@@ -104,11 +106,11 @@ const MemberList = ({
 
       {/* Members list */}
       {members.length === 0 ? (
-        <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
+        <div className='text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 dark:bg-gray-950 dark:border-gray-600'>
           <Users size={48} className='mx-auto text-gray-400 mb-4' />
-          <p className='text-gray-600 mb-2'>No members yet</p>
+          <p className='text-gray-600 mb-2 dark:text-gray-400'>No members yet</p>
           {isTripOwner && (
-            <p className='text-sm text-gray-500'>
+            <p className='text-sm text-gray-500 dark:text-gray-400'>
               Invite members to start planning together
             </p>
           )}

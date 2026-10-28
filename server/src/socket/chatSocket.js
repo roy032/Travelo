@@ -1,8 +1,11 @@
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { jwtToken } from "#utils/jwt.js";
+import { resolveSession } from "#services/session.service.js";
+import { takeUserQuota } from "#middlewares/rateLimit.middleware.js";
 import Trip from "#models/trip.model.js";
 import { createMessage } from "#services/message.service.js";
+import { registerTripLiveHandlers, setTripLiveServer } from "./tripLive.js";
 
 let io;
 
@@ -36,9 +39,12 @@ export const initializeSocket = (httpServer) => {
       }
 
       // Verify JWT token
-      const decoded = jwtToken.verify(token);
-      socket.userId = decoded.id;
-      socket.userRole = decoded.role;
+      const user = await resolveSession(jwtToken.verify(token));
+      if (!user) {
+        return next(new Error("Authentication failed"));
+      }
+      socket.userId = user.id;
+      socket.userRole = user.role;
 
       next();
     } catch (error) {
@@ -47,9 +53,16 @@ export const initializeSocket = (httpServer) => {
     }
   });
 
+  setTripLiveServer(io);
+
   // Connection handler
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.userId}`);
+    // Lets disconnectUserSockets end every connection of this user
+    socket.join(`user:${socket.userId}`);
+
+    // Presence and change notifications for the trip page
+    registerTripLiveHandlers(socket);
 
     // Handle joining a trip chatroom
     // Payloads come from the client: never destructure them in the parameter
@@ -157,6 +170,13 @@ export const initializeSocket = (httpServer) => {
           return callback?.({ error: "You must join the room first" });
         }
 
+        // Same per-user cap as the REST endpoint
+        if (!takeUserQuota("message", socket.userId)) {
+          return callback?.({
+            error: "You're sending messages too fast. Wait a moment and try again.",
+          });
+        }
+
         // Validate text
         if (typeof text !== "string" || text.trim().length === 0) {
           return callback?.({ error: "Message cannot be empty" });
@@ -240,4 +260,12 @@ export const getIO = () => {
     throw new Error("Socket.IO not initialized");
   }
   return io;
+};
+
+/**
+ * Close every open connection of a user, after their sessions are revoked
+ * @param {string} userId
+ */
+export const disconnectUserSockets = (userId) => {
+  io?.in(`user:${userId}`).disconnectSockets(true);
 };

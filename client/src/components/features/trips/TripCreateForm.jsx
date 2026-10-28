@@ -4,6 +4,7 @@ import Input from "../../ui/Input";
 import Button from "../../ui/Button";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../hooks/useAuth";
+import { trackEvent } from "../../../utils/analytics";
 
 /**
  * TripCreateForm component - form for creating a new trip
@@ -166,15 +167,12 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
     setLoading(true);
 
     try {
-      const tripData = {
-        ...formData,
-        // Only include destinationType if it's selected
-        ...(formData.destinationType && {
-          destinationType: formData.destinationType,
-        }),
-      };
+      // Only include destinationType if it's selected; the API rejects ""
+      const { destinationType, ...rest } = formData;
+      const tripData = destinationType ? { ...rest, destinationType } : rest;
 
       const newTrip = await tripApi.createTrip(tripData);
+      trackEvent("Trip created", { category: tripData.tripCategory ?? "unknown" });
       toast.success("Trip created successfully!");
       onSuccess(newTrip);
     } catch (error) {
@@ -200,8 +198,8 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
 
       {/* Trip Category Selection */}
       <div>
-        <label className='block text-sm font-medium text-gray-700 mb-2'>
-          Trip Category <span className='text-red-500'>*</span>
+        <label className='block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300'>
+          Trip Category <span className='text-red-600 dark:text-red-400'>*</span>
         </label>
         <div className='flex gap-4'>
           <label className='flex items-center cursor-pointer'>
@@ -211,19 +209,19 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
               value='domestic'
               checked={formData.tripCategory === "domestic"}
               onChange={handleChange}
-              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300'
+              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:text-blue-400 dark:border-gray-600'
             />
-            <span className='ml-2 text-sm text-gray-700'>
+            <span className='ml-2 text-sm text-gray-700 dark:text-gray-300'>
               Domestic
               {user?.domesticVerification?.status === "verified" && (
-                <span className='ml-1 text-green-600'>✓</span>
+                <span className='ml-1 text-green-700 dark:text-green-300'>✓</span>
               )}
               {user?.domesticVerification?.status === "pending" && (
-                <span className='ml-1 text-yellow-600'>(Pending)</span>
+                <span className='ml-1 text-yellow-700 dark:text-yellow-300'>(Pending)</span>
               )}
               {(!user?.domesticVerification?.status ||
                 user?.domesticVerification?.status === "unverified") && (
-                <span className='ml-1 text-red-600'>(NID Required)</span>
+                <span className='ml-1 text-red-600 dark:text-red-400'>(NID Required)</span>
               )}
             </span>
           </label>
@@ -234,33 +232,33 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
               value='international'
               checked={formData.tripCategory === "international"}
               onChange={handleChange}
-              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300'
+              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:text-blue-400 dark:border-gray-600'
             />
-            <span className='ml-2 text-sm text-gray-700'>
+            <span className='ml-2 text-sm text-gray-700 dark:text-gray-300'>
               International
               {user?.internationalVerification?.status === "verified" && (
-                <span className='ml-1 text-green-600'>✓</span>
+                <span className='ml-1 text-green-700 dark:text-green-300'>✓</span>
               )}
               {user?.internationalVerification?.status === "pending" && (
-                <span className='ml-1 text-yellow-600'>(Pending)</span>
+                <span className='ml-1 text-yellow-700 dark:text-yellow-300'>(Pending)</span>
               )}
               {(!user?.internationalVerification?.status ||
                 user?.internationalVerification?.status === "unverified") && (
-                <span className='ml-1 text-red-600'>(Passport Required)</span>
+                <span className='ml-1 text-red-600 dark:text-red-400'>(Passport Required)</span>
               )}
             </span>
           </label>
         </div>
         {errors.tripCategory && (
-          <p className='mt-1 text-sm text-red-600'>{errors.tripCategory}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.tripCategory}</p>
         )}
 
         {/* Verification Warning Message */}
         {showVerificationWarning && (
-          <div className='mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
+          <div className='mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-950/40 dark:border-yellow-800'>
             <div className='flex items-start'>
               <svg
-                className='w-5 h-5 text-yellow-600 mt-0.5 mr-2'
+                className='w-5 h-5 text-yellow-700 mt-0.5 mr-2 dark:text-yellow-300'
                 fill='currentColor'
                 viewBox='0 0 20 20'
               >
@@ -271,12 +269,12 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
                 />
               </svg>
               <div className='flex-1'>
-                <h4 className='text-sm font-medium text-yellow-800'>
+                <h4 className='text-sm font-medium text-yellow-800 dark:text-yellow-200'>
                   {formData.tripCategory === "domestic"
                     ? "NID Verification Required"
                     : "Passport Verification Required"}
                 </h4>
-                <p className='mt-1 text-sm text-yellow-700'>
+                <p className='mt-1 text-sm text-yellow-700 dark:text-yellow-300'>
                   {formData.tripCategory === "domestic"
                     ? user?.domesticVerification?.status === "pending"
                       ? "Your NID verification is pending. Please wait for admin approval before creating domestic trips."
@@ -288,7 +286,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
                 <button
                   type='button'
                   onClick={() => (window.location.href = "/profile")}
-                  className='mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900 underline'
+                  className='mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900 underline dark:text-yellow-200 dark:hover:text-yellow-200'
                 >
                   Go to Profile →
                 </button>
@@ -301,7 +299,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor='description'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Description
         </label>
@@ -312,10 +310,10 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
           onChange={handleChange}
           placeholder='Tell us about your trip...'
           rows={4}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         />
         {errors.description && (
-          <p className='mt-1 text-sm text-red-600'>{errors.description}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.description}</p>
         )}
       </div>
 
@@ -344,7 +342,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor='destinationType'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300'
         >
           Destination Type
         </label>
@@ -353,7 +351,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
           name='destinationType'
           value={formData.destinationType}
           onChange={handleChange}
-          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          className='block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600'
         >
           {destinationTypes.map((type) => (
             <option key={type.value} value={type.value}>
@@ -362,7 +360,7 @@ const TripCreateForm = ({ onSuccess, onCancel }) => {
           ))}
         </select>
         {errors.destinationType && (
-          <p className='mt-1 text-sm text-red-600'>{errors.destinationType}</p>
+          <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.destinationType}</p>
         )}
       </div>
 

@@ -1,0 +1,48 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, then pick this repo.
+# See DEPLOY.md for the full setup steps.
+services:
+  - type: web
+    name: travelo
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: UPLOADTHING_TOKEN
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      # Comma-separated emails that become admins when they sign in
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: TRUST_PROXY
+        value: "true"
+      # Encrypts two-factor secrets; never change it once anyone has 2FA on
+      - key: TOTP_ENCRYPTION_KEY
+        generateValue: true
+      # Base URL for links in emails; set to the custom domain once it is live
+      - key: APP_URL
+        sync: false
+      # Email: set to resend once RESEND_API_KEY exists (the server refuses
+      # to start with resend and no key); console only logs emails
+      - key: EMAIL_PROVIDER
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # Optional error tracking; VITE_ values are baked in at build time
+      - key: SENTRY_DSN
+        sync: false
+      - key: VITE_SENTRY_DSN
+        sync: false
+      # Shown in the footer and the privacy and terms pages (build time)
+      - key: VITE_SUPPORT_EMAIL
+        sync: false
+      - key: VITE_OPERATOR_NAME
+        sync: false

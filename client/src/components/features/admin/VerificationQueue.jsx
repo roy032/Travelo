@@ -11,7 +11,11 @@ import toast from "react-hot-toast";
  * VerificationQueue component
  * Displays pending verification requests for both domestic (NID) and international (Passport)
  */
-const VerificationQueue = () => {
+/**
+ * @param {Function} [onChange] - Called after a verification is approved or
+ *   rejected, so the page can refresh user statistics and lists
+ */
+const VerificationQueue = ({ onChange }) => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +46,7 @@ const VerificationQueue = () => {
       );
       // Refresh the list
       fetchPendingVerifications();
+      onChange?.();
     } catch (error) {
       console.error("Failed to approve verification:", error);
       toast.error("Failed to approve verification");
@@ -58,6 +63,7 @@ const VerificationQueue = () => {
       );
       // Refresh the list
       fetchPendingVerifications();
+      onChange?.();
     } catch (error) {
       console.error("Failed to reject verification:", error);
       toast.error("Failed to reject verification");
@@ -128,10 +134,10 @@ const VerificationQueue = () => {
       <Card>
         <div className='text-center py-12'>
           <FileText className='mx-auto text-gray-400 mb-4' size={48} />
-          <h3 className='text-lg font-medium text-gray-900 mb-2'>
+          <h3 className='text-lg font-medium text-gray-900 mb-2 dark:text-gray-100'>
             No Pending Verifications
           </h3>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-400'>
             All verification requests have been processed.
           </p>
         </div>
@@ -142,7 +148,7 @@ const VerificationQueue = () => {
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between mb-4'>
-        <h2 className='text-xl font-semibold text-gray-900'>
+        <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
           Verification Queue
         </h2>
         <Badge variant='warning'>{pendingVerifications.length} Pending</Badge>
@@ -158,10 +164,10 @@ const VerificationQueue = () => {
             <div className='flex-1'>
               <div className='flex items-start justify-between mb-2'>
                 <div>
-                  <h3 className='text-lg font-semibold text-gray-900'>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
                     {verification.userName}
                   </h3>
-                  <p className='text-sm text-gray-600'>
+                  <p className='text-sm text-gray-600 dark:text-gray-400'>
                     {verification.userEmail}
                   </p>
                 </div>
@@ -174,17 +180,17 @@ const VerificationQueue = () => {
               {/* Document Info */}
               {verification.document && (
                 <div className='mt-4 space-y-2'>
-                  <div className='flex items-center text-sm text-gray-600'>
+                  <div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
                     <FileText size={16} className='mr-2' />
                     <span>Document: {verification.document.filename}</span>
                   </div>
-                  <div className='flex items-center text-sm text-gray-600'>
+                  <div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
                     <Calendar size={16} className='mr-2' />
                     <span>
                       Uploaded: {formatDate(verification.document.uploadedAt)}
                     </span>
                   </div>
-                  <div className='text-sm text-gray-600'>
+                  <div className='text-sm text-gray-600 dark:text-gray-400'>
                     <span className='font-medium'>Trip Type:</span>{" "}
                     {verification.verificationType === "domestic"
                       ? "Domestic"
@@ -197,11 +203,11 @@ const VerificationQueue = () => {
               {verification.document && verification.document.url && (
                 <div className='mt-4'>
                   <div className='space-y-2'>
-                    <div className='border border-gray-200 rounded-lg overflow-hidden'>
+                    <div className='border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700'>
                       <img
                         src={verification.document.url}
                         alt={`${verification.documentType} for ${verification.userName}`}
-                        className='w-full max-w-md h-auto object-contain bg-gray-50'
+                        className='w-full max-w-md h-auto object-contain bg-gray-50 dark:bg-gray-950'
                         onError={(e) => {
                           e.target.style.display = "none";
                           e.target.nextElementSibling.style.display = "block";
@@ -209,7 +215,7 @@ const VerificationQueue = () => {
                       />
                       <div
                         style={{ display: "none" }}
-                        className='p-4 text-center text-gray-500 text-sm'
+                        className='p-4 text-center text-gray-500 text-sm dark:text-gray-400'
                       >
                         Failed to load image
                       </div>
@@ -218,7 +224,7 @@ const VerificationQueue = () => {
                       href={verification.document.url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-blue-600 hover:text-blue-700 text-sm font-medium inline-block'
+                      className='text-blue-600 hover:text-blue-700 text-sm font-medium inline-block dark:text-blue-400 dark:hover:text-blue-300'
                     >
                       Open in new tab →
                     </a>

@@ -9,20 +9,22 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
-import { tripApi, notificationApi } from "../services/api.service";
+import { tripApi } from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * JoinRequestsPage - Dedicated page for managing all join requests across all trips
  */
 const JoinRequestsPage = () => {
+  usePageTitle("Join requests");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingIds, setProcessingIds] = useState(new Set());
-  const [userTrips, setUserTrips] = useState([]);
+  const [, setUserTrips] = useState([]);
 
   useEffect(() => {
     if (!user) {
@@ -139,32 +141,32 @@ const JoinRequestsPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <Loader2 className='w-12 h-12 text-blue-600 animate-spin' />
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-950'>
+        <Loader2 className='w-12 h-12 text-blue-600 animate-spin dark:text-blue-400' />
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gray-50 py-8 dark:bg-gray-950'>
       <div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Header */}
         <div className='mb-8'>
           <div className='flex items-center gap-3 mb-2'>
-            <Users className='w-8 h-8 text-blue-600' />
-            <h1 className='text-3xl font-bold text-gray-900'>Join Requests</h1>
+            <Users className='w-8 h-8 text-blue-600 dark:text-blue-400' />
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>Join Requests</h1>
           </div>
-          <p className='text-gray-600'>Manage join requests for your trips</p>
+          <p className='text-gray-600 dark:text-gray-400'>Manage join requests for your trips</p>
         </div>
 
         {/* Empty State */}
         {requests.length === 0 && (
-          <div className='bg-white rounded-lg shadow-md p-12 text-center'>
+          <div className='bg-white rounded-lg shadow-md p-12 text-center dark:bg-gray-900'>
             <UserPlus className='w-16 h-16 text-gray-400 mx-auto mb-4' />
-            <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+            <h2 className='text-xl font-semibold text-gray-900 mb-2 dark:text-gray-100'>
               No Pending Requests
             </h2>
-            <p className='text-gray-600'>
+            <p className='text-gray-600 dark:text-gray-400'>
               You don't have any pending join requests at the moment.
             </p>
           </div>
@@ -180,27 +182,27 @@ const JoinRequestsPage = () => {
               return (
                 <div
                   key={request._id}
-                  className='bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow'
+                  className='bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow dark:bg-gray-900'
                 >
                   <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
                     {/* Left Section - Request Info */}
                     <div className='flex-1 space-y-3'>
                       {/* Requester Info */}
                       <div className='flex items-start gap-4'>
-                        <div className='bg-blue-100 p-3 rounded-full flex-shrink-0'>
-                          <UserPlus className='w-6 h-6 text-blue-600' />
+                        <div className='bg-blue-100 p-3 rounded-full flex-shrink-0 dark:bg-blue-900/40'>
+                          <UserPlus className='w-6 h-6 text-blue-600 dark:text-blue-400' />
                         </div>
                         <div className='flex-1'>
-                          <h3 className='font-semibold text-lg text-gray-900'>
+                          <h3 className='font-semibold text-lg text-gray-900 dark:text-gray-100'>
                             {requester?.name}
                           </h3>
-                          <p className='text-sm text-gray-600'>
+                          <p className='text-sm text-gray-600 dark:text-gray-400'>
                             {requester?.email}
                           </p>
-                          <p className='text-sm font-medium text-blue-600 mt-1'>
+                          <p className='text-sm font-medium text-blue-600 mt-1 dark:text-blue-400'>
                             {request.message || `Wants to join your trip`}
                           </p>
-                          <p className='text-xs text-gray-500 mt-1'>
+                          <p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
                             Requested{" "}
                             {new Date(request.createdAt).toLocaleDateString(
                               "en-US",
@@ -218,11 +220,11 @@ const JoinRequestsPage = () => {
 
                       {/* Trip Info */}
                       {tripInfo && (
-                        <div className='ml-16 pl-4 border-l-2 border-gray-200 space-y-2'>
-                          <p className='font-medium text-gray-900'>
+                        <div className='ml-16 pl-4 border-l-2 border-gray-200 space-y-2 dark:border-gray-700'>
+                          <p className='font-medium text-gray-900 dark:text-gray-100'>
                             Trip: {tripInfo.title}
                           </p>
-                          <div className='flex flex-wrap gap-4 text-sm text-gray-600'>
+                          <div className='flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400'>
                             <div className='flex items-center gap-1'>
                               <Calendar className='w-4 h-4' />
                               <span>
@@ -253,7 +255,7 @@ const JoinRequestsPage = () => {
                       <button
                         onClick={() => handleAccept(request)}
                         disabled={processingIds.has(request._id)}
-                        className='flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors'
+                        className='flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors dark:disabled:bg-gray-600'
                       >
                         {processingIds.has(request._id) ? (
                           <Loader2 className='w-5 h-5 animate-spin' />
@@ -265,7 +267,7 @@ const JoinRequestsPage = () => {
                       <button
                         onClick={() => handleReject(request)}
                         disabled={processingIds.has(request._id)}
-                        className='flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors'
+                        className='flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors dark:disabled:bg-gray-600'
                       >
                         {processingIds.has(request._id) ? (
                           <Loader2 className='w-5 h-5 animate-spin' />

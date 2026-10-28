@@ -14,7 +14,7 @@ export const Skeleton = ({ className = '', width, height }) => {
 
   return (
     <div
-      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      className={`animate-pulse bg-gray-200 rounded dark:bg-gray-700 ${className}`}
       style={style}
     />
   );
@@ -42,7 +42,7 @@ export const SkeletonText = ({ lines = 3, className = '' }) => {
  */
 export const SkeletonCard = ({ className = '' }) => {
   return (
-    <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
+    <div className={`bg-white rounded-lg shadow p-6 dark:bg-gray-900 ${className}`}>
       <Skeleton height="1.5rem" width="60%" className="mb-4" />
       <SkeletonText lines={3} />
       <div className="mt-4 flex gap-2">
@@ -58,7 +58,7 @@ export const SkeletonCard = ({ className = '' }) => {
  */
 export const SkeletonListItem = ({ className = '' }) => {
   return (
-    <div className={`flex items-center gap-4 p-4 bg-white rounded-lg ${className}`}>
+    <div className={`flex items-center gap-4 p-4 bg-white rounded-lg dark:bg-gray-900 ${className}`}>
       <Skeleton width="3rem" height="3rem" className="rounded-full shrink-0" />
       <div className="flex-1">
         <Skeleton height="1rem" width="40%" className="mb-2" />

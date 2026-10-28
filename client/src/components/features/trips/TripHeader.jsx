@@ -1,10 +1,19 @@
 import { useState } from "react";
-import { Calendar, MapPin, Edit2, Trash2, ArrowLeft } from "lucide-react";
+import {
+  Calendar,
+  CalendarPlus,
+  MapPin,
+  Edit2,
+  Trash2,
+  ArrowLeft,
+  Share2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../ui/Button";
 import Badge from "../../ui/Badge";
 import Modal from "../../ui/Modal";
 import TripEditForm from "./TripEditForm";
+import ShareTripPanel from "./ShareTripPanel";
 import ReportButton from "../../report/ReportButton";
 import { tripApi } from "../../../services/api.service";
 import toast from "react-hot-toast";
@@ -17,6 +26,23 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportCalendar = async () => {
+    setExporting(true);
+    try {
+      await tripApi.downloadCalendar(trip.id || trip._id);
+    } catch {
+      // handleApiError already showed the reason
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleShareTokenChange = (shareToken) => {
+    onTripUpdate({ ...trip, shareToken });
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -83,12 +109,12 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
 
   return (
     <>
-      <div className='bg-white shadow-sm border-b border-gray-200'>
+      <div className='bg-white shadow-sm border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
           {/* Back Button */}
           <button
             onClick={handleBack}
-            className='flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors'
+            className='flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors dark:text-gray-400 dark:hover:text-white'
           >
             <ArrowLeft size={20} className='mr-2' />
             Back to Trips
@@ -98,17 +124,17 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
           <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
             <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
-                <h1 className='text-3xl font-bold text-gray-900'>
+                <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
                   {trip.title}
                 </h1>
                 <Badge variant={status.variant}>{status.label}</Badge>
               </div>
 
               {trip.description && (
-                <p className='text-gray-600 mb-4'>{trip.description}</p>
+                <p className='text-gray-600 mb-4 dark:text-gray-400'>{trip.description}</p>
               )}
 
-              <div className='flex flex-wrap gap-4 text-sm text-gray-600'>
+              <div className='flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400'>
                 <div className='flex items-center'>
                   <Calendar size={16} className='mr-2' />
                   <span>
@@ -126,40 +152,75 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
             </div>
 
             {/* Action Buttons */}
-            {isOwner ? (
-              <div className='flex gap-2'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={handleEdit}
-                  className='flex items-center'
-                >
-                  <Edit2 size={16} className='mr-2' />
-                  Edit
-                </Button>
-                <Button
-                  variant='danger'
-                  size='sm'
-                  onClick={handleDeleteClick}
-                  className='flex items-center'
-                >
-                  <Trash2 size={16} className='mr-2' />
-                  Delete
-                </Button>
-              </div>
-            ) : (
-              <div className='flex gap-2'>
-                <ReportButton
-                  tripId={trip.id || trip._id}
-                  tripTitle={trip.title}
-                  variant='outline'
-                  size='sm'
-                />
-              </div>
-            )}
+            <div className='flex flex-wrap gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleExportCalendar}
+                disabled={exporting}
+                className='flex items-center'
+              >
+                <CalendarPlus size={16} className='mr-2' aria-hidden='true' />
+                {exporting ? "Exporting..." : "Add to calendar"}
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setIsShareModalOpen(true)}
+                className='flex items-center'
+              >
+                <Share2 size={16} className='mr-2' aria-hidden='true' />
+                {trip.shareToken ? "Shared" : "Share"}
+              </Button>
+              {isOwner ? (
+                <div className='flex gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handleEdit}
+                    className='flex items-center'
+                  >
+                    <Edit2 size={16} className='mr-2' />
+                    Edit
+                  </Button>
+                  <Button
+                    variant='danger'
+                    size='sm'
+                    onClick={handleDeleteClick}
+                    className='flex items-center'
+                  >
+                    <Trash2 size={16} className='mr-2' />
+                    Delete
+                  </Button>
+                </div>
+              ) : (
+                <div className='flex gap-2'>
+                  <ReportButton
+                    tripId={trip.id || trip._id}
+                    tripTitle={trip.title}
+                    variant='outline'
+                    size='sm'
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title='Share trip'
+        size='md'
+      >
+        <ShareTripPanel
+          trip={trip}
+          isOwner={isOwner}
+          onShareTokenChange={handleShareTokenChange}
+        />
+      </Modal>
 
       {/* Edit Modal */}
       <Modal
@@ -183,7 +244,7 @@ const TripHeader = ({ trip, isOwner, onTripUpdate, onTripDelete }) => {
         size='md'
       >
         <div className='space-y-4'>
-          <p className='text-gray-700'>
+          <p className='text-gray-700 dark:text-gray-300'>
             Are you sure you want to delete <strong>{trip.title}</strong>? This
             action cannot be undone. All associated data including itinerary,
             expenses, messages, and photos will be permanently deleted.

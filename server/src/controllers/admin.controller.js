@@ -4,14 +4,10 @@ import {
   rejectVerification,
 } from "#services/verification.service.js";
 import User from "#models/user.model.js";
-import Trip from "#models/trip.model.js";
-import Activity from "#models/activity.model.js";
-import Checklist from "#models/checklist.model.js";
-import Expense from "#models/expense.model.js";
-import Note from "#models/note.model.js";
-import Photo from "#models/photo.model.js";
-import Notification from "#models/notification.model.js";
-import Invitation from "#models/invitation.model.js";
+import { disconnectUserSockets } from "#src/socket/chatSocket.js";
+import { deleteAccount } from "#services/accountData.service.js";
+import { listAdminActions, logUserAction } from "#services/audit.service.js";
+import { ANALYTICS_RANGES, getAnalytics } from "#services/analytics.service.js";
 
 /**
  * Get all users with pending verification status
@@ -55,6 +51,12 @@ export const approveUserVerification = async (req, res, next) => {
     );
 
     const docType = verificationType === "domestic" ? "NID" : "Passport";
+    await logUserAction(req, {
+      actionType: "verification_approved",
+      targetId: userId,
+      message: `Approved ${docType} verification`,
+      metadata: { verificationType },
+    });
     res.status(200).json({
       message: `${docType} verification approved successfully`,
       user: updatedUser,
@@ -102,6 +104,12 @@ export const rejectUserVerification = async (req, res, next) => {
     );
 
     const docType = verificationType === "domestic" ? "NID" : "Passport";
+    await logUserAction(req, {
+      actionType: "verification_rejected",
+      targetId: userId,
+      message: `Rejected ${docType} verification`,
+      metadata: { verificationType },
+    });
     res.status(200).json({
       message: `${docType} verification rejected`,
       user: updatedUser,
@@ -162,6 +170,9 @@ export const fetchAllUsers = async (req, res, next) => {
     limit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
     const skip = (page - 1) * limit;
 
+    // Deleted accounts stay only as anonymous placeholders
+    query.deletedAt = null;
+
     // Get users with pagination
     const users = await User.find(query)
       .select("name email role verificationStatus createdAt")
@@ -197,10 +208,10 @@ export const getUserStatistics = async (req, res, next) => {
     // Get counts for different verification statuses
     const [totalUsers, verifiedUsers, pendingUsers, unverifiedUsers] =
       await Promise.all([
-        User.countDocuments(),
-        User.countDocuments({ verificationStatus: "verified" }),
-        User.countDocuments({ verificationStatus: "pending" }),
-        User.countDocuments({ verificationStatus: "unverified" }),
+        User.countDocuments({ deletedAt: null }),
+        User.countDocuments({ verificationStatus: "verified", deletedAt: null }),
+        User.countDocuments({ verificationStatus: "pending", deletedAt: null }),
+        User.countDocuments({ verificationStatus: "unverified", deletedAt: null }),
       ]);
 
     res.status(200).json({
@@ -211,6 +222,30 @@ export const getUserStatistics = async (req, res, next) => {
         pendingUsers,
         unverifiedUsers,
       },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+/**
+ * Daily sign-ups, active trips and server errors for the admin charts
+ * Admin only endpoint
+ */
+export const fetchAnalytics = async (req, res, next) => {
+  try {
+    const days = Number.parseInt(req.query.days, 10) || 30;
+    if (!ANALYTICS_RANGES.includes(days)) {
+      return res.status(400).json({
+        error: "Validation failed",
+        message: `days must be one of ${ANALYTICS_RANGES.join(", ")}`,
+      });
+    }
+
+    const analytics = await getAnalytics(days);
+    res.status(200).json({
+      message: "Analytics retrieved successfully",
+      analytics,
     });
   } catch (e) {
     next(e);
@@ -250,8 +285,15 @@ export const updateUserRole = async (req, res, next) => {
       });
     }
 
+    const previousRole = user.role;
     user.role = role;
     await user.save();
+    await logUserAction(req, {
+      actionType: "user_role_changed",
+      targetId: userId,
+      message: `Changed role from ${previousRole} to ${role}`,
+      metadata: { previousRole, role },
+    });
 
     res.status(200).json({
       message: `User role updated to ${role} successfully`,
@@ -301,7 +343,17 @@ export const toggleUserBlockStatus = async (req, res, next) => {
     }
 
     user.isBlocked = blocked;
+    if (blocked) {
+      // End the user's existing sessions too, not just future sign-ins
+      user.tokenVersion = (user.tokenVersion || 0) + 1;
+    }
     await user.save();
+    if (blocked) disconnectUserSockets(userId);
+    await logUserAction(req, {
+      actionType: blocked ? "user_banned" : "user_unbanned",
+      targetId: userId,
+      message: `${blocked ? "Blocked" : "Unblocked"} ${user.email}`,
+    });
 
     res.status(200).json({
       message: `User ${blocked ? "blocked" : "unblocked"} successfully`,
@@ -342,47 +394,31 @@ export const deleteUserAccount = async (req, res, next) => {
       });
     }
 
-    // Start cascade deletion
-    await Promise.all([
-      // Delete trips owned by user
-      Trip.deleteMany({ owner: userId }),
-
-      // Remove user from trip members
-      Trip.updateMany({ members: userId }, { $pull: { members: userId } }),
-
-      // Delete activities created by user
-      Activity.deleteMany({ creator: userId }),
-
-      // Delete checklists created by user
-      Checklist.deleteMany({ creator: userId }),
-
-      // Delete expenses created by user
-      Expense.deleteMany({ creator: userId }),
-
-      // Delete notes created by user
-      Note.deleteMany({ creator: userId }),
-
-      // Delete photos uploaded by user
-      Photo.deleteMany({ uploader: userId }),
-
-      // Delete messages sent by user
-
-      // Delete notifications for user
-      Notification.deleteMany({ user: userId }),
-
-      // Delete invitations sent to or from user
-      Invitation.deleteMany({
-        $or: [{ invitedUser: userId }, { invitedBy: userId }],
-      }),
-    ]);
-
-    // Finally, delete the user
-    await User.findByIdAndDelete(userId);
+    // Same cleanup as self-service deletion: solo trips are removed, shared
+    // trips pass to another member and personal data is wiped
+    const { email } = user;
+    await deleteAccount(userId);
+    await logUserAction(req, {
+      actionType: "user_deleted",
+      targetId: userId,
+      message: `Deleted the account of ${email}`,
+    });
 
     res.status(200).json({
       message: "User account and all associated data deleted successfully",
       userId,
     });
+  } catch (e) {
+    next(e);
+  }
+};
+
+/**
+ * GET /api/admin/audit-log - who did what, newest first
+ */
+export const fetchAuditLog = async (req, res, next) => {
+  try {
+    res.json(await listAdminActions(req.query));
   } catch (e) {
     next(e);
   }

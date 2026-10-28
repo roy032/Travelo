@@ -33,6 +33,7 @@ const notificationSchema = new mongoose.Schema(
         "report_reviewed",
         "report_dismissed",
         "trip_deleted_from_report",
+        "trip_owner_changed",
       ],
     },
     title: {

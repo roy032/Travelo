@@ -4,7 +4,10 @@ import { destinationApi } from "../services/api.service";
 import Loader from "../components/ui/Loader";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
-import toast from "react-hot-toast";
+import { usePageTitle } from "../hooks/usePageTitle";
+import FavoriteButton from "../components/favorites/FavoriteButton";
+import ReviewsSection from "../components/reviews/ReviewsSection";
+import { StarDisplay } from "../components/reviews/StarRating";
 
 /**
  * DestinationDetailPage displays full destination information with multiple photos
@@ -13,23 +16,35 @@ const DestinationDetailPage = () => {
   const { destinationId } = useParams();
   const navigate = useNavigate();
   const [destination, setDestination] = useState(null);
+  usePageTitle(destination?.name);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
-    fetchDestination();
+    let cancelled = false;
+    destinationApi
+      .getDestinationById(destinationId)
+      .then((data) => {
+        if (!cancelled) setDestination(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching destination:", error);
+        if (!cancelled) setDestination(null);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSelectedImageIndex(0);
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [destinationId]);
 
-  const fetchDestination = async () => {
-    try {
-      setLoading(true);
-      const data = await destinationApi.getDestinationById(destinationId);
-      setDestination(data);
-    } catch (error) {
-      console.error("Error fetching destination:", error);
-      toast.error("Failed to load destination details");
-    } finally {
-      setLoading(false);
+  const handleRatingChange = (rating) => {
+    if (rating) {
+      setDestination((prev) => (prev ? { ...prev, ...rating } : prev));
     }
   };
 
@@ -45,7 +60,7 @@ const DestinationDetailPage = () => {
     return (
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
         <div className='text-center'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
             Destination not found
           </h2>
           <Button onClick={() => navigate("/destinations")}>
@@ -62,7 +77,7 @@ const DestinationDetailPage = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gray-50 py-8 dark:bg-gray-950'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Back Button */}
         <div className='mb-6'>
@@ -89,11 +104,11 @@ const DestinationDetailPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-900 dark:border-gray-700'>
           {/* Image Gallery */}
           <div className='relative'>
             {/* Main Image */}
-            <div className='relative h-96 w-full overflow-hidden bg-gray-200'>
+            <div className='relative h-96 w-full overflow-hidden bg-gray-200 dark:bg-gray-700'>
               <img
                 src={currentImage.path}
                 alt={destination.name}
@@ -109,7 +124,7 @@ const DestinationDetailPage = () => {
 
             {/* Thumbnail Gallery */}
             {images.length > 1 && (
-              <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black bg-opacity-50 p-2 rounded-lg'>
+              <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 p-2 rounded-lg'>
                 {images.map((image, index) => (
                   <button
                     key={index}
@@ -135,11 +150,34 @@ const DestinationDetailPage = () => {
           <div className='p-8'>
             {/* Header */}
             <div className='mb-6'>
-              <h1 className='text-4xl font-bold text-gray-900 mb-2'>
-                {destination.name}
-              </h1>
+              <div className='flex items-start justify-between gap-4'>
+                <h1 className='text-4xl font-bold text-gray-900 mb-2 dark:text-gray-100'>
+                  {destination.name}
+                </h1>
+                <FavoriteButton
+                  itemType='destination'
+                  itemId={String(destination.id)}
+                  label={destination.name}
+                  className='shrink-0 border border-gray-200 dark:border-gray-700'
+                />
+              </div>
+              <a
+                href='#reviews-heading'
+                className='inline-flex items-center gap-2 mb-2 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+              >
+                <StarDisplay value={destination.ratingAverage || 0} />
+                {destination.ratingCount > 0 ? (
+                  <span>
+                    {destination.ratingAverage.toFixed(1)} ·{" "}
+                    {destination.ratingCount}{" "}
+                    {destination.ratingCount === 1 ? "review" : "reviews"}
+                  </span>
+                ) : (
+                  <span>No reviews yet</span>
+                )}
+              </a>
               {destination.country && (
-                <p className='text-lg text-gray-600 flex items-center gap-2'>
+                <p className='text-lg text-gray-600 flex items-center gap-2 dark:text-gray-400'>
                   <svg
                     className='w-5 h-5'
                     fill='none'
@@ -166,20 +204,20 @@ const DestinationDetailPage = () => {
 
             {/* Description */}
             <div className='mb-8'>
-              <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
+              <h2 className='text-2xl font-semibold text-gray-900 mb-4 dark:text-gray-100'>
                 About
               </h2>
-              <p className='text-gray-700 leading-relaxed whitespace-pre-line'>
+              <p className='text-gray-700 leading-relaxed whitespace-pre-line dark:text-gray-300'>
                 {destination.description}
               </p>
             </div>
 
             {/* Best Time to Visit */}
             {destination.bestTimeToVisit && (
-              <div className='mb-8 p-4 bg-blue-50 rounded-lg'>
-                <h3 className='text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2'>
+              <div className='mb-8 p-4 bg-blue-50 rounded-lg dark:bg-blue-950/40'>
+                <h3 className='text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2 dark:text-gray-100'>
                   <svg
-                    className='w-5 h-5 text-blue-600'
+                    className='w-5 h-5 text-blue-600 dark:text-blue-400'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'
@@ -193,24 +231,24 @@ const DestinationDetailPage = () => {
                   </svg>
                   Best Time to Visit
                 </h3>
-                <p className='text-gray-700'>{destination.bestTimeToVisit}</p>
+                <p className='text-gray-700 dark:text-gray-300'>{destination.bestTimeToVisit}</p>
               </div>
             )}
 
             {/* Highlights */}
             {destination.highlights && destination.highlights.length > 0 && (
               <div className='mb-8'>
-                <h3 className='text-2xl font-semibold text-gray-900 mb-4'>
+                <h3 className='text-2xl font-semibold text-gray-900 mb-4 dark:text-gray-100'>
                   Highlights
                 </h3>
                 <ul className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                   {destination.highlights.map((highlight, index) => (
                     <li
                       key={index}
-                      className='flex items-start gap-3 text-gray-700'
+                      className='flex items-start gap-3 text-gray-700 dark:text-gray-300'
                     >
                       <svg
-                        className='w-5 h-5 text-green-600 mt-0.5 shrink-0'
+                        className='w-5 h-5 text-green-700 mt-0.5 shrink-0 dark:text-green-300'
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
@@ -228,6 +266,11 @@ const DestinationDetailPage = () => {
                 </ul>
               </div>
             )}
+
+            <ReviewsSection
+              destinationId={destinationId}
+              onRatingChange={handleRatingChange}
+            />
           </div>
         </div>
       </div>

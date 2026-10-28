@@ -1,4 +1,20 @@
 import { z } from "zod";
+import { SUPPORTED_CURRENCIES } from "#services/currency.service.js";
+
+const baseCurrency = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .refine((code) => SUPPORTED_CURRENCIES.includes(code), {
+    message: "Unsupported currency",
+  });
+
+// null clears the budget
+const budget = z.coerce
+  .number({ error: "Budget must be a number" })
+  .min(0, "Budget cannot be negative")
+  .max(1e12, "Budget is too large")
+  .nullable();
 
 export const createTripSchema = z
   .object({
@@ -22,10 +38,10 @@ export const createTripSchema = z
       .enum(["beach", "mountain", "city", "countryside", "other"])
       .optional(),
     tripCategory: z.enum(["domestic", "international"], {
-      errorMap: () => ({
-        message: "Trip category must be either domestic or international",
-      }),
+      error: "Trip category must be either domestic or international",
     }),
+    baseCurrency: baseCurrency.optional(),
+    budget: budget.optional(),
   })
   .refine(
     (data) => {
@@ -67,6 +83,8 @@ export const updateTripSchema = z
     destinationType: z
       .enum(["beach", "mountain", "city", "countryside", "other"])
       .optional(),
+    baseCurrency: baseCurrency.optional(),
+    budget: budget.optional(),
   })
   .refine(
     (data) => {
@@ -86,7 +104,7 @@ export const updateTripSchema = z
 
 export const adminDeleteTripSchema = z.object({
   message: z
-    .string({ required_error: "Deletion message is required" })
+    .string({ error: "Deletion message is required" })
     .min(10, "Message must be at least 10 characters")
     .max(1000, "Message must not exceed 1000 characters")
     .trim(),

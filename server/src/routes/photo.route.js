@@ -1,4 +1,5 @@
 import express from "express";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   uploadPhotoController,
   deletePhotoController,
@@ -26,6 +27,7 @@ router.get("/trips/:tripId/photos", isTripMember, getPhotosController);
 router.post(
   "/trips/:tripId/photos",
   isTripMember,
+  userRateLimiter("photo"),
   uploadPhoto,
   handleUploadError,
   validateFileContent,
@@ -33,6 +35,10 @@ router.post(
 );
 
 // Delete a photo (uploader only - enforced in controller)
-router.delete("/trips/:tripId/photos/:photoId", deletePhotoController);
+router.delete(
+  "/trips/:tripId/photos/:photoId",
+  isTripMember,
+  deletePhotoController
+);
 
 export default router;

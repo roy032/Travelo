@@ -1,21 +1,23 @@
-import { AppError } from '#errors/AppError.js';
 import { formatValidationError } from '#utils/format.js';
+import { recordServerError } from '#services/analytics.service.js';
+import { logger } from '#utils/logger.js';
 
 /**
  * Centralized error handling middleware
  * This should be registered as the last middleware in the Express app
  */
 export const errorHandler = (err, req, res, next) => {
-  // Log error for debugging
-  console.error('Error:', {
+  logger.error('Error', {
+    requestId: req.id,
     message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    url: req.originalUrl,
+    path: req.path,
     method: req.method,
   });
 
   // Handle operational errors (known errors)
   if (err.isOperational) {
+    if (err.statusCode >= 500) recordServerError(err, req, err.statusCode);
     return res.status(err.statusCode).json({
       error: err.error || 'Error',
       message: err.message,
@@ -102,12 +104,15 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Handle unknown/unexpected errors (500)
+  recordServerError(err, req, 500);
   res.status(500).json({
     error: 'Internal server error',
     message:
       process.env.NODE_ENV === 'development'
         ? err.message
         : 'An unexpected error occurred',
+    // Quoted by users in support requests; matches the logs and Sentry
+    ...(req.id && { requestId: req.id }),
   });
 };
 

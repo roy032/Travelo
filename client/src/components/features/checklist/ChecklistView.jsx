@@ -13,6 +13,7 @@ const ChecklistView = ({
   tripId,
   canEdit = true,
   showPackingSuggestions = true,
+  refreshKey = 0,
 }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ const ChecklistView = ({
 
   useEffect(() => {
     fetchChecklist();
-  }, [tripId]);
+  }, [tripId, refreshKey]);
 
   const fetchChecklist = async () => {
     try {
@@ -72,7 +73,6 @@ const ChecklistView = ({
     }
 
     try {
-      console.log(itemId);
       await checklistApi.deleteItem(tripId, itemId);
       setItems(items.filter((item) => item.id !== itemId));
       toast.success("Item deleted");
@@ -108,22 +108,22 @@ const ChecklistView = ({
       {/* Header with progress */}
       <div className='flex items-center justify-between'>
         <div>
-          <h2 className='text-xl font-semibold text-gray-900'>Checklist</h2>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Checklist</h2>
           {totalCount > 0 && (
-            <p className='text-sm text-gray-600 mt-1'>
+            <p className='text-sm text-gray-600 mt-1 dark:text-gray-400'>
               {checkedCount} of {totalCount} completed
             </p>
           )}
         </div>
         {totalCount > 0 && (
           <div className='flex items-center space-x-2'>
-            <div className='w-32 bg-gray-200 rounded-full h-2'>
+            <div className='w-32 bg-gray-200 rounded-full h-2 dark:bg-gray-700'>
               <div
                 className='bg-blue-600 h-2 rounded-full transition-all duration-300'
                 style={{ width: `${(checkedCount / totalCount) * 100}%` }}
               />
             </div>
-            <span className='text-sm font-medium text-gray-700'>
+            <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
               {Math.round((checkedCount / totalCount) * 100)}%
             </span>
           </div>
@@ -147,12 +147,12 @@ const ChecklistView = ({
       {/* Checklist items */}
       {items.length === 0 ? (
         <div className='text-center py-12'>
-          <p className='text-gray-500'>
+          <p className='text-gray-500 dark:text-gray-400'>
             No items yet. Add your first item above!
           </p>
         </div>
       ) : (
-        <div className='space-y-1 border border-gray-200 rounded-lg divide-y divide-gray-200'>
+        <div className='space-y-1 border border-gray-200 rounded-lg divide-y divide-gray-200 dark:border-gray-700 dark:divide-gray-700'>
           {items.map((item) => (
             <ChecklistItem
               key={item.id}

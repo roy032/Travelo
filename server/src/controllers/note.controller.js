@@ -98,6 +98,7 @@ export const updateNoteController = async (req, res, next) => {
       updateData.visibility === 'shared';
 
     const note = await updateNote(noteId, req.user.id, updateData);
+    res.locals.liveChange = { tripId: note.trip, resource: "notes" };
 
     // Create notifications if visibility changed from private to shared
     if (visibilityChangedToShared) {
@@ -153,7 +154,8 @@ export const deleteNoteController = async (req, res, next) => {
   try {
     const { noteId } = req.params;
 
-    const result = await deleteNote(noteId, req.user.id);
+    const { tripId, ...result } = await deleteNote(noteId, req.user.id);
+    res.locals.liveChange = { tripId, resource: "notes" };
 
     res.status(200).json(result);
   } catch (e) {

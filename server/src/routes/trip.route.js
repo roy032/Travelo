@@ -1,4 +1,5 @@
 import express from "express";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   createTripController,
   updateTripController,
@@ -15,6 +16,11 @@ import {
   rejectJoinRequestController,
 } from "#controllers/trip.controller.js";
 import {
+  enableSharingController,
+  disableSharingController,
+  tripCalendarController,
+} from "#controllers/share.controller.js";
+import {
   authenticateToken,
   isTripMember,
   isTripOwner,
@@ -30,7 +36,7 @@ router.get("/explore", getPublicTripsController);
 router.use(authenticateToken);
 
 // Create a new trip
-router.post("/", createTripController);
+router.post("/", userRateLimiter("trip"), createTripController);
 
 // Get all trips for the authenticated user
 router.get("/", getUserTripsController);
@@ -38,8 +44,19 @@ router.get("/", getUserTripsController);
 // Get a specific trip by ID (member only)
 router.get("/:tripId", isTripMember, getTripController);
 
+// Download the trip and its itinerary as a calendar file (member only)
+router.get("/:tripId/calendar.ics", isTripMember, tripCalendarController);
+
+// Turn the public read-only link on or off (owner only)
+router.post("/:tripId/share", isTripOwner, enableSharingController);
+router.delete("/:tripId/share", isTripOwner, disableSharingController);
+
 // Request to join a trip (authenticated users only)
-router.post("/:id/join-request", requestJoinTripController);
+router.post(
+  "/:id/join-request",
+  userRateLimiter("joinRequest"),
+  requestJoinTripController
+);
 
 // Get join requests for a trip (owner only)
 router.get("/:tripId/join-requests", isTripOwner, getJoinRequestsController);
@@ -68,7 +85,12 @@ router.delete("/:tripId", isTripOwner, deleteTripController);
 router.get("/:tripId/members", isTripMember, getTripMembersController);
 
 // Invite a member to a trip (owner only)
-router.post("/:tripId/members", isTripOwner, inviteMemberController);
+router.post(
+  "/:tripId/members",
+  isTripOwner,
+  userRateLimiter("invitation"),
+  inviteMemberController
+);
 
 // Remove a member from a trip (owner only)
 router.delete(

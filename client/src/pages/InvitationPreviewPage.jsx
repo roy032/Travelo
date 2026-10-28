@@ -16,12 +16,14 @@ import {
 import { invitationApi } from "../services/api.service";
 import Button from "../components/ui/Button";
 import { format } from "date-fns";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 /**
  * InvitationPreviewPage - Allows invited users to view trip details and accept/reject invitation
  * This page is accessible to invited users who are NOT yet members of the trip
  */
 const InvitationPreviewPage = () => {
+  usePageTitle("Trip invitation");
   const { invitationId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -95,10 +97,10 @@ const InvitationPreviewPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-950'>
         <div className='text-center'>
-          <Loader2 className='w-12 h-12 text-blue-600 animate-spin mx-auto mb-4' />
-          <p className='text-gray-600'>Loading invitation...</p>
+          <Loader2 className='w-12 h-12 text-blue-600 animate-spin mx-auto mb-4 dark:text-blue-400' />
+          <p className='text-gray-600 dark:text-gray-400'>Loading invitation...</p>
         </div>
       </div>
     );
@@ -106,13 +108,13 @@ const InvitationPreviewPage = () => {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center p-4'>
-        <div className='bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center'>
-          <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-            <XCircle className='w-8 h-8 text-red-600' />
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center p-4 dark:bg-gray-950'>
+        <div className='bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center dark:bg-gray-900'>
+          <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-red-900/40'>
+            <XCircle className='w-8 h-8 text-red-600 dark:text-red-400' />
           </div>
-          <h2 className='text-xl font-bold text-gray-900 mb-2'>Error</h2>
-          <p className='text-gray-600 mb-6'>{error}</p>
+          <h2 className='text-xl font-bold text-gray-900 mb-2 dark:text-gray-100'>Error</h2>
+          <p className='text-gray-600 mb-6 dark:text-gray-400'>{error}</p>
           <Button onClick={() => navigate("/invitations")} variant='secondary'>
             Back to Invitations
           </Button>
@@ -123,8 +125,8 @@ const InvitationPreviewPage = () => {
 
   if (!data || !data.trip) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <p className='text-gray-600'>No invitation data available</p>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-950'>
+        <p className='text-gray-600 dark:text-gray-400'>No invitation data available</p>
       </div>
     );
   }
@@ -133,19 +135,19 @@ const InvitationPreviewPage = () => {
   const isAlreadyResponded = invitation.status !== "pending";
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-8'>
+    <div className='min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-8 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Back Button */}
         <button
           onClick={() => navigate("/invitations")}
-          className='flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors'
+          className='flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors dark:text-gray-400 dark:hover:text-white'
         >
           <ArrowLeft className='w-5 h-5 mr-2' />
           Back to Invitations
         </button>
 
         {/* Invitation Card */}
-        <div className='bg-white rounded-lg shadow-lg overflow-hidden mb-6'>
+        <div className='bg-white rounded-lg shadow-lg overflow-hidden mb-6 dark:bg-gray-900'>
           {/* Header */}
           <div className='bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white'>
             <div className='flex items-center justify-between mb-4'>
@@ -166,12 +168,12 @@ const InvitationPreviewPage = () => {
 
           {/* Trip Details */}
           <div className='p-8'>
-            <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+            <h2 className='text-2xl font-bold text-gray-900 mb-4 dark:text-gray-100'>
               {trip.title}
             </h2>
 
             {trip.description && (
-              <p className='text-gray-600 mb-6 leading-relaxed'>
+              <p className='text-gray-600 mb-6 leading-relaxed dark:text-gray-400'>
                 {trip.description}
               </p>
             )}
@@ -180,14 +182,14 @@ const InvitationPreviewPage = () => {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
               {/* Dates */}
               <div className='flex items-start space-x-3'>
-                <Calendar className='w-5 h-5 text-blue-600 mt-1' />
+                <Calendar className='w-5 h-5 text-blue-600 mt-1 dark:text-blue-400' />
                 <div>
-                  <p className='text-sm font-semibold text-gray-900'>Dates</p>
-                  <p className='text-sm text-gray-600'>
+                  <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>Dates</p>
+                  <p className='text-sm text-gray-600 dark:text-gray-400'>
                     {format(new Date(trip.startDate), "MMM d, yyyy")} -{" "}
                     {format(new Date(trip.endDate), "MMM d, yyyy")}
                   </p>
-                  <p className='text-xs text-gray-500 mt-1'>
+                  <p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
                     {getDurationDays(trip.startDate, trip.endDate)} days
                   </p>
                 </div>
@@ -195,15 +197,15 @@ const InvitationPreviewPage = () => {
 
               {/* Destination Type */}
               <div className='flex items-start space-x-3'>
-                <MapPin className='w-5 h-5 text-purple-600 mt-1' />
+                <MapPin className='w-5 h-5 text-purple-600 mt-1 dark:text-purple-400' />
                 <div>
-                  <p className='text-sm font-semibold text-gray-900'>
+                  <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
                     Destination
                   </p>
-                  <p className='text-sm text-gray-600 capitalize'>
+                  <p className='text-sm text-gray-600 capitalize dark:text-gray-400'>
                     {trip.destinationType || "Not specified"}
                   </p>
-                  <p className='text-xs text-gray-500 mt-1 capitalize'>
+                  <p className='text-xs text-gray-500 mt-1 capitalize dark:text-gray-400'>
                     {trip.tripCategory || "domestic"}
                   </p>
                 </div>
@@ -211,12 +213,12 @@ const InvitationPreviewPage = () => {
 
               {/* Members */}
               <div className='flex items-start space-x-3'>
-                <Users className='w-5 h-5 text-green-600 mt-1' />
+                <Users className='w-5 h-5 text-green-700 mt-1 dark:text-green-300' />
                 <div>
-                  <p className='text-sm font-semibold text-gray-900'>
+                  <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
                     Current Members
                   </p>
-                  <p className='text-sm text-gray-600'>
+                  <p className='text-sm text-gray-600 dark:text-gray-400'>
                     {trip.memberCount}{" "}
                     {trip.memberCount === 1 ? "member" : "members"}
                   </p>
@@ -225,12 +227,12 @@ const InvitationPreviewPage = () => {
 
               {/* Activities */}
               <div className='flex items-start space-x-3'>
-                <ActivityIcon className='w-5 h-5 text-orange-600 mt-1' />
+                <ActivityIcon className='w-5 h-5 text-orange-700 mt-1 dark:text-orange-300' />
                 <div>
-                  <p className='text-sm font-semibold text-gray-900'>
+                  <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
                     Planned Activities
                   </p>
-                  <p className='text-sm text-gray-600'>
+                  <p className='text-sm text-gray-600 dark:text-gray-400'>
                     {trip.activityCount}{" "}
                     {trip.activityCount === 1 ? "activity" : "activities"}
                   </p>
@@ -241,20 +243,20 @@ const InvitationPreviewPage = () => {
             {/* Activities Preview */}
             {trip.activities && trip.activities.length > 0 && (
               <div className='mb-8'>
-                <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-                  <ActivityIcon className='w-5 h-5 mr-2 text-orange-600' />
+                <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center dark:text-gray-100'>
+                  <ActivityIcon className='w-5 h-5 mr-2 text-orange-700 dark:text-orange-300' />
                   Sample Activities
                 </h3>
                 <div className='space-y-3'>
                   {trip.activities.map((activity, index) => (
                     <div
                       key={index}
-                      className='bg-gray-50 rounded-md p-4 hover:bg-gray-100 transition-colors'
+                      className='bg-gray-50 rounded-md p-4 hover:bg-gray-100 transition-colors dark:bg-gray-950 dark:hover:bg-gray-800'
                     >
-                      <h4 className='font-semibold text-gray-900 mb-2'>
+                      <h4 className='font-semibold text-gray-900 mb-2 dark:text-gray-100'>
                         {activity.title}
                       </h4>
-                      <div className='flex flex-wrap gap-4 text-sm text-gray-600'>
+                      <div className='flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400'>
                         <span className='flex items-center'>
                           <Calendar className='w-4 h-4 mr-1' />
                           {format(new Date(activity.date), "MMM d, yyyy")}
@@ -274,7 +276,7 @@ const InvitationPreviewPage = () => {
                   ))}
                 </div>
                 {trip.activityCount > trip.activities.length && (
-                  <p className='text-sm text-gray-500 mt-3 text-center'>
+                  <p className='text-sm text-gray-500 mt-3 text-center dark:text-gray-400'>
                     + {trip.activityCount - trip.activities.length} more{" "}
                     {trip.activityCount - trip.activities.length === 1
                       ? "activity"
@@ -286,8 +288,8 @@ const InvitationPreviewPage = () => {
 
             {/* Checklist Info */}
             {trip.checklistCount > 0 && (
-              <div className='bg-blue-50 rounded-md p-4 mb-8'>
-                <div className='flex items-center text-blue-900'>
+              <div className='bg-blue-50 rounded-md p-4 mb-8 dark:bg-blue-950/40'>
+                <div className='flex items-center text-blue-900 dark:text-blue-200'>
                   <ListChecks className='w-5 h-5 mr-2' />
                   <span className='font-semibold'>
                     {trip.checklistCount} checklist{" "}
@@ -302,10 +304,10 @@ const InvitationPreviewPage = () => {
               <div
                 className={`rounded-md p-4 mb-6 ${
                   invitation.status === "accepted"
-                    ? "bg-green-50 text-green-900"
+                    ? "bg-green-50 text-green-900 dark:bg-green-950/40 dark:text-green-200"
                     : invitation.status === "rejected"
-                    ? "bg-red-50 text-red-900"
-                    : "bg-gray-50 text-gray-900"
+                    ? "bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200"
+                    : "bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100"
                 }`}
               >
                 <p className='font-semibold'>

@@ -1,4 +1,5 @@
 import express from "express";
+import { userRateLimiter } from "#middlewares/rateLimit.middleware.js";
 import {
   fetchTripMessages,
   sendTripMessage,
@@ -17,6 +18,11 @@ router.use(authenticateToken);
 router.get("/:tripId/messages", isTripMember, fetchTripMessages);
 
 // POST /trips/:tripId/messages - Send message (REST fallback)
-router.post("/:tripId/messages", isTripMember, sendTripMessage);
+router.post(
+  "/:tripId/messages",
+  isTripMember,
+  userRateLimiter("message"),
+  sendTripMessage
+);
 
 export default router;
