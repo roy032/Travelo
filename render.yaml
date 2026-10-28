@@ -22,3 +22,26 @@ services:
         value: 1d
       - key: TRUST_PROXY
         value: "true"
+      # Encrypts two-factor secrets; never change it once anyone has 2FA on
+      - key: TOTP_ENCRYPTION_KEY
+        generateValue: true
+      # Base URL for links in emails; set to the custom domain once it is live
+      - key: APP_URL
+        sync: false
+      # Email: resend (or smtp with SMTP_URL); unset only logs emails
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # Optional error tracking; VITE_ values are baked in at build time
+      - key: SENTRY_DSN
+        sync: false
+      - key: VITE_SENTRY_DSN
+        sync: false
+      # Shown in the footer and the privacy and terms pages (build time)
+      - key: VITE_SUPPORT_EMAIL
+        sync: false
+      - key: VITE_OPERATOR_NAME
+        sync: false
