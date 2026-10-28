@@ -28,9 +28,10 @@ services:
       # Base URL for links in emails; set to the custom domain once it is live
       - key: APP_URL
         sync: false
-      # Email: resend (or smtp with SMTP_URL); unset only logs emails
+      # Email: set to resend once RESEND_API_KEY exists (the server refuses
+      # to start with resend and no key); console only logs emails
       - key: EMAIL_PROVIDER
-        value: resend
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
